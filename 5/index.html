@@ -689,8 +689,10 @@ Overall, L controls how much fine detail the model can represent, and W controls
     // Tiny toggle for mini-box
     document.querySelectorAll('.mini-toggle').forEach(btn=>{
       btn.addEventListener('click', ()=>{
-        const sel = btn.getAttribute('data-target');
-        const box = document.querySelector(sel);
+        const requestedId = btn.getAttribute('data-target').replace(/^#/, '');
+        const targetId = requestedId.replace(/-bo$/, '-body');
+        const box = document.getElementById(targetId);
+        if(!box) return;
         const hidden = box.style.display === 'none';
         box.style.display = hidden ? '' : 'none';
         btn.textContent = hidden ? 'Hide' : 'Show';

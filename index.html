@@ -62,6 +62,12 @@
     .logo { width: 42px; height: 42px; display: grid; place-items:center; border-radius: 12px; background: linear-gradient(135deg, var(--accent), var(--accent-2)); color: #fff; font-weight: 800; box-shadow: var(--shadow); letter-spacing: .4px; }
     .brand { font-weight: 750; letter-spacing: .3px; }
     .grow { flex: 1; }
+    .site-inner > .actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; }
+
+    @media (max-width: 760px){
+      .site-inner { flex-wrap: wrap; }
+      .site-inner > .actions { width: 100%; justify-content: flex-start; }
+    }
 
     .btn, a.btn { appearance: none; border: 0; cursor: pointer; text-decoration: none; color: #fff; font-weight: 600; }
     .btn.primary { padding: 10px 14px; border-radius: 10px; background: linear-gradient(135deg, var(--accent), var(--accent-2)); box-shadow: var(--shadow); transition: transform .2s ease, filter .2s ease; }
@@ -115,6 +121,7 @@
       <div class="brand">Ivan Xu · CS180 Portfolio</div>
       <div class="grow"></div>
       <div class="actions">
+        <a class="btn ghost" href="https://aprilavrilivan.github.io/">← Personal Website</a>
         <button class="btn ghost" id="themeToggle" aria-label="Toggle theme">🌓 Theme</button>
         <a class="btn primary" href="#projects">View Projects</a>
       </div>
@@ -132,7 +139,7 @@
           <div class="avatar" aria-hidden="true">IX</div>
           <div class="kv">
             <div id="profile-heading" class="name">Ivan Xu</div>
-            <div class="meta">UCB Visiting Student · SID 3041989629</div>
+            <div class="meta">UC Berkeley Visiting Student</div>
             <div class="meta"><a class="link" href="mailto:ivanxu@berkeley.edu">ivanxu@berkeley.edu</a></div>
           </div>
         </div>
@@ -149,7 +156,7 @@
     <section id="projects" class="section panel" aria-labelledby="projects-heading">
       <div class="panel-hd">
         <h2 id="projects-heading">Projects</h2>
-        <span class="chip">2 items</span>
+        <span class="chip">6 items</span>
       </div>
       <div class="panel-bd">
         <div class="grid">
@@ -181,7 +188,7 @@
           </article>
 
           <article class="card" aria-labelledby="p3-title">
-            <h3 id="p2-title">Project 3 — (Auto)stitching and Photo Mosaics</h3>
+            <h3 id="p3-title">Project 3 — (Auto)stitching and Photo Mosaics</h3>
             <p>Pyramid alignment and channel shift estimation to reconstruct color images from glass‑plate scans.</p>
             <div class="actions">
               <a class="btn primary" href="./4/index.html" aria-label="Open Project 3">Open</a>
@@ -190,7 +197,7 @@
           </article>
 
           <article class="card" aria-labelledby="p4-title">
-            <h3 id="p2-title">Project 4 —Neural Radiance Field!</h3>
+            <h3 id="p4-title">Project 4 —Neural Radiance Field!</h3>
             <p>Simple Nerf Construction</p>
             <div class="actions">
               <a class="btn primary" href="./5/index.html" aria-label="Open Project 4">Open</a>
@@ -199,7 +206,7 @@
           </article>
           
           <article class="card" aria-labelledby="p5-title">
-            <h3 id="p2-title">Project 5 —Fun With Diffusion Models!</h3>
+            <h3 id="p5-title">Project 5 —Fun With Diffusion Models!</h3>
             <p>Some exploration on diffusion</p>
             <div class="actions">
               <a class="btn primary" href="./6/index.html" aria-label="Open Project 5">Open</a>

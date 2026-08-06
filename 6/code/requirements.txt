@@ -1,0 +1,16 @@
+accelerate
+bitsandbytes
+diffusers
+einops
+huggingface-hub
+matplotlib
+mediapy
+numpy
+Pillow
+requests
+safetensors
+sentencepiece
+torch
+torchvision
+tqdm
+transformers
