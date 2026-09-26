@@ -248,6 +248,13 @@ h1 {
   box-shadow: var(--shadow);
 }
 
+.hero-collage.hero-collage-single {
+  min-height: 0;
+  aspect-ratio: 5 / 3;
+  grid-template-columns: 1fr;
+  grid-template-rows: 1fr;
+}
+
 .hero-image {
   min-width: 0;
   min-height: 0;
@@ -259,6 +266,10 @@ h1 {
 
 .hero-image-main {
   grid-row: 1 / -1;
+}
+
+.hero-collage-single .hero-image-main {
+  grid-row: auto;
 }
 
 .hero-image-dark {
@@ -334,6 +345,14 @@ h1 {
 
 .project-media img.project-media-contain {
   object-fit: contain;
+}
+
+.project-cover-rays {
+  object-position: center center;
+}
+
+.project-cover-campanile {
+  object-position: center 7%;
 }
 
 .project-number {
