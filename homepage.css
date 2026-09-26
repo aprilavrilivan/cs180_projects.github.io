@@ -347,8 +347,10 @@ h1 {
   object-fit: contain;
 }
 
-.project-cover-rays {
+.project-media img.project-cover-rays {
   object-position: center center;
+  transform: scale(1.35);
+  transform-origin: 47% 40%;
 }
 
 .project-cover-campanile {
@@ -479,6 +481,10 @@ h1 {
 
   .project-card:hover .project-media img {
     transform: scale(1.025);
+  }
+
+  .project-card:hover .project-media img.project-cover-rays {
+    transform: scale(1.39);
   }
 }
 
