@@ -1,252 +1,318 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en" data-theme="light">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>My CS180 Portfolio — Ivan Xu</title>
-  <meta name="description" content="Ivan Xu · CS180/280A Portfolio — projects, profile, and links." />
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <style>
-    /* ------------------------------
-       Theme Tokens (consistent with project pages)
-    ------------------------------ */
-    :root{
-      --bg: #0b0c10;
-      --panel: #111318;
-      --text: #e6e8ec;
-      --muted: #a6adbb;
-      --accent: #7c9cff;
-      --accent-2: #4ad6a7;
-      --bdr: #1e2230;
-      --shadow: 0 14px 40px rgba(0,0,0,.25);
-      --radius-xl: 18px;
-      --radius-lg: 14px;
-      --radius-md: 12px;
-      --blur: saturate(120%) blur(0px);
-    }
-    [data-theme="light"]{
-      --bg: #f6f7fb;
-      --panel: #ffffff;
-      --text: #0b1220;
-      --muted: #5c6475;
-      --accent: #3a66ff;
-      --accent-2: #0dbb8e;
-      --bdr: #e8ebf3;
-      --shadow: 0 18px 48px rgba(16,24,40,.08);
-    }
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    /* ------------------------------
-       Base Styles
-    ------------------------------ */
-    * { box-sizing: border-box; }
-    html, body { height: 100%; }
-    body {
-      margin: 0;
-      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
-      background: radial-gradient(1200px 600px at 10% -10%, rgba(124,156,255,.12), transparent 60%),
-                  radial-gradient(900px 500px at 100% 0%, rgba(74,214,167,.12), transparent 60%),
-                  var(--bg);
-      color: var(--text);
-      line-height: 1.65;
-    }
+    <title>CS 180/280A Portfolio — Ivan Xu</title>
+    <meta
+      name="description"
+      content="Ivan Xu’s CS 180/280A portfolio: six projects in computer vision and computational photography."
+    >
+    <meta name="theme-color" content="#f5f3ee">
 
-    a { color: inherit; }
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap"
+      rel="stylesheet"
+    >
+    <link rel="stylesheet" href="homepage.css?v=20260926">
 
-    /* ------------------------------
-       Header
-    ------------------------------ */
-    header.site { position: sticky; top: 0; z-index: 50; backdrop-filter: var(--blur); background: color-mix(in oklab, var(--bg) 70%, transparent); border-bottom: 1px solid var(--bdr); }
-    .site-inner { max-width: 1080px; margin: 0 auto; padding: 14px 20px; display: flex; align-items: center; gap: 12px; }
-    .logo { width: 42px; height: 42px; display: grid; place-items:center; border-radius: 12px; background: linear-gradient(135deg, var(--accent), var(--accent-2)); color: #fff; font-weight: 800; box-shadow: var(--shadow); letter-spacing: .4px; }
-    .brand { font-weight: 750; letter-spacing: .3px; }
-    .grow { flex: 1; }
-    .site-inner > .actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; }
+    <script>
+      try {
+        const savedTheme = localStorage.getItem('cs180-theme');
+        if (savedTheme) document.documentElement.dataset.theme = savedTheme;
+      } catch (_) {}
+    </script>
+  </head>
 
-    @media (max-width: 760px){
-      .site-inner { flex-wrap: wrap; }
-      .site-inner > .actions { width: 100%; justify-content: flex-start; }
-    }
+  <body id="top">
+    <a class="skip-link" href="#main-content">Skip to main content</a>
 
-    .btn, a.btn { appearance: none; border: 0; cursor: pointer; text-decoration: none; color: #fff; font-weight: 600; }
-    .btn.primary { padding: 10px 14px; border-radius: 10px; background: linear-gradient(135deg, var(--accent), var(--accent-2)); box-shadow: var(--shadow); transition: transform .2s ease, filter .2s ease; }
-    .btn.primary:hover { transform: translateY(-1px); filter: saturate(110%); }
-    .btn.ghost { padding: 10px 12px; border-radius: 10px; color: var(--text); background: transparent; border: 1px solid var(--bdr); }
+    <header class="site-header">
+      <div class="nav-inner">
+        <a class="brand" href="#top" aria-label="Back to the top of the CS 180 portfolio">
+          <span class="brand-mark" aria-hidden="true">IX</span>
+          <span class="brand-copy">
+            <strong>Ivan Xu</strong>
+            <small>CS 180/280A Portfolio</small>
+          </span>
+        </a>
 
-    /* ------------------------------
-       Hero
-    ------------------------------ */
-    .wrap { max-width: 1080px; margin: 0 auto; padding: 32px 20px 80px; }
-    .hero { display: grid; grid-template-columns: 1.2fr .8fr; gap: 22px; align-items: center; }
-    @media (max-width: 900px){ .hero { grid-template-columns: 1fr; } }
-    .title { font-size: clamp(28px, 4vw, 44px); margin: 6px 0 8px; }
-    .subtitle { color: var(--muted); margin: 0 0 18px; }
-
-    .profile-card { background: var(--panel); border: 1px solid var(--bdr); border-radius: var(--radius-xl); box-shadow: var(--shadow); padding: 22px; display: grid; grid-template-columns: 72px 1fr; gap: 16px; align-items: center; }
-    .avatar { width: 72px; height: 72px; border-radius: 16px; background: linear-gradient(135deg, var(--accent), var(--accent-2)); display: grid; place-items:center; color:#fff; font-weight: 800; box-shadow: var(--shadow); }
-    .kv { display: grid; gap: 6px; }
-    .kv .name { font-size: 18px; font-weight: 700; }
-    .kv .meta { color: var(--muted); font-size: 14px; }
-    .kv a.link { color: var(--accent); text-decoration: none; font-weight: 600; }
-
-    /* ------------------------------
-       Sections
-    ------------------------------ */
-    .section { margin-top: 28px; }
-    .panel { background: var(--panel); border: 1px solid var(--bdr); border-radius: var(--radius-xl); box-shadow: var(--shadow); overflow: hidden; }
-    .panel .panel-hd { padding: 18px 20px; border-bottom: 1px solid var(--bdr); display: flex; align-items: center; justify-content: space-between; gap: 10px; }
-    .panel .panel-hd h2 { margin: 0; font-size: 18px; }
-    .panel .panel-bd { padding: 20px; }
-
-    /* Projects grid */
-    .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 18px; }
-    @media (max-width: 760px){ .grid { grid-template-columns: 1fr; } }
-
-    .card { position: relative; background: color-mix(in oklab, var(--panel) 92%, #000 8%); border: 1px solid var(--bdr); border-radius: var(--radius-lg); padding: 18px; box-shadow: var(--shadow); display: grid; gap: 10px; }
-    .card h3 { margin: 0; font-size: 16px; }
-    .card p { margin: 0; color: var(--muted); font-size: 14px; }
-    .card .actions { display: flex; gap: 10px; margin-top: 8px; }
-    .chip { display: inline-flex; align-items:center; gap:6px; padding: 6px 10px; border-radius: 999px; border: 1px dashed var(--bdr); font-size: 12px; color: var(--text); }
-
-    /* Footer */
-    footer { margin-top: 24px; color: var(--muted); font-size: 14px; }
-  </style>
-  <link rel="stylesheet" href="./portfolio-polish.css">
-</head>
-<body class="portfolio-home">
-  <!-- Header -->
-  <header class="site">
-    <div class="site-inner">
-      <div class="logo" aria-hidden="true">IV</div>
-      <div class="brand">Ivan Xu · CS180 Portfolio</div>
-      <div class="grow"></div>
-      <div class="actions">
-        <a class="btn ghost" href="https://aprilavrilivan.github.io/">← Personal Website</a>
-        <button class="btn ghost" id="themeToggle" aria-label="Toggle theme">🌓 Theme</button>
-        <a class="btn primary" href="#projects">View Projects</a>
+        <nav class="header-actions" aria-label="Portfolio navigation">
+          <a class="button button-quiet" href="https://aprilavrilivan.github.io/">
+            Personal Website
+          </a>
+          <button
+            class="button button-quiet theme-toggle"
+            id="themeToggle"
+            type="button"
+            aria-label="Toggle light and dark theme"
+            aria-pressed="false"
+          >
+            <span aria-hidden="true">◐</span>
+            Theme
+          </button>
+        </nav>
       </div>
-    </div>
-  </header>
+    </header>
 
-  <!-- Main -->
-  <main class="wrap">
-    <section class="hero">
-      <div>
-        <h1 class="title">Welcome to My CS180 Portfolio!</h1>
-        <p class="subtitle">Computer Vision & Computational Photography — selected works, notes, and artifacts.</p>
+    <main class="page-shell" id="main-content">
+      <section class="course-hero" aria-labelledby="page-title">
+        <div class="hero-copy">
+          <p class="eyebrow">UC Berkeley · Fall 2025</p>
+          <h1 id="page-title">Computer Vision &amp; Computational Photography</h1>
+          <p class="hero-summary">
+            A six-project portfolio exploring how images are formed, aligned,
+            filtered, stitched, reconstructed in 3D, and generated.
+          </p>
 
-        <div class="profile-card" aria-labelledby="profile-heading">
-          <div class="avatar" aria-hidden="true">IX</div>
-          <div class="kv">
-            <div id="profile-heading" class="name">Ivan Xu</div>
-            <div class="meta">UC Berkeley Visiting Student</div>
-            <div class="meta"><a class="link" href="mailto:ivanxu@berkeley.edu">ivanxu@berkeley.edu</a></div>
+          <div class="course-meta" aria-label="Course information">
+            <span>CS 180/280A</span>
+            <span>Coursework by Ivan Xu</span>
+          </div>
+
+          <div class="hero-actions">
+            <a class="button button-primary" href="#projects">
+              Explore Projects <span aria-hidden="true">↓</span>
+            </a>
+            <a
+              class="button button-secondary"
+              href="https://cal-cs180.github.io/fa25/"
+            >
+              Course Website <span aria-hidden="true">↗</span>
+            </a>
           </div>
         </div>
-      </div>
-      <div class="panel" style="align-self: stretch;">
-        <div class="panel-hd"><h2>About This Portfolio</h2><span class="chip">Updated</span></div>
-        <div class="panel-bd">
-          This site hosts write‑ups and visual results for CS180/280A projects. Pages share a unified design with responsive layouts and a light/dark theme toggle. Use the buttons below to jump directly into a project.
+
+        <div class="hero-collage" aria-label="Selected visual results from the course projects">
+          <figure class="hero-image hero-image-main">
+            <img
+              src="2/media/emir.jpeg"
+              alt="Colorized photograph from the Prokudin-Gorskii collection"
+              width="3702"
+              height="3209"
+              decoding="async"
+            >
+          </figure>
+          <figure class="hero-image">
+            <img
+              src="3/media/blend_final.png"
+              alt="Hybrid apple and orange image"
+              width="300"
+              height="300"
+              decoding="async"
+            >
+          </figure>
+          <figure class="hero-image hero-image-dark">
+            <img
+              src="5/media/lego_spherical.gif"
+              alt="NeRF rendering of a Lego scene rotating in three dimensions"
+              width="200"
+              height="200"
+              decoding="async"
+            >
+          </figure>
         </div>
-      </div>
-    </section>
+      </section>
 
-    <!-- Projects -->
-    <section id="projects" class="section panel" aria-labelledby="projects-heading">
-      <div class="panel-hd">
-        <h2 id="projects-heading">Projects</h2>
-        <span class="chip">7 items</span>
-      </div>
-      <div class="panel-bd">
-        <div class="grid">
-          <article class="card" aria-labelledby="p0-title">
-            <h3 id="p0-title">Project 0 — Becoming Friends with Your Camera</h3>
-            <p>Focal length effects, perspective compression, and the dolly zoom, with side‑by‑side comparisons.</p>
-            <div class="actions">
-              <a class="btn primary" href="./1/index.html" aria-label="Open Project 0">Open</a>
-              <span class="chip" title="Computational Photography">Photog.</span>
-            </div>
-          </article>
-
-          <article class="card" aria-labelledby="p1-title">
-            <h3 id="p1-title">Project 1 — Colorizing the Prokudin‑Gorskii Collection</h3>
-            <p>Pyramid alignment and channel shift estimation to reconstruct color images from glass‑plate scans.</p>
-            <div class="actions">
-              <a class="btn primary" href="./2/index.html" aria-label="Open Project 1">Open</a>
-              <span class="chip" title="Image Alignment">Alignment</span>
-            </div>
-          </article>
-
-          <article class="card" aria-labelledby="p2-title">
-            <h3 id="p2-title">Project 2 — Fun With Filters and Frequencies</h3>
-            <p>Pyramid alignment and channel shift estimation to reconstruct color images from glass‑plate scans.</p>
-            <div class="actions">
-              <a class="btn primary" href="./3/index.html" aria-label="Open Project 2">Open</a>
-              <span class="chip" title="Filters and Frequencies">Alignment</span>
-            </div>
-          </article>
-
-          <article class="card" aria-labelledby="p3-title">
-            <h3 id="p3-title">Project 3 — (Auto)stitching and Photo Mosaics</h3>
-            <p>Pyramid alignment and channel shift estimation to reconstruct color images from glass‑plate scans.</p>
-            <div class="actions">
-              <a class="btn primary" href="./4/index.html" aria-label="Open Project 3">Open</a>
-              <span class="chip" title="Image Alignment">Alignment</span>
-            </div>
-          </article>
-
-          <article class="card" aria-labelledby="p4-title">
-            <h3 id="p4-title">Project 4 —Neural Radiance Field!</h3>
-            <p>Simple Nerf Construction</p>
-            <div class="actions">
-              <a class="btn primary" href="./5/index.html" aria-label="Open Project 4">Open</a>
-              <span class="chip" title="Nerf">Nerf</span>
-            </div>
-          </article>
-          
-          <article class="card" aria-labelledby="p5-title">
-            <h3 id="p5-title">Project 5 —Fun With Diffusion Models!</h3>
-            <p>Some exploration on diffusion</p>
-            <div class="actions">
-              <a class="btn primary" href="./6/index.html" aria-label="Open Project 5">Open</a>
-              <span class="chip" title="Diffusion">Diffusion</span>
-            </div>
-          </article>
-
-          <article class="card" aria-labelledby="notes-title">
-            <h3 id="notes-title">Notes</h3>
-            <p>Course notes.</p>
-            <div class="actions">
-              <a class="btn primary" href="./notes/cs180-course-notes.pdf" aria-label="Open CS 180 notes">Open</a>
-              <span class="chip" title="Course Notes">Notes</span>
-            </div>
-          </article>
-          
+      <section class="projects-section" id="projects" aria-labelledby="projects-title">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Coursework</p>
+            <h2 id="projects-title">Six projects, one visual journey.</h2>
+          </div>
+          <p>
+            From camera geometry and classical image processing to neural
+            rendering and diffusion models.
+          </p>
         </div>
-      </div>
-    </section>
 
-    <!-- Footer -->
-    <footer class="wrap" style="padding-top:0;">
-      © <span id="year"></span> Ivan Xu · Built for CS180/280A · <a class="btn ghost" href="#top" style="margin-left:8px;">Back to Top</a>
+        <div class="project-grid">
+          <a class="project-card" href="1/index.html" aria-labelledby="project-0-title">
+            <div class="project-media">
+              <img
+                src="1/media/img6.jpg"
+                alt="Wide-angle street view used to study perspective"
+                width="4032"
+                height="3024"
+                loading="lazy"
+                decoding="async"
+              >
+              <span class="project-number">00</span>
+            </div>
+            <div class="project-copy">
+              <span class="project-tag">Camera Optics</span>
+              <h3 id="project-0-title">Becoming Friends with Your Camera</h3>
+              <p>
+                Explore how focal length and camera distance reshape perspective
+                through portraits, architectural studies, and a dolly zoom.
+              </p>
+              <span class="project-link">View project <span aria-hidden="true">→</span></span>
+            </div>
+          </a>
+
+          <a class="project-card" href="2/index.html" aria-labelledby="project-1-title">
+            <div class="project-media">
+              <img
+                src="2/media/emir.jpeg"
+                alt="Colorized portrait of the Emir of Bukhara"
+                width="3702"
+                height="3209"
+                loading="lazy"
+                decoding="async"
+              >
+              <span class="project-number">01</span>
+            </div>
+            <div class="project-copy">
+              <span class="project-tag">Image Alignment</span>
+              <h3 id="project-1-title">Colorizing the Prokudin-Gorskii Collection</h3>
+              <p>
+                Reconstruct full-color photographs from glass-plate scans using
+                multiscale channel alignment.
+              </p>
+              <span class="project-link">View project <span aria-hidden="true">→</span></span>
+            </div>
+          </a>
+
+          <a class="project-card" href="3/index.html" aria-labelledby="project-2-title">
+            <div class="project-media">
+              <img
+                src="3/media/blend_final.png"
+                alt="Hybrid apple and orange produced with frequency-domain blending"
+                width="300"
+                height="300"
+                loading="lazy"
+                decoding="async"
+              >
+              <span class="project-number">02</span>
+            </div>
+            <div class="project-copy">
+              <span class="project-tag">Filters &amp; Frequencies</span>
+              <h3 id="project-2-title">Fun with Filters and Frequencies</h3>
+              <p>
+                Study edges, sharpening, hybrid images, and multiresolution
+                blending in the spatial and frequency domains.
+              </p>
+              <span class="project-link">View project <span aria-hidden="true">→</span></span>
+            </div>
+          </a>
+
+          <a class="project-card" href="4/index.html" aria-labelledby="project-3-title">
+            <div class="project-media">
+              <img
+                src="4/media/canteen_result.png"
+                alt="Automatically stitched panorama of an interior space"
+                width="2188"
+                height="1384"
+                loading="lazy"
+                decoding="async"
+              >
+              <span class="project-number">03</span>
+            </div>
+            <div class="project-copy">
+              <span class="project-tag">Geometry &amp; Mosaics</span>
+              <h3 id="project-3-title">(Auto)stitching and Photo Mosaics</h3>
+              <p>
+                Estimate homographies, match features, warp photographs, and
+                blend them into seamless panoramas.
+              </p>
+              <span class="project-link">View project <span aria-hidden="true">→</span></span>
+            </div>
+          </a>
+
+          <a class="project-card" href="5/index.html" aria-labelledby="project-4-title">
+            <div class="project-media project-media-dark">
+              <img
+                class="project-media-contain"
+                src="5/media/lego_spherical.gif"
+                alt="Rotating NeRF reconstruction of a Lego scene"
+                width="200"
+                height="200"
+                loading="lazy"
+                decoding="async"
+              >
+              <span class="project-number">04</span>
+            </div>
+            <div class="project-copy">
+              <span class="project-tag">Neural Rendering</span>
+              <h3 id="project-4-title">Neural Radiance Fields</h3>
+              <p>
+                Move from camera calibration and ray sampling to neural fields
+                and a complete NeRF rendering pipeline.
+              </p>
+              <span class="project-link">View project <span aria-hidden="true">→</span></span>
+            </div>
+          </a>
+
+          <a class="project-card" href="6/index.html" aria-labelledby="project-5-title">
+            <div class="project-media project-media-dark">
+              <img
+                class="project-media-contain"
+                src="6/media/anagram_4.png"
+                alt="Visual anagram generated with a diffusion model"
+                width="64"
+                height="64"
+                loading="lazy"
+                decoding="async"
+              >
+              <span class="project-number">05</span>
+            </div>
+            <div class="project-copy">
+              <span class="project-tag">Diffusion &amp; Flow Matching</span>
+              <h3 id="project-5-title">Fun with Diffusion Models</h3>
+              <p>
+                Explore denoising, classifier-free guidance, image-to-image
+                translation, inpainting, visual anagrams, and flow matching.
+              </p>
+              <span class="project-link">View project <span aria-hidden="true">→</span></span>
+            </div>
+          </a>
+        </div>
+      </section>
+
+      <section class="notes-card" aria-labelledby="notes-title">
+        <div class="notes-icon" aria-hidden="true">PDF</div>
+        <div>
+          <p class="eyebrow">Course Resource</p>
+          <h2 id="notes-title">CS 180/280A Course Notes</h2>
+          <p>A compact reference collected alongside the six project write-ups.</p>
+        </div>
+        <a class="button button-secondary" href="notes/cs180-course-notes.pdf">
+          Open Notes <span aria-hidden="true">↗</span>
+        </a>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div>
+        <span>© <span id="year"></span> Ivan Xu</span>
+        <span aria-hidden="true">·</span>
+        <span>CS 180/280A</span>
+      </div>
+      <a href="#top">Back to top ↑</a>
     </footer>
-  </main>
 
-  <script>
-    // Theme toggle with persistence
-    const key = 'pg-theme';
-    const saved = localStorage.getItem(key);
-    if(saved){ document.documentElement.setAttribute('data-theme', saved); }
-    document.getElementById('themeToggle').addEventListener('click', () => {
-      const current = document.documentElement.getAttribute('data-theme') || 'light';
-      const next = current === 'light' ? 'dark' : 'light';
-      document.documentElement.setAttribute('data-theme', next);
-      localStorage.setItem(key, next);
-    });
-    // Footer year
-    document.getElementById('year').textContent = new Date().getFullYear();
-  </script>
-</body>
+    <script>
+      const themeKey = 'cs180-theme';
+      const themeToggle = document.getElementById('themeToggle');
+
+      function updateThemeButton() {
+        const isDark = document.documentElement.dataset.theme === 'dark';
+        themeToggle.setAttribute('aria-pressed', String(isDark));
+      }
+
+      themeToggle.addEventListener('click', () => {
+        const currentTheme = document.documentElement.dataset.theme || 'light';
+        const nextTheme = currentTheme === 'light' ? 'dark' : 'light';
+        document.documentElement.dataset.theme = nextTheme;
+        try { localStorage.setItem(themeKey, nextTheme); } catch (_) {}
+        updateThemeButton();
+      });
+
+      updateThemeButton();
+      document.getElementById('year').textContent = new Date().getFullYear();
+    </script>
+  </body>
 </html>
