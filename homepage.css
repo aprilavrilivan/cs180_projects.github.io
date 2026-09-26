@@ -6,13 +6,13 @@
   --text: #edf2f6;
   --muted: #9ba8b6;
   --line: rgb(159 177 196 / 18%);
-  --accent: #75a2ff;
+  --accent: #7aa8ff;
   --accent-strong: #4f7ee8;
-  --accent-2: #38c99d;
+  --accent-2: #345fae;
   --header: rgb(12 17 24 / 82%);
   --shadow: 0 20px 55px rgb(0 0 0 / 23%);
-  --radius: 24px;
-  --content-width: 1160px;
+  --radius: 18px;
+  --content-width: 1100px;
 }
 
 [data-theme="light"] {
@@ -23,9 +23,9 @@
   --text: #17212c;
   --muted: #647181;
   --line: rgb(42 61 77 / 13%);
-  --accent: #23669a;
-  --accent-strong: #194f79;
-  --accent-2: #178269;
+  --accent: #215f98;
+  --accent-strong: #245f9b;
+  --accent-2: #334f91;
   --header: rgb(245 243 238 / 84%);
   --shadow: 0 20px 55px rgb(48 43 35 / 9%);
 }
@@ -43,8 +43,7 @@ body {
   min-height: 100vh;
   margin: 0;
   background:
-    radial-gradient(circle at 86% 4rem, color-mix(in srgb, var(--accent) 11%, transparent), transparent 28rem),
-    radial-gradient(circle at 8% 35rem, color-mix(in srgb, var(--accent-2) 8%, transparent), transparent 26rem),
+    radial-gradient(circle at 86% 4rem, color-mix(in srgb, var(--accent) 8%, transparent), transparent 24rem),
     var(--background);
   color: var(--text);
   font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
@@ -102,7 +101,7 @@ button:focus-visible {
 
 .nav-inner {
   width: min(calc(100% - 40px), var(--content-width));
-  min-height: 68px;
+  min-height: 60px;
   margin: 0 auto;
   display: flex;
   align-items: center;
@@ -118,12 +117,12 @@ button:focus-visible {
 }
 
 .brand-mark {
-  width: 38px;
-  height: 38px;
+  width: 34px;
+  height: 34px;
   display: grid;
   place-items: center;
   flex: 0 0 auto;
-  border-radius: 11px;
+  border-radius: 10px;
   background: linear-gradient(135deg, var(--accent-strong), var(--accent-2));
   color: #fff;
   font-size: 0.78rem;
@@ -153,12 +152,12 @@ button:focus-visible {
 }
 
 .button {
-  min-height: 42px;
+  min-height: 38px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 0.45rem;
-  padding: 0.62rem 0.95rem;
+  padding: 0.52rem 0.82rem;
   border: 1px solid transparent;
   border-radius: 12px;
   cursor: pointer;
@@ -174,7 +173,7 @@ button:focus-visible {
 }
 
 .button-primary {
-  background: linear-gradient(135deg, var(--accent-strong), var(--accent-2));
+  background: var(--accent-strong);
   color: #fff;
   box-shadow: 0 10px 24px color-mix(in srgb, var(--accent) 22%, transparent);
 }
@@ -189,15 +188,15 @@ button:focus-visible {
 .page-shell {
   width: min(calc(100% - 40px), var(--content-width));
   margin: 0 auto;
-  padding: 3rem 0 4.5rem;
+  padding: 2rem 0 3.5rem;
 }
 
 .course-hero {
   display: grid;
-  grid-template-columns: minmax(0, 0.9fr) minmax(440px, 1.1fr);
-  gap: clamp(2.5rem, 6vw, 5.5rem);
+  grid-template-columns: minmax(0, 0.92fr) minmax(400px, 1.08fr);
+  gap: clamp(2rem, 4.5vw, 3.8rem);
   align-items: center;
-  padding: clamp(1.5rem, 4vw, 3.2rem) 0 clamp(3.6rem, 7vw, 5.4rem);
+  padding: 1rem 0 2.75rem;
 }
 
 .eyebrow {
@@ -223,49 +222,26 @@ h3 {
 }
 
 h1 {
-  max-width: 12ch;
-  margin-bottom: 1.15rem;
-  font-size: clamp(2.65rem, 5.4vw, 4.7rem);
-  letter-spacing: -0.052em;
+  max-width: 14ch;
+  margin-bottom: 0.9rem;
+  font-size: clamp(2.15rem, 3.6vw, 3.2rem);
+  letter-spacing: -0.048em;
 }
 
 .hero-summary {
   max-width: 570px;
-  margin-bottom: 1.25rem;
+  margin-bottom: 0;
   color: var(--muted);
-  font-size: clamp(1rem, 1.5vw, 1.13rem);
-}
-
-.course-meta {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.6rem;
-  margin-bottom: 1.55rem;
-}
-
-.course-meta span {
-  padding: 0.32rem 0.72rem;
-  border: 1px solid var(--line);
-  border-radius: 999px;
-  background: color-mix(in srgb, var(--surface-raised) 68%, transparent);
-  color: var(--muted);
-  font-size: 0.8rem;
-  font-weight: 600;
-}
-
-.hero-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.7rem;
+  font-size: 0.98rem;
 }
 
 .hero-collage {
-  min-height: 430px;
+  min-height: 340px;
   display: grid;
   grid-template-columns: minmax(0, 1.38fr) minmax(130px, 0.62fr);
   grid-template-rows: 1fr 1fr;
-  gap: 0.75rem;
-  padding: 0.75rem;
+  gap: 0.55rem;
+  padding: 0.55rem;
   border: 1px solid var(--line);
   border-radius: calc(var(--radius) + 6px);
   background: color-mix(in srgb, var(--surface-raised) 74%, transparent);
@@ -277,7 +253,7 @@ h1 {
   min-height: 0;
   margin: 0;
   overflow: hidden;
-  border-radius: 17px;
+  border-radius: 13px;
   background: var(--surface-raised);
 }
 
@@ -300,34 +276,25 @@ h1 {
 }
 
 .projects-section {
-  padding-top: 3.7rem;
+  padding-top: 2.25rem;
   border-top: 1px solid var(--line);
 }
 
 .section-heading {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(280px, 420px);
-  gap: 2rem;
-  align-items: end;
-  margin-bottom: 1.8rem;
+  margin-bottom: 1.15rem;
 }
 
 .section-heading h2,
 .notes-card h2 {
   margin-bottom: 0;
-  font-size: clamp(1.9rem, 3.5vw, 2.7rem);
+  font-size: clamp(1.65rem, 3vw, 2.2rem);
   letter-spacing: -0.038em;
-}
-
-.section-heading > p {
-  margin-bottom: 0.2rem;
-  color: var(--muted);
 }
 
 .project-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 1.1rem;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.9rem;
 }
 
 .project-card {
@@ -347,7 +314,7 @@ h1 {
 
 .project-media {
   position: relative;
-  aspect-ratio: 16 / 9;
+  aspect-ratio: 5 / 3;
   overflow: hidden;
   background: var(--surface-raised);
 }
@@ -371,10 +338,10 @@ h1 {
 
 .project-number {
   position: absolute;
-  top: 0.8rem;
-  left: 0.8rem;
-  min-width: 2.35rem;
-  height: 2.35rem;
+  top: 0.65rem;
+  left: 0.65rem;
+  min-width: 2rem;
+  height: 2rem;
   display: grid;
   place-items: center;
   border: 1px solid rgb(255 255 255 / 42%);
@@ -388,39 +355,24 @@ h1 {
 }
 
 .project-copy {
-  min-height: 240px;
+  min-height: 156px;
   display: flex;
   flex-direction: column;
-  padding: 1.35rem 1.4rem 1.4rem;
-}
-
-.project-tag {
-  margin-bottom: 0.7rem;
-  color: var(--accent);
-  font-size: 0.7rem;
-  font-weight: 700;
-  letter-spacing: 0.11em;
-  text-transform: uppercase;
+  padding: 1rem 1.05rem 1.1rem;
 }
 
 .project-copy h3 {
   max-width: 29ch;
-  margin-bottom: 0.65rem;
-  font-size: clamp(1.15rem, 2vw, 1.42rem);
+  margin-bottom: 0.55rem;
+  font-size: clamp(1.05rem, 1.6vw, 1.2rem);
   letter-spacing: -0.025em;
 }
 
 .project-copy p {
-  margin-bottom: 1.2rem;
+  margin-bottom: 0;
   color: var(--muted);
-  font-size: 0.92rem;
-}
-
-.project-link {
-  margin-top: auto;
-  color: var(--accent);
-  font-size: 0.86rem;
-  font-weight: 700;
+  font-size: 0.84rem;
+  line-height: 1.55;
 }
 
 .notes-card {
@@ -428,8 +380,8 @@ h1 {
   grid-template-columns: auto minmax(0, 1fr) auto;
   gap: 1.2rem;
   align-items: center;
-  margin-top: 1.2rem;
-  padding: 1.6rem;
+  margin-top: 0.9rem;
+  padding: 1.2rem 1.3rem;
   border: 1px solid var(--line);
   border-radius: var(--radius);
   background:
@@ -439,12 +391,12 @@ h1 {
 }
 
 .notes-icon {
-  width: 58px;
-  height: 58px;
+  width: 48px;
+  height: 48px;
   display: grid;
   place-items: center;
   border-radius: 16px;
-  background: linear-gradient(135deg, var(--accent-strong), var(--accent-2));
+  background: var(--accent-strong);
   color: #fff;
   font-size: 0.75rem;
   font-weight: 700;
@@ -521,7 +473,11 @@ h1 {
   }
 
   .hero-collage {
-    min-height: 390px;
+    min-height: 330px;
+  }
+
+  .project-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
@@ -558,7 +514,7 @@ h1 {
 
   .course-hero {
     gap: 2rem;
-    padding-bottom: 3.5rem;
+    padding-bottom: 2.75rem;
   }
 
   h1 {
@@ -567,11 +523,6 @@ h1 {
 
   .hero-collage {
     min-height: 300px;
-  }
-
-  .section-heading {
-    grid-template-columns: 1fr;
-    gap: 0.6rem;
   }
 
   .project-grid {

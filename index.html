@@ -17,7 +17,7 @@
       href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap"
       rel="stylesheet"
     >
-    <link rel="stylesheet" href="homepage.css?v=20260926">
+    <link rel="stylesheet" href="homepage.css?v=20260926b">
 
     <script>
       try {
@@ -67,27 +67,19 @@
             A six-project portfolio exploring how images are formed, aligned,
             filtered, stitched, reconstructed in 3D, and generated.
           </p>
-
-          <div class="course-meta" aria-label="Course information">
-            <span>CS 180/280A</span>
-            <span>Coursework by Ivan Xu</span>
-          </div>
-
-          <div class="hero-actions">
-            <a class="button button-primary" href="#projects">
-              Explore Projects <span aria-hidden="true">↓</span>
-            </a>
-            <a
-              class="button button-secondary"
-              href="https://cal-cs180.github.io/fa25/"
-            >
-              Course Website <span aria-hidden="true">↗</span>
-            </a>
-          </div>
         </div>
 
         <div class="hero-collage" aria-label="Selected visual results from the course projects">
-          <figure class="hero-image hero-image-main">
+          <figure class="hero-image hero-image-main hero-image-dark">
+            <img
+              src="assets/lego-spherical-loop.gif"
+              alt="NeRF rendering of a Lego scene rotating in three dimensions"
+              width="200"
+              height="200"
+              decoding="async"
+            >
+          </figure>
+          <figure class="hero-image">
             <img
               src="2/media/emir.jpeg"
               alt="Colorized photograph from the Prokudin-Gorskii collection"
@@ -98,19 +90,10 @@
           </figure>
           <figure class="hero-image">
             <img
-              src="3/media/blend_final.png"
-              alt="Hybrid apple and orange image"
-              width="300"
-              height="300"
-              decoding="async"
-            >
-          </figure>
-          <figure class="hero-image hero-image-dark">
-            <img
-              src="5/media/lego_spherical.gif"
-              alt="NeRF rendering of a Lego scene rotating in three dimensions"
-              width="200"
-              height="200"
+              src="3/media/blend_final3.png"
+              alt="An eye composited into a hand using multiresolution blending"
+              width="416"
+              height="402"
               decoding="async"
             >
           </figure>
@@ -119,83 +102,51 @@
 
       <section class="projects-section" id="projects" aria-labelledby="projects-title">
         <div class="section-heading">
-          <div>
-            <p class="eyebrow">Coursework</p>
-            <h2 id="projects-title">Six projects, one visual journey.</h2>
-          </div>
-          <p>
-            From camera geometry and classical image processing to neural
-            rendering and diffusion models.
-          </p>
+          <h2 id="projects-title">Projects</h2>
         </div>
 
         <div class="project-grid">
-          <a class="project-card" href="1/index.html" aria-labelledby="project-0-title">
-            <div class="project-media">
+          <a class="project-card" href="6/index.html" aria-labelledby="project-5-title">
+            <div class="project-media project-media-dark">
               <img
-                src="1/media/img6.jpg"
-                alt="Wide-angle street view used to study perspective"
-                width="4032"
-                height="3024"
+                class="project-media-contain project-media-pixelated"
+                src="6/media/anagram_4.png"
+                alt="Visual anagram generated with a diffusion model"
+                width="64"
+                height="64"
                 loading="lazy"
                 decoding="async"
               >
-              <span class="project-number">00</span>
+              <span class="project-number">05</span>
             </div>
             <div class="project-copy">
-              <span class="project-tag">Camera Optics</span>
-              <h3 id="project-0-title">Becoming Friends with Your Camera</h3>
+              <h3 id="project-5-title">Fun with Diffusion Models</h3>
               <p>
-                Explore how focal length and camera distance reshape perspective
-                through portraits, architectural studies, and a dolly zoom.
+                Explore denoising, classifier-free guidance, image-to-image
+                translation, inpainting, visual anagrams, and flow matching.
               </p>
-              <span class="project-link">View project <span aria-hidden="true">→</span></span>
             </div>
           </a>
 
-          <a class="project-card" href="2/index.html" aria-labelledby="project-1-title">
-            <div class="project-media">
+          <a class="project-card" href="5/index.html" aria-labelledby="project-4-title">
+            <div class="project-media project-media-dark">
               <img
-                src="2/media/emir.jpeg"
-                alt="Colorized portrait of the Emir of Bukhara"
-                width="3702"
-                height="3209"
+                class="project-media-contain"
+                src="assets/lego-spherical-loop.gif"
+                alt="Rotating NeRF reconstruction of a Lego scene"
+                width="200"
+                height="200"
                 loading="lazy"
                 decoding="async"
               >
-              <span class="project-number">01</span>
+              <span class="project-number">04</span>
             </div>
             <div class="project-copy">
-              <span class="project-tag">Image Alignment</span>
-              <h3 id="project-1-title">Colorizing the Prokudin-Gorskii Collection</h3>
+              <h3 id="project-4-title">Neural Radiance Fields</h3>
               <p>
-                Reconstruct full-color photographs from glass-plate scans using
-                multiscale channel alignment.
+                Move from camera calibration and ray sampling to neural fields
+                and a complete NeRF rendering pipeline.
               </p>
-              <span class="project-link">View project <span aria-hidden="true">→</span></span>
-            </div>
-          </a>
-
-          <a class="project-card" href="3/index.html" aria-labelledby="project-2-title">
-            <div class="project-media">
-              <img
-                src="3/media/blend_final.png"
-                alt="Hybrid apple and orange produced with frequency-domain blending"
-                width="300"
-                height="300"
-                loading="lazy"
-                decoding="async"
-              >
-              <span class="project-number">02</span>
-            </div>
-            <div class="project-copy">
-              <span class="project-tag">Filters &amp; Frequencies</span>
-              <h3 id="project-2-title">Fun with Filters and Frequencies</h3>
-              <p>
-                Study edges, sharpening, hybrid images, and multiresolution
-                blending in the spatial and frequency domains.
-              </p>
-              <span class="project-link">View project <span aria-hidden="true">→</span></span>
             </div>
           </a>
 
@@ -212,61 +163,74 @@
               <span class="project-number">03</span>
             </div>
             <div class="project-copy">
-              <span class="project-tag">Geometry &amp; Mosaics</span>
               <h3 id="project-3-title">(Auto)stitching and Photo Mosaics</h3>
               <p>
                 Estimate homographies, match features, warp photographs, and
                 blend them into seamless panoramas.
               </p>
-              <span class="project-link">View project <span aria-hidden="true">→</span></span>
             </div>
           </a>
 
-          <a class="project-card" href="5/index.html" aria-labelledby="project-4-title">
-            <div class="project-media project-media-dark">
+          <a class="project-card" href="3/index.html" aria-labelledby="project-2-title">
+            <div class="project-media">
               <img
-                class="project-media-contain"
-                src="5/media/lego_spherical.gif"
-                alt="Rotating NeRF reconstruction of a Lego scene"
-                width="200"
-                height="200"
+                src="3/media/blend_final3.png"
+                alt="An eye composited into a hand using multiresolution blending"
+                width="416"
+                height="402"
                 loading="lazy"
                 decoding="async"
               >
-              <span class="project-number">04</span>
+              <span class="project-number">02</span>
             </div>
             <div class="project-copy">
-              <span class="project-tag">Neural Rendering</span>
-              <h3 id="project-4-title">Neural Radiance Fields</h3>
+              <h3 id="project-2-title">Fun with Filters and Frequencies</h3>
               <p>
-                Move from camera calibration and ray sampling to neural fields
-                and a complete NeRF rendering pipeline.
+                Study edges, sharpening, hybrid images, and multiresolution
+                blending in the spatial and frequency domains.
               </p>
-              <span class="project-link">View project <span aria-hidden="true">→</span></span>
             </div>
           </a>
 
-          <a class="project-card" href="6/index.html" aria-labelledby="project-5-title">
-            <div class="project-media project-media-dark">
+          <a class="project-card" href="2/index.html" aria-labelledby="project-1-title">
+            <div class="project-media">
               <img
-                class="project-media-contain"
-                src="6/media/anagram_4.png"
-                alt="Visual anagram generated with a diffusion model"
-                width="64"
-                height="64"
+                src="2/media/emir.jpeg"
+                alt="Colorized portrait of the Emir of Bukhara"
+                width="3702"
+                height="3209"
                 loading="lazy"
                 decoding="async"
               >
-              <span class="project-number">05</span>
+              <span class="project-number">01</span>
             </div>
             <div class="project-copy">
-              <span class="project-tag">Diffusion &amp; Flow Matching</span>
-              <h3 id="project-5-title">Fun with Diffusion Models</h3>
+              <h3 id="project-1-title">Colorizing the Prokudin-Gorskii Collection</h3>
               <p>
-                Explore denoising, classifier-free guidance, image-to-image
-                translation, inpainting, visual anagrams, and flow matching.
+                Reconstruct full-color photographs from glass-plate scans using
+                multiscale channel alignment.
               </p>
-              <span class="project-link">View project <span aria-hidden="true">→</span></span>
+            </div>
+          </a>
+
+          <a class="project-card" href="1/index.html" aria-labelledby="project-0-title">
+            <div class="project-media">
+              <img
+                src="1/media/img6.jpg"
+                alt="Wide-angle street view used to study perspective"
+                width="4032"
+                height="3024"
+                loading="lazy"
+                decoding="async"
+              >
+              <span class="project-number">00</span>
+            </div>
+            <div class="project-copy">
+              <h3 id="project-0-title">Becoming Friends with Your Camera</h3>
+              <p>
+                Explore how focal length and camera distance reshape perspective
+                through portraits, architectural studies, and a dolly zoom.
+              </p>
             </div>
           </a>
         </div>
@@ -275,9 +239,7 @@
       <section class="notes-card" aria-labelledby="notes-title">
         <div class="notes-icon" aria-hidden="true">PDF</div>
         <div>
-          <p class="eyebrow">Course Resource</p>
-          <h2 id="notes-title">CS 180/280A Course Notes</h2>
-          <p>A compact reference collected alongside the six project write-ups.</p>
+          <h2 id="notes-title">Course Notes</h2>
         </div>
         <a class="button button-secondary" href="notes/cs180-course-notes.pdf">
           Open Notes <span aria-hidden="true">↗</span>
