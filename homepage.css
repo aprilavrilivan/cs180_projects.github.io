@@ -349,7 +349,7 @@ h1 {
 
 .project-media img.project-cover-rays {
   object-position: center center;
-  transform: scale(1.35);
+  transform: translateY(8%) scale(1.35);
   transform-origin: 47% 40%;
 }
 
@@ -484,7 +484,7 @@ h1 {
   }
 
   .project-card:hover .project-media img.project-cover-rays {
-    transform: scale(1.39);
+    transform: translateY(8%) scale(1.39);
   }
 }
 
