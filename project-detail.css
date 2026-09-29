@@ -472,7 +472,7 @@ body.project-detail::before {
 
 .project-main .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(0, 420px));
+  grid-template-columns: repeat(auto-fit, minmax(0, 300px));
   align-items: start;
   justify-content: center;
   gap: 18px;
@@ -481,43 +481,43 @@ body.project-detail::before {
 
 .project-main .result-box,
 .project-main .result-line {
-  --media-card-width: 300px;
+  --media-card-width: 215px;
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(0, var(--media-card-width)));
   align-items: start;
   justify-content: center;
-  gap: 16px;
-  margin: 20px auto;
+  gap: 10px;
+  margin: 12px auto;
 }
 
 .project-main .result-box:has(> .thumb:nth-child(5)),
 .project-main .result-line:has(> .thumb:nth-child(5)) {
-  --media-card-width: 205px;
+  --media-card-width: 155px;
 }
 
 .project-main .result-box:has(> .thumb:nth-child(4)):not(:has(> .thumb:nth-child(5))),
 .project-main .result-line:has(> .thumb:nth-child(4)):not(:has(> .thumb:nth-child(5))) {
-  --media-card-width: 235px;
+  --media-card-width: 175px;
 }
 
 .project-main .result-box:has(> .thumb:nth-child(3)):not(:has(> .thumb:nth-child(4))),
 .project-main .result-line:has(> .thumb:nth-child(3)):not(:has(> .thumb:nth-child(4))) {
-  --media-card-width: 285px;
+  --media-card-width: 190px;
 }
 
 .project-main .result-box:has(> .thumb:nth-child(2)):not(:has(> .thumb:nth-child(3))),
 .project-main .result-line:has(> .thumb:nth-child(2)):not(:has(> .thumb:nth-child(3))) {
-  --media-card-width: 380px;
+  --media-card-width: 260px;
 }
 
 .project-main .result-box:not(:has(> .thumb:nth-child(2))),
 .project-main .result-line:not(:has(> .thumb:nth-child(2))) {
-  --media-card-width: 520px;
+  --media-card-width: 380px;
 }
 
 .project-main .result-box:not(:has(> .thumb:nth-child(2))) > .thumb.large-box,
 .project-main .result-line:not(:has(> .thumb:nth-child(2))) > .thumb.large-box {
-  width: min(100%, 700px);
+  width: min(100%, 560px);
 }
 
 .project-main figure {
@@ -560,7 +560,7 @@ body.project-detail::before {
 .project-main figcaption,
 .project-main .caption {
   margin: 0;
-  padding: 9px 12px 10px;
+  padding: 6px 9px 7px;
   color: var(--project-muted);
   font-size: 0.76rem;
   line-height: 1.42;
