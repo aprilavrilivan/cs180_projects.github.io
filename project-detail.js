@@ -64,6 +64,7 @@
 
     const miniBoxes = [...section.querySelectorAll('.mini-box')];
     if (miniBoxes.length) {
+      group.classList.add('has-subsections');
       const sublist = document.createElement('ol');
       sublist.className = 'project-nav-sublist';
 
@@ -86,6 +87,7 @@
         const link = document.createElement('a');
         link.href = `#${subsectionId}`;
         link.dataset.level = 'subsection';
+        link.dataset.parent = sectionId;
         link.textContent = label;
         item.append(link);
         sublist.append(item);
@@ -127,8 +129,14 @@
   const setActive = (id) => {
     if (!id || id === activeId) return;
     activeId = id;
-    navLinks.forEach((link) => link.classList.toggle('is-active', link === linksById.get(id)));
+    const activeLink = linksById.get(id);
+    navLinks.forEach((link) => {
+      link.classList.toggle('is-active', link === activeLink);
+      link.classList.toggle('is-parent-active', Boolean(activeLink?.dataset.parent) && link.hash === `#${activeLink.dataset.parent}`);
+    });
   };
+
+  if (observed[0]) setActive(observed[0].id);
 
   if ('IntersectionObserver' in window) {
     const observer = new IntersectionObserver((entries) => {

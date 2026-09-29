@@ -10,7 +10,7 @@
   --project-accent-soft: #f5e4d8;
   --project-border: #ded9cf;
   --project-shadow: 0 18px 50px rgb(65 50 38 / 8%);
-  --project-sidebar-width: 276px;
+  --project-sidebar-width: 248px;
   --project-header-height: 65px;
 }
 
@@ -35,9 +35,7 @@ html {
 body.project-detail {
   min-height: 100%;
   margin: 0;
-  background:
-    radial-gradient(circle at 90% 5%, color-mix(in srgb, var(--project-accent) 8%, transparent), transparent 26rem),
-    var(--project-bg);
+  background: var(--project-bg) !important;
   color: var(--project-text);
   font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   font-size: 16px;
@@ -53,7 +51,7 @@ body.project-detail::before {
   left: 0;
   height: 3px;
   content: "";
-  background: linear-gradient(90deg, var(--project-accent), #df9b63);
+  background: var(--project-accent);
   transform: scaleX(var(--project-progress, 0));
   transform-origin: left center;
 }
@@ -64,10 +62,10 @@ body.project-detail::before {
   top: 0;
   min-height: var(--project-header-height);
   border-bottom: 1px solid color-mix(in srgb, var(--project-border) 88%, transparent);
-  background: color-mix(in srgb, var(--project-bg) 92%, transparent);
+  background: var(--project-bg) !important;
   box-shadow: none;
-  backdrop-filter: blur(18px) saturate(125%);
-  -webkit-backdrop-filter: blur(18px) saturate(125%);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
   transition: box-shadow 180ms ease;
 }
 
@@ -150,18 +148,18 @@ body.project-detail::before {
   top: var(--project-header-height);
   align-self: start;
   height: calc(100vh - var(--project-header-height));
-  padding: 30px 20px 28px;
+  padding: 30px 18px 28px 22px;
   overflow-y: auto;
   border-right: 1px solid var(--project-border);
-  background: color-mix(in srgb, var(--project-sidebar) 94%, transparent);
+  background: var(--project-bg);
   scrollbar-color: color-mix(in srgb, var(--project-accent) 30%, transparent) transparent;
   scrollbar-width: thin;
 }
 
 .project-sidebar-inner {
   width: 100%;
-  max-width: 236px;
-  margin-left: auto;
+  max-width: none;
+  margin: 0;
 }
 
 .project-sidebar-kicker {
@@ -216,9 +214,9 @@ body.project-detail::before {
 
 .project-nav-sublist {
   position: relative;
-  display: grid;
-  gap: 1px;
-  margin: 2px 0 4px 10px;
+  display: grid !important;
+  gap: 2px;
+  margin: 3px 0 7px 9px;
 }
 
 .project-nav-sublist::before {
@@ -232,9 +230,27 @@ body.project-detail::before {
 }
 
 .project-nav a[data-level="subsection"] {
-  padding: 5px 9px 5px 14px;
-  font-size: 0.74rem;
+  position: relative;
+  padding: 6px 8px 6px 16px;
+  font-size: 0.79rem;
+  font-weight: 560;
   line-height: 1.35;
+}
+
+.project-nav a[data-level="subsection"]::before {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--project-muted) 46%, transparent);
+  content: "";
+  transform: translate(-2px, -50%);
+}
+
+.project-nav a[data-level="subsection"].is-active::before {
+  background: var(--project-accent);
 }
 
 .project-nav a:hover,
@@ -243,6 +259,10 @@ body.project-detail::before {
   border-left-color: var(--project-accent);
   background: color-mix(in srgb, var(--project-accent-soft) 72%, transparent);
   color: var(--project-accent-dark);
+}
+
+.project-nav a.is-parent-active {
+  color: var(--project-text);
 }
 
 .project-nav a:hover {
@@ -265,16 +285,16 @@ body.project-detail::before {
 }
 
 .project-main.wrap {
-  width: min(100%, 1120px);
-  max-width: 1120px;
+  width: min(100%, 1440px);
+  max-width: 1440px;
   min-width: 0;
   margin: 0 auto;
-  padding: 52px clamp(30px, 5vw, 72px) 88px;
+  padding: 48px clamp(32px, 3.2vw, 54px) 88px;
   overflow-wrap: break-word;
 }
 
 .project-main h1.page-title {
-  max-width: 920px;
+  max-width: 1120px;
   margin: 0 0 14px;
   color: var(--project-text);
   font-size: clamp(2.15rem, 4vw, 3.55rem);
@@ -284,7 +304,7 @@ body.project-detail::before {
 }
 
 .project-main p.lead {
-  max-width: 820px;
+  max-width: 1080px;
   margin: 0 0 32px;
   color: var(--project-muted);
   font-size: 1.04rem;
@@ -307,6 +327,8 @@ body.project-detail::before {
   box-shadow: var(--project-shadow);
   scroll-margin-top: calc(var(--project-header-height) + 22px);
   min-width: 0;
+  margin-right: auto;
+  margin-left: auto;
 }
 
 .project-main > section.panel::before {
@@ -317,7 +339,7 @@ body.project-detail::before {
   left: 0;
   height: 3px;
   content: "";
-  background: linear-gradient(90deg, var(--project-accent), color-mix(in srgb, var(--project-accent) 28%, transparent));
+  background: var(--project-accent);
 }
 
 .project-main .panel .panel-hd {
@@ -327,7 +349,7 @@ body.project-detail::before {
   gap: 14px;
   padding: 24px 28px 20px;
   border-bottom: 1px solid var(--project-border);
-  background: linear-gradient(135deg, color-mix(in srgb, var(--project-accent-soft) 40%, var(--project-paper)), var(--project-paper) 66%);
+  background: var(--project-paper);
 }
 
 .project-main .panel .panel-hd h2 {
@@ -373,7 +395,7 @@ body.project-detail::before {
   overflow: hidden;
   border: 1px solid var(--project-border);
   border-radius: 13px;
-  background: color-mix(in srgb, var(--project-paper-soft) 58%, var(--project-paper));
+  background: var(--project-paper);
   box-shadow: none;
   scroll-margin-top: calc(var(--project-header-height) + 22px);
 }
@@ -386,7 +408,7 @@ body.project-detail::before {
   min-height: 58px;
   padding: 11px 14px 11px 17px;
   border-left: 3px solid var(--project-accent);
-  background: color-mix(in srgb, var(--project-accent-soft) 38%, var(--project-paper));
+  background: var(--project-paper-soft);
   color: var(--project-text);
   font-size: 0.9rem;
   font-weight: 720;
@@ -569,7 +591,7 @@ body.project-detail::before {
 
 @media (max-width: 1020px) {
   :root {
-    --project-sidebar-width: 238px;
+    --project-sidebar-width: 224px;
   }
 
   .project-main.wrap {
