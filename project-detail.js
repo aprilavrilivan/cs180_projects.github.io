@@ -106,6 +106,13 @@
   tocToggle.innerHTML = '<span aria-hidden="true">☰</span> Contents';
   main.insertBefore(tocToggle, main.firstChild);
 
+  if (window.location.hash) {
+    const linkedSection = document.getElementById(decodeURIComponent(window.location.hash.slice(1)));
+    if (linkedSection) {
+      requestAnimationFrame(() => linkedSection.scrollIntoView({ block: 'start' }));
+    }
+  }
+
   const closeNavigation = () => {
     document.body.classList.remove('toc-open');
     tocToggle.setAttribute('aria-expanded', 'false');
