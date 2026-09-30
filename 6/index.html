@@ -1555,7 +1555,7 @@
                 </p>
 
                 <p>
-                  Diffusion models solve this problem by performing denoising iteratively. Instead of
+                  Diffusion models address this problem by learning a gradual reverse process. Instead of
                   directly mapping:
                 </p>
 
@@ -1566,18 +1566,17 @@
                 </div>
 
                 <p>
-                  the reverse diffusion process gradually refines the image through a sequence of
-                  intermediate states:
+                  the model progressively removes noise through intermediate states:
                 </p>
 
                 <div class="equation-block">
                   \[
-                  x_T \rightarrow x_{T-1}\rightarrow ... \rightarrow x_1 \rightarrow x_0
+                  x_T\rightarrow x_{T-1}\rightarrow ...\rightarrow x_1\rightarrow x_0
                   \]
                 </div>
 
                 <p>
-                  At each denoising step, the model first predicts the noise component:
+                  At each reverse step, the UNet predicts the noise component:
                 </p>
 
                 <div class="equation-block">
@@ -1587,37 +1586,73 @@
                 </div>
 
                 <p>
-                  and estimates the clean image using the reverse of the forward diffusion equation:
+                  which allows us to estimate the clean image:
                 </p>
 
                 <div class="equation-block">
                   \[
                   \hat{x}_0=
-                  \frac{x_t-\sqrt{1-\bar{\alpha}_t}
-                  \epsilon_\theta(x_t,t)}
+                  \frac{x_t-\sqrt{1-\bar{\alpha}_t}\epsilon_\theta(x_t,t)}
                   {\sqrt{\bar{\alpha}_t}}
                   \]
                 </div>
 
                 <p>
-                  Instead of directly returning \(\hat{x}_0\), the diffusion sampler uses the estimated
-                  clean image together with the current noisy state \(x_t\) to generate a slightly
-                  less noisy image \(x_{t'}\), where \(t'&lt;t\):
+                  A natural idea is then to generate a less noisy image by applying the forward
+                  diffusion equation again on the estimated clean image:
                 </p>
 
                 <div class="equation-block">
                   \[
-                  x_t \rightarrow x_{t'}
-                  \rightarrow x_{t''}
-                  \rightarrow ... \rightarrow x_0
+                  x_{t'}
+                  =
+                  \sqrt{\bar{\alpha}_{t'}}\hat{x}_0
+                  +
+                  \sqrt{1-\bar{\alpha}_{t'}}z,
+                  \quad t'&lt;t
                   \]
                 </div>
 
                 <p>
-                  This transition is derived from the diffusion posterior
-                  \(q(x_{t'}|x_t,x_0)\), which combines information from both the current noisy image
-                  and the estimated clean image. Therefore, each step only needs to solve a small
-                  denoising problem instead of reconstructing the entire image at once.
+                  However, this approach only uses the predicted clean image and ignores the current
+                  noisy state \(x_t\). Since \(x_t\) still contains useful information from the current
+                  diffusion trajectory, the reverse process should preserve both the current state and
+                  the estimated target.
+                </p>
+
+                <p>
+                  Therefore, DDPM derives a posterior transition:
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  q(x_{t'}|x_t,x_0)
+                  \]
+                </div>
+
+                <p>
+                  which combines information from both \(x_t\) and \(x_0\):
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  x_{t'}
+                  =
+                  \frac{\sqrt{\bar{\alpha}_{t'}}\beta_t}
+                  {1-\bar{\alpha}_t}x_0
+                  +
+                  \frac{\sqrt{\alpha_t}(1-\bar{\alpha}_{t'})}
+                  {1-\bar{\alpha}_t}x_t
+                  +
+                  v_\sigma
+                  \]
+                </div>
+
+                <p>
+                  Intuitively, the first term guides the sample toward the predicted clean image,
+                  while the second term keeps the sample on a consistent reverse diffusion trajectory.
+                  This allows each step to solve only a small denoising problem instead of reconstructing
+                  the entire image at once.
                 </p>
 
               </li>
