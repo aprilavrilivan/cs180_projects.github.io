@@ -1085,6 +1085,85 @@
       line-height: 1.3;
     }
 
+    /* Part 1.7.2: image inpainting */
+    .project-main .inpainting-step .result-box.inpainting-code,
+    .project-main .inpainting-step .result-box.inpainting-gallery {
+      display: grid;
+      width: min(100%, 900px);
+      margin: 24px auto;
+      gap: 12px;
+    }
+
+    .project-main .inpainting-step .result-box.inpainting-code {
+      width: min(100%, 760px);
+      grid-template-columns: 1fr;
+    }
+
+    .project-main .inpainting-step .result-box.inpainting-gallery {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+
+    .project-main .inpainting-code .thumb,
+    .project-main .inpainting-gallery .thumb {
+      max-width: none;
+      border-radius: 13px;
+      background: var(--project-paper-soft);
+      box-shadow: none;
+    }
+
+    .project-main .inpainting-code img {
+      width: 100%;
+      height: auto;
+      background: #fff;
+      object-fit: contain;
+    }
+
+    .project-main .inpainting-gallery img {
+      width: 100%;
+      aspect-ratio: 1;
+      background: #fff;
+      object-fit: cover;
+    }
+
+    .project-main .inpainting-code .caption,
+    .project-main .inpainting-gallery .caption {
+      min-height: 44px;
+      margin: 0;
+      padding: 8px 7px 9px;
+      border-top: 1px solid var(--project-border);
+      background: var(--project-paper-soft);
+      font-size: 10px;
+      line-height: 1.35;
+    }
+
+    .project-main .inpainting-equation--primary {
+      border-color: color-mix(in srgb, var(--project-accent) 52%, var(--project-border));
+      background:
+        linear-gradient(135deg, color-mix(in srgb, var(--project-accent-soft) 88%, var(--project-paper)), var(--project-paper));
+    }
+
+    /* Part 1.7.3: text-guided SDEdit */
+    .project-main .guided-prompt {
+      margin: 20px 0 24px;
+      padding: 13px 16px;
+      border-left: 3px solid var(--project-accent);
+      border-radius: 0 11px 11px 0;
+      background: var(--project-accent-soft);
+      color: var(--project-text);
+    }
+
+    .project-main .guided-prompt strong {
+      color: var(--project-accent);
+      font-size: 11px;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    .project-main .guided-prompt em {
+      font-style: normal;
+      font-weight: 650;
+    }
+
     @media (max-width: 760px) {
       .forward-diffusion-study {
         padding: 14px !important;
@@ -1180,6 +1259,22 @@
         min-height: 40px;
         padding: 6px 2px 7px;
         font-size: 8px;
+      }
+
+      .project-main .inpainting-step .result-box.inpainting-gallery {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 8px;
+      }
+
+      .project-main .inpainting-code .caption,
+      .project-main .inpainting-gallery .caption {
+        min-height: 40px;
+        padding: 6px 4px 7px;
+        font-size: 9px;
+      }
+
+      .project-main .guided-prompt {
+        padding: 11px 13px;
       }
     }
   </style>
@@ -2611,76 +2706,245 @@
             <span class="hint">1.7.2</span>
             <button class="mini-toggle" type="button" data-target="#1.7.2-bo">Hide</button>
           </div>
-          <div class="mini-bd" id="1.7.2-body">
-            <ol>
-              <li><p>We can also use this process to do inpainting. That is, given a mask, the diffusion process only edits the area where the mask is 1. To realize this, at every diffusing step
-              when we get the result x_t, we only keep the unmasked area, and replace the masked area with the original corresponding image at that stage. The following is the critical 
-              part of the inpainting function (the rest part is just like CFG function):</p>
-              <div class="result-box">
+          <div class="mini-bd sdedit-study inpainting-study" id="1.7.2-body">
+            <ol class="sdedit-steps">
+
+              <li class="sdedit-step inpainting-step">
+                <p>
+                  In the previous sections, SDEdit modified the entire image.
+                  However, what if we only want to edit a specific region
+                  while preserving everything else? This motivates
+                  <strong>image inpainting</strong>, where a binary mask
+                  determines which pixels the diffusion model is allowed
+                  to modify.
+                </p>
+
+                <p>
+                  Let \(m\) denote the binary mask, where \(m=1\)
+                  indicates the region to be generated and \(m=0\)
+                  indicates the region to be preserved.
+                </p>
+
+                <p>
+                  A straightforward idea would be to replace the unmasked
+                  region with the original image after every denoising step.
+                  However, the reverse diffusion process operates at
+                  different noise levels. Directly inserting clean pixels
+                  into a noisy intermediate image would create a mismatch
+                  between the two regions.
+                </p>
+
+                <p>
+                  Instead, at each timestep \(t\), we first add the
+                  corresponding amount of noise to the original image:
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  x_t^{\mathrm{orig}}
+                  =
+                  \sqrt{\bar{\alpha}_t}x_{\mathrm{orig}}
+                  +
+                  \sqrt{1-\bar{\alpha}_t}\epsilon
+                  \]
+                </div>
+
+                <p>
+                  We then combine the current generated image with the
+                  noisy original image using the mask:
+                </p>
+
+                <div class="equation-block inpainting-equation--primary">
+                  \[
+                  \boxed{
+                  x_t
+                  \leftarrow
+                  m\odot x_t
+                  +
+                  (1-m)\odot x_t^{\mathrm{orig}}
+                  }
+                  \]
+                </div>
+
+                <p>
+                  Here, \(\odot\) denotes element-wise multiplication.
+                  The masked region retains the newly generated content,
+                  while the unmasked region is replaced with the
+                  corresponding noisy original pixels.
+                </p>
+
+                <p>
+                  By repeating this operation throughout iterative
+                  denoising, we allow the model to generate new content
+                  inside the mask while preserving the original image
+                  outside it. This is a simplified, RePaint-inspired
+                  inpainting approach.
+                </p>
+
+                <p>
+                  I implemented this by extending the previous
+                  CFG-based denoising function. The key modification
+                  is shown below:
+                </p>
+
+                <div class="result-box inpainting-code">
                   <div class="thumb large-box">
-                    <img src="media/inpaintingcriticalpic.png" alt="Box filter result 1">
-                  </div>
-              </div>
-              </li>
-              <li>
-              <p>Here I first inpainted the Companile using my own mask:</p>
-              <div class="result-box">
-                  <div class="thumb">
-                    <img src="media/original.png" alt="Box filter result 1">
-                    <div class="caption">Orginal Companile</div>
-                  </div>
-                  <div class="thumb">
-                    <img src="media/mask1.png" alt="Box filter result 1">
-                    <div class="caption">The mask</div>
-                  </div>
-                  <div class="thumb">
-                    <img src="media/holeToFill.png" alt="Box filter result 1">
-                    <div class="caption">Area to replace</div>
-                  </div>
-                  <div class="thumb">
-                    <img src="media/inpaintedCampanile.png" alt="Box filter result 1">
-                    <div class="caption">The inpainted picture</div>
+                    <img
+                      src="media/inpaintingcriticalpic.png"
+                      alt="Inpainting implementation using a binary mask"
+                    >
+                    <div class="caption">
+                      Combining generated pixels with the noisy
+                      original image at each timestep
+                    </div>
                   </div>
                 </div>
               </li>
-              <li><p>I also tested this on two pictures drawn by myself:</p>
-              <div class="result-box">
+
+
+              <li class="sdedit-step inpainting-step">
+                <p>
+                  I first applied inpainting to the Berkeley Campanile
+                  using a custom mask. The following images show the
+                  original image, the binary mask, the region to be
+                  replaced, and the final inpainted result.
+                </p>
+
+                <div class="result-box inpainting-gallery">
+
                   <div class="thumb">
-                    <img src="media/airplaneOriginal.png" alt="Box filter result 1">
-                    <div class="caption">Orginal Airplane</div>
+                    <img
+                      src="media/original.png"
+                      alt="Original Berkeley Campanile"
+                    >
+                    <div class="caption">Original Campanile</div>
                   </div>
+
                   <div class="thumb">
-                    <img src="media/mask2.png" alt="Box filter result 1">
-                    <div class="caption">The mask</div>
+                    <img
+                      src="media/mask1.png"
+                      alt="Binary mask for Campanile"
+                    >
+                    <div class="caption">Binary mask</div>
                   </div>
+
                   <div class="thumb">
-                    <img src="media/toreplace2.png" alt="Box filter result 1">
-                    <div class="caption">Area to replace</div>
+                    <img
+                      src="media/holeToFill.png"
+                      alt="Campanile region to replace"
+                    >
+                    <div class="caption">Region to replace</div>
                   </div>
+
                   <div class="thumb">
-                    <img src="media/airplainInpainted.png" alt="Box filter result 1">
-                    <div class="caption">The inpainted picture</div>
+                    <img
+                      src="media/inpaintedCampanile.png"
+                      alt="Inpainted Campanile"
+                    >
+                    <div class="caption">Inpainted Campanile</div>
                   </div>
-              </div>
-              <div class="result-box">
-                  <div class="thumb">
-                    <img src="media/railwayOriginal.png" alt="Box filter result 1">
-                    <div class="caption">Orginal Companile</div>
-                  </div>
-                  <div class="thumb">
-                    <img src="media/mask3.png" alt="Box filter result 1">
-                    <div class="caption">The mask</div>
-                  </div>
-                  <div class="thumb">
-                    <img src="media/toreplace3.png" alt="Box filter result 1">
-                    <div class="caption">Area to replace</div>
-                  </div>
-                  <div class="thumb">
-                    <img src="media/railwayInpainted.png" alt="Box filter result 1">
-                    <div class="caption">The inpainted picture</div>
-                  </div>
+
                 </div>
+
+                <p>
+                  The generated content is concentrated in the selected
+                  region, while the remaining parts of the original
+                  image are preserved.
+                </p>
               </li>
+
+
+              <li class="sdedit-step inpainting-step">
+                <p>
+                  I further tested the same method on two additional
+                  images: an airplane and a railway scene. For each
+                  experiment, I designed a custom mask and applied
+                  the same masked iterative denoising process.
+                </p>
+
+                <div class="result-box inpainting-gallery">
+
+                  <div class="thumb">
+                    <img
+                      src="media/airplaneOriginal.png"
+                      alt="Original airplane"
+                    >
+                    <div class="caption">Original Airplane</div>
+                  </div>
+
+                  <div class="thumb">
+                    <img
+                      src="media/mask2.png"
+                      alt="Binary mask for airplane"
+                    >
+                    <div class="caption">Binary mask</div>
+                  </div>
+
+                  <div class="thumb">
+                    <img
+                      src="media/toreplace2.png"
+                      alt="Airplane region to replace"
+                    >
+                    <div class="caption">Region to replace</div>
+                  </div>
+
+                  <div class="thumb">
+                    <img
+                      src="media/airplainInpainted.png"
+                      alt="Inpainted airplane"
+                    >
+                    <div class="caption">Inpainted Airplane</div>
+                  </div>
+
+                </div>
+
+
+                <div class="result-box inpainting-gallery">
+
+                  <div class="thumb">
+                    <img
+                      src="media/railwayOriginal.png"
+                      alt="Original railway"
+                    >
+                    <div class="caption">Original Railway</div>
+                  </div>
+
+                  <div class="thumb">
+                    <img
+                      src="media/mask3.png"
+                      alt="Binary mask for railway"
+                    >
+                    <div class="caption">Binary mask</div>
+                  </div>
+
+                  <div class="thumb">
+                    <img
+                      src="media/toreplace3.png"
+                      alt="Railway region to replace"
+                    >
+                    <div class="caption">Region to replace</div>
+                  </div>
+
+                  <div class="thumb">
+                    <img
+                      src="media/railwayInpainted.png"
+                      alt="Inpainted railway"
+                    >
+                    <div class="caption">Inpainted Railway</div>
+                  </div>
+
+                </div>
+
+                <p>
+                  These experiments demonstrate how spatial constraints
+                  can be incorporated into diffusion sampling without
+                  retraining the denoising model. By changing the mask,
+                  we can control where new content is generated while
+                  retaining the surrounding scene.
+                </p>
+
+              </li>
+
             </ol>
           </div>
         </div>
@@ -2691,105 +2955,376 @@
             <span class="hint">1.7.3</span>
             <button class="mini-toggle" type="button" data-target="#1.7.3-bo">Hide</button>
           </div>
-          <div class="mini-bd" id="1.7.3-body">
-            <ol>
-              <li><p>Now, we will do the same thing as the previous section, but guide the projection with a text prompt.</p>
-              <p>Here is the version of berkeley Campanile with the prompt:"a wide angle photo of the campanile reflected in a rain puddle at night":</p>
-              <div class="result-box">
-                  <div class="thumb">
-                    <img src="media/prompt1_1.png" alt="Box filter result 1">
-                    <div class="caption">SDEdit with i_start=1</div>
-                  </div>
-                  <div class="thumb">
-                    <img src="media/prompt1_3.png" alt="Box filter result 1">
-                    <div class="caption">SDEdit with i_start=3</div>
-                  </div>
-                  <div class="thumb">
-                    <img src="media/prompt1_5.png" alt="Box filter result 1">
-                    <div class="caption">SDEdit with i_start=5</div>
-                  </div>
-                  <div class="thumb">
-                    <img src="media/prompt1_7.png" alt="Box filter result 1">
-                    <div class="caption">SDEdit with i_start=7</div>
-                  </div>
-                  <div class="thumb">
-                    <img src="media/prompt1_10.png" alt="Box filter result 1">
-                    <div class="caption">SDEdit with i_start=10</div>
-                  </div>                  
-                  <div class="thumb">
-                    <img src="media/prompt1_21.png" alt="Box filter result 1">
-                    <div class="caption">SDEdit with i_start=20</div>
-                  </div>
-                  <div class="thumb">
-                    <img src="media/original.png" alt="Box filter result 1">
-                    <div class="caption">original campanile</div>
-                  </div>
+          <div class="mini-bd sdedit-study text-guided-study" id="1.7.3-body">
+            <ol class="sdedit-steps">
+
+              <li class="sdedit-step">
+                <p>
+                  So far, we have used SDEdit to modify existing images
+                  with a general prompt such as
+                  <code>"a high quality photo"</code>.
+                  However, this provides little control over what
+                  the edited image should contain.
+                </p>
+
+                <p>
+                  To introduce semantic control, we can combine
+                  <strong>SDEdit with Classifier-Free Guidance (CFG)</strong>.
+                  SDEdit determines how much information from the
+                  original image is preserved, while CFG steers the
+                  reverse diffusion process toward a desired text prompt.
+                </p>
+
+                <p>
+                  The procedure remains almost identical to the previous
+                  SDEdit experiments. We first add noise to the original
+                  image at a chosen timestep:
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  x_t
+                  =
+                  \sqrt{\bar{\alpha}_t}x_0
+                  +
+                  \sqrt{1-\bar{\alpha}_t}\epsilon
+                  \]
                 </div>
+
+                <p>
+                  We then perform iterative denoising, using CFG at
+                  each reverse step to strengthen the influence of
+                  the desired text condition:
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \hat{\epsilon}
+                  =
+                  \epsilon_u
+                  +
+                  \gamma(\epsilon_c-\epsilon_u)
+                  \]
+                </div>
+
+                <p>
+                  This introduces two complementary controls:
+                  the starting noise level determines how strongly
+                  the output is constrained by the original image,
+                  while the guidance scale determines how strongly
+                  the text prompt influences the denoising process.
+                </p>
+
+                <p>
+                  In my implementation, <code>i_start</code> indexes
+                  the descending timestep schedule. Therefore,
+                  a smaller <code>i_start</code> corresponds to a
+                  higher noise level and allows more substantial edits,
+                  while a larger value preserves more of the original
+                  image.
+                </p>
+
+                <p>
+                  I first tested this approach on the Berkeley
+                  Campanile using the following prompt:
+                </p>
+
+                <p class="guided-prompt">
+                  <strong>Prompt:</strong>
+                  <em>
+                    "a wide angle photo of the campanile reflected
+                    in a rain puddle at night"
+                  </em>
+                </p>
+
+                <div class="result-box sdedit-gallery">
+
+                  <div class="thumb">
+                    <img
+                      src="media/prompt1_1.png"
+                      alt="Campanile text-conditioned SDEdit at i_start=1"
+                    >
+                    <div class="caption">
+                      SDEdit with i_start=1
+                    </div>
+                  </div>
+
+                  <div class="thumb">
+                    <img
+                      src="media/prompt1_3.png"
+                      alt="Campanile text-conditioned SDEdit at i_start=3"
+                    >
+                    <div class="caption">
+                      SDEdit with i_start=3
+                    </div>
+                  </div>
+
+                  <div class="thumb">
+                    <img
+                      src="media/prompt1_5.png"
+                      alt="Campanile text-conditioned SDEdit at i_start=5"
+                    >
+                    <div class="caption">
+                      SDEdit with i_start=5
+                    </div>
+                  </div>
+
+                  <div class="thumb">
+                    <img
+                      src="media/prompt1_7.png"
+                      alt="Campanile text-conditioned SDEdit at i_start=7"
+                    >
+                    <div class="caption">
+                      SDEdit with i_start=7
+                    </div>
+                  </div>
+
+                  <div class="thumb">
+                    <img
+                      src="media/prompt1_10.png"
+                      alt="Campanile text-conditioned SDEdit at i_start=10"
+                    >
+                    <div class="caption">
+                      SDEdit with i_start=10
+                    </div>
+                  </div>
+
+                  <div class="thumb">
+                    <img
+                      src="media/prompt1_21.png"
+                      alt="Campanile text-conditioned SDEdit at i_start=20"
+                    >
+                    <div class="caption">
+                      SDEdit with i_start=20
+                    </div>
+                  </div>
+
+                  <div class="thumb">
+                    <img
+                      src="media/original.png"
+                      alt="Original Berkeley Campanile"
+                    >
+                    <div class="caption">
+                      Original Campanile
+                    </div>
+                  </div>
+
+                </div>
+
+                <p>
+                  At higher noise levels, the model has more freedom
+                  to reinterpret the scene according to the prompt,
+                  producing nighttime architecture and reflections.
+                  As the starting noise level decreases, the output
+                  gradually retains more of the original Campanile
+                  structure, leaving less freedom for large semantic
+                  changes.
+                </p>
+
               </li>
-              <li><p>I also tested this on two pictures drawn by myself:</p>
-                <p>Prompt: "a watercolor painting of robots studying under paper lanterns in a quiet library"</p>
-              <div class="result-box">
+
+
+              <li class="sdedit-step">
+                <p>
+                  I further experimented with two additional images
+                  using more imaginative prompts to explore how
+                  text guidance interacts with the original
+                  image structure.
+                </p>
+
+                <p class="guided-prompt">
+                  <strong>Prompt 1:</strong>
+                  <em>
+                    "a watercolor painting of robots studying under
+                    paper lanterns in a quiet library"
+                  </em>
+                </p>
+
+                <div class="result-box sdedit-gallery">
+
                   <div class="thumb">
-                    <img src="media/prompt2_1.png" alt="Box filter result 1">
-                    <div class="caption">SDEdit with i_start=1</div>
+                    <img
+                      src="media/prompt2_1.png"
+                      alt="Robot SDEdit at i_start=1"
+                    >
+                    <div class="caption">
+                      SDEdit with i_start=1
+                    </div>
                   </div>
+
                   <div class="thumb">
-                    <img src="media/prompt2_3.png" alt="Box filter result 1">
-                    <div class="caption">SDEdit with i_start=3</div>
+                    <img
+                      src="media/prompt2_3.png"
+                      alt="Robot SDEdit at i_start=3"
+                    >
+                    <div class="caption">
+                      SDEdit with i_start=3
+                    </div>
                   </div>
+
                   <div class="thumb">
-                    <img src="media/prompt2_5.png" alt="Box filter result 1">
-                    <div class="caption">SDEdit with i_start=5</div>
+                    <img
+                      src="media/prompt2_5.png"
+                      alt="Robot SDEdit at i_start=5"
+                    >
+                    <div class="caption">
+                      SDEdit with i_start=5
+                    </div>
                   </div>
+
                   <div class="thumb">
-                    <img src="media/prompt2_7.png" alt="Box filter result 1">
-                    <div class="caption">SDEdit with i_start=7</div>
+                    <img
+                      src="media/prompt2_7.png"
+                      alt="Robot SDEdit at i_start=7"
+                    >
+                    <div class="caption">
+                      SDEdit with i_start=7
+                    </div>
                   </div>
+
                   <div class="thumb">
-                    <img src="media/prompt2_10.png" alt="Box filter result 1">
-                    <div class="caption">SDEdit with i_start=10</div>
-                  </div>                  
-                  <div class="thumb">
-                    <img src="media/prompt2_21.png" alt="Box filter result 1">
-                    <div class="caption">SDEdit with i_start=20</div>
+                    <img
+                      src="media/prompt2_10.png"
+                      alt="Robot SDEdit at i_start=10"
+                    >
+                    <div class="caption">
+                      SDEdit with i_start=10
+                    </div>
                   </div>
+
                   <div class="thumb">
-                    <img src="media/prompt2Original.png" alt="Box filter result 1">
-                    <div class="caption">original robot</div>
+                    <img
+                      src="media/prompt2_21.png"
+                      alt="Robot SDEdit at i_start=20"
+                    >
+                    <div class="caption">
+                      SDEdit with i_start=20
+                    </div>
                   </div>
+
+                  <div class="thumb">
+                    <img
+                      src="media/prompt2Original.png"
+                      alt="Original robot image"
+                    >
+                    <div class="caption">
+                      Original Robot
+                    </div>
+                  </div>
+
                 </div>
-                <p>Prompt: "an aerial photograph of terraced rice fields shaped like a spiral galaxy"</p>
-                <div class="result-box">
+
+                <p>
+                  In this experiment, the prompt introduces a new
+                  environment and visual style. Higher noise levels
+                  allow the model to substantially reinterpret the
+                  original robot image, while lower noise levels
+                  preserve more of its original appearance.
+                </p>
+
+
+                <p class="guided-prompt">
+                  <strong>Prompt 2:</strong>
+                  <em>
+                    "an aerial photograph of terraced rice fields
+                    shaped like a spiral galaxy"
+                  </em>
+                </p>
+
+                <div class="result-box sdedit-gallery">
+
                   <div class="thumb">
-                    <img src="media/galaxy1.png" alt="Box filter result 1">
-                    <div class="caption">SDEdit with i_start=1</div>
+                    <img
+                      src="media/galaxy1.png"
+                      alt="Galaxy SDEdit at i_start=1"
+                    >
+                    <div class="caption">
+                      SDEdit with i_start=1
+                    </div>
                   </div>
+
                   <div class="thumb">
-                    <img src="media/galaxy3.png" alt="Box filter result 1">
-                    <div class="caption">SDEdit with i_start=3</div>
+                    <img
+                      src="media/galaxy3.png"
+                      alt="Galaxy SDEdit at i_start=3"
+                    >
+                    <div class="caption">
+                      SDEdit with i_start=3
+                    </div>
                   </div>
+
                   <div class="thumb">
-                    <img src="media/galaxy5.png" alt="Box filter result 1">
-                    <div class="caption">SDEdit with i_start=5</div>
+                    <img
+                      src="media/galaxy5.png"
+                      alt="Galaxy SDEdit at i_start=5"
+                    >
+                    <div class="caption">
+                      SDEdit with i_start=5
+                    </div>
                   </div>
+
                   <div class="thumb">
-                    <img src="media/galaxy7.png" alt="Box filter result 1">
-                    <div class="caption">SDEdit with i_start=7</div>
+                    <img
+                      src="media/galaxy7.png"
+                      alt="Galaxy SDEdit at i_start=7"
+                    >
+                    <div class="caption">
+                      SDEdit with i_start=7
+                    </div>
                   </div>
+
                   <div class="thumb">
-                    <img src="media/galaxy10.png" alt="Box filter result 1">
-                    <div class="caption">SDEdit with i_start=10</div>
-                  </div>                  
-                  <div class="thumb">
-                    <img src="media/galaxy20.png" alt="Box filter result 1">
-                    <div class="caption">SDEdit with i_start=20</div>
+                    <img
+                      src="media/galaxy10.png"
+                      alt="Galaxy SDEdit at i_start=10"
+                    >
+                    <div class="caption">
+                      SDEdit with i_start=10
+                    </div>
                   </div>
+
                   <div class="thumb">
-                    <img src="media/galaxyOriginal.png" alt="Box filter result 1">
-                    <div class="caption">original galaxy</div>
+                    <img
+                      src="media/galaxy20.png"
+                      alt="Galaxy SDEdit at i_start=20"
+                    >
+                    <div class="caption">
+                      SDEdit with i_start=20
+                    </div>
                   </div>
+
+                  <div class="thumb">
+                    <img
+                      src="media/galaxyOriginal.png"
+                      alt="Original galaxy image"
+                    >
+                    <div class="caption">
+                      Original Galaxy
+                    </div>
+                  </div>
+
                 </div>
+
+                <p>
+                  This experiment is particularly interesting because
+                  the prompt asks the model to reinterpret an existing
+                  spiral structure as terraced rice fields. The
+                  results illustrate how text guidance can introduce
+                  new semantic content while SDEdit controls how
+                  much of the original visual structure is retained.
+                </p>
+
+                <p>
+                  Together, these experiments demonstrate the
+                  trade-off between preserving the original image
+                  and following a new text condition. By adjusting
+                  the starting noise level and using CFG, we can
+                  control both the strength and the semantic
+                  direction of image editing.
+                </p>
+
               </li>
+
             </ol>
           </div>
         </div>
