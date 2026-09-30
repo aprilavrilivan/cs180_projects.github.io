@@ -1794,6 +1794,32 @@
                   reconstructing all missing information from a highly noisy image at once.
                 </p>
 
+                <p>
+                  I implemented the <code>iterative_denoise</code> function following the reverse
+                  diffusion transition. At each step, the function predicts \(\hat{x}_0\) and moves
+                  from the current timestep \(t\) to a smaller timestep \(t'\):
+                </p>
+
+                <div class="result-box iterative-formula-figure">
+                  <div class="thumb">
+                    <img src="media/iterativeFormula.png" alt="Iterative denoise formula">
+                  </div>
+                </div>
+
+                <p>
+                  The corresponding implementation is shown below:
+                </p>
+
+                <div class="result-box iterative-code-grid">
+                  <div class="thumb large-box">
+                    <img src="media/getAlpha.png" alt="Get alpha values">
+                  </div>
+
+                  <div class="thumb large-box">
+                    <img src="media/compFormula.png" alt="Compute reverse step">
+                  </div>
+                </div>
+
               </li>
 
 
@@ -1827,60 +1853,6 @@
                 </div>
 
               </li>
-
-
-              <li class="iterative-step">
-
-                <p>
-                  I implemented the <code>iterative_denoise</code> function following the reverse
-                  diffusion transition. At each step, the function predicts \(\hat{x}_0\) and moves
-                  from the current timestep \(t\) to a smaller timestep \(t'\):
-                </p>
-
-
-                <div class="result-box iterative-formula-figure">
-                  <div class="thumb">
-                    <img src="media/iterativeFormula.png" alt="Iterative denoise formula">
-                  </div>
-                </div>
-
-
-                <p>
-                  The implementation follows the three operations described above:
-                </p>
-
-                <ol class="iterative-process-list">
-                  <li>
-                    Predict the noise \(\epsilon_\theta(x_t,t)\) from the current noisy image.
-                  </li>
-
-                  <li>
-                    Recover the clean image estimate \(\hat{x}_0\).
-                  </li>
-
-                  <li>
-                    Apply the posterior transition to obtain a less noisy image \(x_{t'}\).
-                  </li>
-                </ol>
-
-
-                <p>
-                  The corresponding implementation is shown below:
-                </p>
-
-
-                <div class="result-box iterative-code-grid">
-                  <div class="thumb large-box">
-                    <img src="media/getAlpha.png" alt="Get alpha values">
-                  </div>
-
-                  <div class="thumb large-box">
-                    <img src="media/compFormula.png" alt="Compute reverse step">
-                  </div>
-                </div>
-
-              </li>
-
 
               <li class="iterative-step">
 
