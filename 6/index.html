@@ -786,7 +786,6 @@
     }
 
     .project-main .iterative-step .result-box.iterative-wide-figure,
-    .project-main .iterative-step .result-box.iterative-formula-figure,
     .project-main .iterative-step .result-box.iterative-code-grid,
     .project-main .iterative-step .result-box.iterative-trajectory,
     .project-main .iterative-step .result-box.iterative-final-comparison {
@@ -801,11 +800,6 @@
       grid-template-columns: 1fr;
     }
 
-    .project-main .iterative-step .result-box.iterative-formula-figure {
-      width: min(100%, 560px);
-      grid-template-columns: 1fr;
-    }
-
     .project-main .iterative-step .result-box.iterative-trajectory {
       grid-template-columns: repeat(5, minmax(0, 1fr));
     }
@@ -815,7 +809,6 @@
     }
 
     .project-main .iterative-step .result-box.iterative-wide-figure .thumb,
-    .project-main .iterative-step .result-box.iterative-formula-figure .thumb,
     .project-main .iterative-step .result-box.iterative-code-grid .thumb,
     .project-main .iterative-step .result-box.iterative-trajectory .thumb,
     .project-main .iterative-step .result-box.iterative-final-comparison .thumb {
@@ -826,7 +819,6 @@
     }
 
     .project-main .iterative-step .result-box.iterative-wide-figure img,
-    .project-main .iterative-step .result-box.iterative-formula-figure img,
     .project-main .iterative-step .result-box.iterative-code-grid img {
       width: 100%;
       height: auto;
@@ -1787,16 +1779,7 @@
                 <p>
                   I implemented the <code>iterative_denoise</code> function following the reverse
                   diffusion transition. At each step, the function predicts \(\hat{x}_0\) and moves
-                  from the current timestep \(t\) to a smaller timestep \(t'\):
-                </p>
-
-                <div class="result-box iterative-formula-figure">
-                  <div class="thumb">
-                    <img src="media/iterativeFormula.png" alt="Iterative denoise formula">
-                  </div>
-                </div>
-
-                <p>
+                  from the current timestep \(t\) to a smaller timestep \(t'\).
                   The corresponding implementation is shown below:
                 </p>
 
