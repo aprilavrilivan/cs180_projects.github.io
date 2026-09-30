@@ -1540,7 +1540,7 @@
           <div class="mini-hd">
             <span>Part 1</span>
             <span class="hint">1.4</span>
-            <button class="mini-toggle" type="button" data-target="#1.4-body">Hide</button>
+            <button class="mini-toggle" type="button" data-target="#1.4-bo">Hide</button>
           </div>
 
           <div class="mini-bd iterative-study" id="1.4-body">
@@ -1550,13 +1550,13 @@
 
                 <p>
                   Although one-step denoising can recover clean images from moderately noisy inputs,
-                  directly predicting \(x_0\) from a highly corrupted image becomes increasingly difficult
-                  as the noise level grows.
+                  directly predicting \(x_0\) from highly corrupted images becomes increasingly
+                  difficult as the noise level grows.
                 </p>
 
                 <p>
-                  Diffusion models address this problem by learning a gradual reverse process. Instead of
-                  directly mapping:
+                  Diffusion models solve this problem by gradually reversing the forward diffusion
+                  process. Instead of directly mapping:
                 </p>
 
                 <div class="equation-block">
@@ -1566,17 +1566,19 @@
                 </div>
 
                 <p>
-                  the model progressively removes noise through intermediate states:
+                  the model performs a sequence of smaller denoising transitions:
                 </p>
 
                 <div class="equation-block">
                   \[
-                  x_T\rightarrow x_{T-1}\rightarrow ...\rightarrow x_1\rightarrow x_0
+                  x_t\rightarrow x_{t'}\rightarrow x_{t''}\rightarrow ...\rightarrow x_0,
+                  \qquad t'&lt;t
                   \]
                 </div>
 
                 <p>
-                  At each reverse step, the UNet predicts the noise component:
+                  At each reverse step, the UNet first predicts the noise component contained in the
+                  current noisy image:
                 </p>
 
                 <div class="equation-block">
@@ -1586,20 +1588,25 @@
                 </div>
 
                 <p>
-                  which allows us to estimate the clean image:
+                  Based on the predicted noise, we can estimate the clean image:
                 </p>
 
                 <div class="equation-block">
                   \[
                   \hat{x}_0=
-                  \frac{x_t-\sqrt{1-\bar{\alpha}_t}\epsilon_\theta(x_t,t)}
+                  \frac{x_t-\sqrt{1-\bar{\alpha}_t}
+                  \epsilon_\theta(x_t,t)}
                   {\sqrt{\bar{\alpha}_t}}
                   \]
                 </div>
 
                 <p>
-                  A natural idea is then to generate a less noisy image by applying the forward
-                  diffusion equation again on the estimated clean image:
+                  A natural question is: after obtaining \(\hat{x}_0\), why not simply add a smaller
+                  amount of noise back to generate \(x_{t'}\)?
+                </p>
+
+                <p>
+                  For example, one possible approach would be:
                 </p>
 
                 <div class="equation-block">
@@ -1608,20 +1615,19 @@
                   =
                   \sqrt{\bar{\alpha}_{t'}}\hat{x}_0
                   +
-                  \sqrt{1-\bar{\alpha}_{t'}}z,
-                  \quad t'&lt;t
+                  \sqrt{1-\bar{\alpha}_{t'}}z
                   \]
                 </div>
 
                 <p>
-                  However, this approach only uses the predicted clean image and ignores the current
-                  noisy state \(x_t\). Since \(x_t\) still contains useful information from the current
-                  diffusion trajectory, the reverse process should preserve both the current state and
-                  the estimated target.
+                  However, this ignores the information contained in the current noisy image \(x_t\).
+                  The reverse process should not randomly generate a new noisy image from
+                  \(\hat{x}_0\); instead, it should follow a consistent trajectory from the current
+                  state \(x_t\) toward the clean image.
                 </p>
 
                 <p>
-                  Therefore, DDPM derives a posterior transition:
+                  Therefore, diffusion models use the posterior transition:
                 </p>
 
                 <div class="equation-block">
@@ -1631,15 +1637,15 @@
                 </div>
 
                 <p>
-                  which combines information from both \(x_t\) and \(x_0\):
+                  which combines information from both the current noisy image and the estimated clean
+                  image. The resulting transition is:
                 </p>
 
                 <div class="equation-block">
                   \[
-                  x_{t'}
-                  =
+                  x_{t'}=
                   \frac{\sqrt{\bar{\alpha}_{t'}}\beta_t}
-                  {1-\bar{\alpha}_t}x_0
+                  {1-\bar{\alpha}_t}\hat{x}_0
                   +
                   \frac{\sqrt{\alpha_t}(1-\bar{\alpha}_{t'})}
                   {1-\bar{\alpha}_t}x_t
@@ -1649,10 +1655,26 @@
                 </div>
 
                 <p>
-                  Intuitively, the first term guides the sample toward the predicted clean image,
-                  while the second term keeps the sample on a consistent reverse diffusion trajectory.
-                  This allows each step to solve only a small denoising problem instead of reconstructing
-                  the entire image at once.
+                  This equation can be interpreted as a weighted combination of:
+                </p>
+
+                <ol class="iterative-process-list">
+                  <li>
+                    the predicted clean image \(\hat{x}_0\), which provides the denoising direction;
+                  </li>
+
+                  <li>
+                    the current noisy state \(x_t\), which preserves trajectory consistency;
+                  </li>
+
+                  <li>
+                    a small random noise term \(v_\sigma\), which maintains stochastic sampling.
+                  </li>
+                </ol>
+
+                <p>
+                  Therefore, each reverse step only solves a small denoising problem instead of
+                  reconstructing all missing information from a highly noisy image at once.
                 </p>
 
               </li>
@@ -1677,8 +1699,8 @@
                 </div>
 
                 <p>
-                  where the stride is set to 30. The scheduler is then initialized with these
-                  reduced timesteps:
+                  where the stride is set to 30. The scheduler is initialized with these reduced
+                  timesteps:
                 </p>
 
                 <div class="result-box iterative-wide-figure">
@@ -1694,8 +1716,8 @@
 
                 <p>
                   I implemented the <code>iterative_denoise</code> function following the reverse
-                  diffusion transition. At each step, the function predicts the clean image and
-                  moves from the current timestep \(t\) to a smaller timestep \(t'\):
+                  diffusion transition. At each step, the function predicts \(\hat{x}_0\) and moves
+                  from the current timestep \(t\) to a smaller timestep \(t'\):
                 </p>
 
 
@@ -1707,19 +1729,20 @@
 
 
                 <p>
-                  The mathematical transition can be viewed as a combination of three operations:
+                  The implementation follows the three operations described above:
                 </p>
 
                 <ol class="iterative-process-list">
                   <li>
-                    Predict the noise in the current noisy image.
+                    Predict the noise \(\epsilon_\theta(x_t,t)\) from the current noisy image.
                   </li>
+
                   <li>
-                    Recover an estimate of the clean image \(\hat{x}_0\).
+                    Recover the clean image estimate \(\hat{x}_0\).
                   </li>
+
                   <li>
-                    Sample a new image with a smaller noise level \(x_{t'}\) using the diffusion
-                    posterior.
+                    Apply the posterior transition to obtain a less noisy image \(x_{t'}\).
                   </li>
                 </ol>
 
@@ -1745,10 +1768,10 @@
               <li class="iterative-step">
 
                 <p>
-                  Finally, I added noise to the Campanile image up to timestep \(t=690\), and
-                  gradually denoised it back to \(t=0\) using the iterative denoising process with
-                  stride 30. I saved intermediate results every 5 denoising steps to visualize the
-                  reverse trajectory.
+                  Finally, I added noise to the Campanile image up to timestep \(t=690\), and gradually
+                  denoised it back to \(t=0\) using the iterative denoising process with stride 30.
+                  I saved intermediate results every 5 denoising steps to visualize the reverse
+                  trajectory.
                 </p>
 
 
@@ -1816,11 +1839,10 @@
 
 
                 <p>
-                  The iterative denoising process achieves the best reconstruction quality.
-                  Compared with one-step denoising, it avoids forcing the model to recover all
-                  missing information in a single prediction. Instead, the image is gradually
-                  projected back onto the natural image manifold through multiple reverse diffusion
-                  steps.
+                  The iterative denoising process achieves the best reconstruction quality. Compared
+                  with one-step denoising, it avoids forcing the model to recover all missing
+                  information in a single prediction. Instead, the image is gradually refined through
+                  multiple reverse diffusion transitions.
                 </p>
 
 
