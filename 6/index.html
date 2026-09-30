@@ -710,6 +710,150 @@
       border-color: color-mix(in srgb, var(--study-color) 48%, var(--project-border));
     }
 
+    /* Part 1.4: iterative denoising */
+    .iterative-study {
+      padding: clamp(18px, 2.8vw, 30px) !important;
+    }
+
+    .project-main .iterative-steps {
+      display: grid;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+      counter-reset: iterative-step;
+    }
+
+    .project-main .iterative-step {
+      position: relative;
+      margin: 0;
+      padding: 0;
+      counter-increment: iterative-step;
+    }
+
+    .project-main .iterative-step + .iterative-step {
+      margin-top: 30px;
+      padding-top: 30px;
+      border-top: 1px solid var(--project-border);
+    }
+
+    .project-main .iterative-step::before {
+      display: grid;
+      width: 32px;
+      height: 32px;
+      margin-bottom: 18px;
+      border: 1px solid color-mix(in srgb, var(--project-accent) 42%, var(--project-border));
+      border-radius: 10px;
+      background: var(--project-accent-soft);
+      color: var(--project-accent-dark);
+      content: counter(iterative-step, decimal-leading-zero);
+      font-size: 12px;
+      font-weight: 800;
+      line-height: 1;
+      place-items: center;
+    }
+
+    .project-main .iterative-step > p:first-of-type {
+      margin-top: 0;
+      color: var(--project-text);
+      font-size: clamp(16px, 1.7vw, 19px);
+      font-weight: 680;
+      line-height: 1.55;
+    }
+
+    .project-main .iterative-step > p:last-of-type {
+      margin-bottom: 0;
+    }
+
+    .project-main .iterative-step code {
+      padding: 2px 6px;
+      border: 1px solid color-mix(in srgb, var(--project-accent) 24%, var(--project-border));
+      border-radius: 6px;
+      background: color-mix(in srgb, var(--project-accent) 7%, var(--project-paper));
+      color: var(--project-text);
+      font-size: .88em;
+    }
+
+    .project-main .iterative-process-list {
+      display: grid;
+      gap: 9px;
+      margin: 16px 0 24px;
+      padding-left: 1.7rem;
+    }
+
+    .project-main .iterative-process-list li {
+      margin: 0;
+      padding-left: 5px;
+    }
+
+    .project-main .iterative-step .result-box.iterative-wide-figure,
+    .project-main .iterative-step .result-box.iterative-formula-figure,
+    .project-main .iterative-step .result-box.iterative-code-grid,
+    .project-main .iterative-step .result-box.iterative-trajectory,
+    .project-main .iterative-step .result-box.iterative-final-comparison {
+      display: grid;
+      width: min(100%, 920px);
+      margin: 24px auto;
+      gap: 12px;
+    }
+
+    .project-main .iterative-step .result-box.iterative-wide-figure,
+    .project-main .iterative-step .result-box.iterative-code-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .project-main .iterative-step .result-box.iterative-formula-figure {
+      width: min(100%, 560px);
+      grid-template-columns: 1fr;
+    }
+
+    .project-main .iterative-step .result-box.iterative-trajectory {
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+    }
+
+    .project-main .iterative-step .result-box.iterative-final-comparison {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+
+    .project-main .iterative-step .result-box.iterative-wide-figure .thumb,
+    .project-main .iterative-step .result-box.iterative-formula-figure .thumb,
+    .project-main .iterative-step .result-box.iterative-code-grid .thumb,
+    .project-main .iterative-step .result-box.iterative-trajectory .thumb,
+    .project-main .iterative-step .result-box.iterative-final-comparison .thumb {
+      max-width: none;
+      border-radius: 13px;
+      background: var(--project-paper-soft);
+      box-shadow: none;
+    }
+
+    .project-main .iterative-step .result-box.iterative-wide-figure img,
+    .project-main .iterative-step .result-box.iterative-formula-figure img,
+    .project-main .iterative-step .result-box.iterative-code-grid img {
+      width: 100%;
+      height: auto;
+      background: #fff;
+      object-fit: contain;
+    }
+
+    .project-main .iterative-step .result-box.iterative-trajectory img,
+    .project-main .iterative-step .result-box.iterative-final-comparison img {
+      width: 100%;
+      aspect-ratio: 1;
+      background: #fff;
+      image-rendering: auto;
+      object-fit: cover;
+    }
+
+    .project-main .iterative-step .result-box.iterative-trajectory .caption,
+    .project-main .iterative-step .result-box.iterative-final-comparison .caption {
+      min-height: 48px;
+      margin: 0;
+      padding: 8px 7px 9px;
+      border-top: 1px solid var(--project-border);
+      background: var(--project-paper-soft);
+      font-size: 11px;
+      line-height: 1.35;
+    }
+
     @media (max-width: 760px) {
       .forward-diffusion-study {
         padding: 14px !important;
@@ -738,6 +882,22 @@
 
       .project-main .denoising-step {
         padding: 0;
+      }
+
+      .iterative-study {
+        padding: 14px !important;
+      }
+
+      .project-main .iterative-step + .iterative-step {
+        padding-top: 24px;
+      }
+
+      .project-main .iterative-step .result-box.iterative-trajectory {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+
+      .project-main .iterative-step .result-box.iterative-final-comparison {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
       }
     }
   </style>
@@ -1308,81 +1468,257 @@
           <div class="mini-hd">
             <span>Part 1</span>
             <span class="hint">1.4</span>
-            <button class="mini-toggle" type="button" data-target="#1.4-bo">Hide</button>
+            <button class="mini-toggle" type="button" data-target="#1.4-body">Hide</button>
           </div>
-          <div class="mini-bd" id="1.4-body">
-            <ol>
-              <li><p>To achieve even better denoising outcome, we can use iterative denoising. We can iteratively denoise from t=990 to t=0, 
-                      with a stride=30. To do this, first I implemented a strided_timesteps list, which contains timesteps like 990,960,930...,60,30,0, and 
-                      also initialize the timesteps to stage_1 model using the function stage_1.scheduler.set_timesteps(timesteps=strided_timesteps):</p>
-                  <div class="result-box">
-                    <div class="thumb large-box">
-                      <img src="media/createStride.png" alt="Box filter result 1">
-                    </div>
-                  </div>
-                </li>
-              <li>
-                <p>Then I implemented the iterative_denoise function, which translates the following iterative denoise formula:</p>
-                <div class="result-box">
-                    <div class="thumb">
-                      <img src="media/iterativeFormula.png" alt="Box filter result 1">
-                    </div>
+
+          <div class="mini-bd iterative-study" id="1.4-body">
+            <ol class="iterative-steps">
+
+              <li class="iterative-step">
+
+                <p>
+                  Although one-step denoising can recover clean images from moderately noisy inputs,
+                  directly predicting \(x_0\) from a highly corrupted image becomes increasingly difficult
+                  as the noise level grows.
+                </p>
+
+                <p>
+                  Diffusion models solve this problem by performing denoising iteratively. Instead of
+                  directly mapping:
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  x_t \rightarrow x_0
+                  \]
                 </div>
-                <p>to code:</p>
-                  <div class="result-box">
-                    <div class="thumb large-box">
-                      <img src="media/getAlpha.png" alt="Box filter result 1">
-                    </div>
-                    <div class="thumb large-box">
-                      <img src="media/compFormula.png" alt="Box filter result 1">
-                    </div>
-                  </div>
+
+                <p>
+                  the reverse diffusion process gradually refines the image through a sequence of
+                  intermediate states:
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  x_T \rightarrow x_{T-1}\rightarrow ... \rightarrow x_1 \rightarrow x_0
+                  \]
+                </div>
+
+                <p>
+                  At each denoising step, the model first predicts the noise component:
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \epsilon_\theta(x_t,t)
+                  \]
+                </div>
+
+                <p>
+                  and estimates the clean image using the reverse of the forward diffusion equation:
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \hat{x}_0=
+                  \frac{x_t-\sqrt{1-\bar{\alpha}_t}
+                  \epsilon_\theta(x_t,t)}
+                  {\sqrt{\bar{\alpha}_t}}
+                  \]
+                </div>
+
+                <p>
+                  Instead of directly returning \(\hat{x}_0\), the diffusion sampler uses the estimated
+                  clean image together with the current noisy state \(x_t\) to generate a slightly
+                  less noisy image \(x_{t'}\), where \(t'&lt;t\):
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  x_t \rightarrow x_{t'}
+                  \rightarrow x_{t''}
+                  \rightarrow ... \rightarrow x_0
+                  \]
+                </div>
+
+                <p>
+                  This transition is derived from the diffusion posterior
+                  \(q(x_{t'}|x_t,x_0)\), which combines information from both the current noisy image
+                  and the estimated clean image. Therefore, each step only needs to solve a small
+                  denoising problem instead of reconstructing the entire image at once.
+                </p>
+
               </li>
-              <li>
-                <p>After that, I tried to add noise to the Campanilie picture to timestep[10], which is equivalent to t=690, and denoise back
-                with stride=30 till t=0. I saved the progress every 5 timestep (i.e. every t=150 steps). I compared the final result
-                  with one-step denoising and Gaussian Blurring, finding the iterative denoise versions achieves the best result.</p>
-                <div class="result-box">
-                    <div class="thumb">
-                      <img src="media/90.png" alt="Box filter result 1">
-                      <div class="caption"> Noisy Campanile at t=90</div>
-                    </div>
-                    <div class="thumb">
-                      <img src="media/240.png" alt="Box filter result 1">
-                      <div class="caption">Noisy Campanile at t=240</div>
-                    </div>
-                    <div class="thumb">
-                      <img src="media/390.png" alt="Box filter result 1">
-                      <div class="caption">Noisy Campanile at t=390</div>
-                    </div>
-                    <div class="thumb">
-                      <img src="media/540.png" alt="Box filter result 1">
-                      <div class="caption"> Noisy Campanile at t=540</div>
-                    </div>
-                    <div class="thumb">
-                      <img src="media/690.png" alt="Box filter result 1">
-                      <div class="caption">Noisy Campanile at t=690</div>
-                    </div>
+
+
+              <li class="iterative-step">
+
+                <p>
+                  In practice, performing the complete reverse process with 1000 denoising steps is
+                  computationally expensive. Therefore, I use a strided timestep schedule to reduce
+                  the number of reverse steps.
+                </p>
+
+                <p>
+                  Specifically, I create a timestep sequence:
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  990,960,930,...,60,30,0
+                  \]
+                </div>
+
+                <p>
+                  where the stride is set to 30. The scheduler is then initialized with these
+                  reduced timesteps:
+                </p>
+
+                <div class="result-box iterative-wide-figure">
+                  <div class="thumb large-box">
+                    <img src="media/createStride.png" alt="Create strided timesteps">
                   </div>
-                  <div class="result-box">
-                    <div class="thumb">
-                      <img src="media/original.png" alt="Box filter result 1">
-                      <div class="caption"> original Campanilie </div>
-                    </div>
-                    <div class="thumb">
-                      <img src="media/iterative_deno.png" alt="Box filter result 1">
-                      <div class="caption">Iteratively Denoised Campanile</div>
-                    </div>
-                    <div class="thumb">
-                      <img src="media/onestep_deno.png" alt="Box filter result 1">
-                      <div class="caption">One-Step Denoised Campanile</div>
-                    </div>
-                    <div class="thumb">
-                      <img src="media/gaus_deno.png" alt="Box filter result 1">
-                      <div class="caption">Gaussian Blurred Campanile</div>
-                    </div>
-                  </div>
+                </div>
+
               </li>
+
+
+              <li class="iterative-step">
+
+                <p>
+                  I implemented the <code>iterative_denoise</code> function following the reverse
+                  diffusion transition. At each step, the function predicts the clean image and
+                  moves from the current timestep \(t\) to a smaller timestep \(t'\):
+                </p>
+
+
+                <div class="result-box iterative-formula-figure">
+                  <div class="thumb">
+                    <img src="media/iterativeFormula.png" alt="Iterative denoise formula">
+                  </div>
+                </div>
+
+
+                <p>
+                  The mathematical transition can be viewed as a combination of three operations:
+                </p>
+
+                <ol class="iterative-process-list">
+                  <li>
+                    Predict the noise in the current noisy image.
+                  </li>
+                  <li>
+                    Recover an estimate of the clean image \(\hat{x}_0\).
+                  </li>
+                  <li>
+                    Sample a new image with a smaller noise level \(x_{t'}\) using the diffusion
+                    posterior.
+                  </li>
+                </ol>
+
+
+                <p>
+                  The corresponding implementation is shown below:
+                </p>
+
+
+                <div class="result-box iterative-code-grid">
+                  <div class="thumb large-box">
+                    <img src="media/getAlpha.png" alt="Get alpha values">
+                  </div>
+
+                  <div class="thumb large-box">
+                    <img src="media/compFormula.png" alt="Compute reverse step">
+                  </div>
+                </div>
+
+              </li>
+
+
+              <li class="iterative-step">
+
+                <p>
+                  Finally, I added noise to the Campanile image up to timestep \(t=690\), and
+                  gradually denoised it back to \(t=0\) using the iterative denoising process with
+                  stride 30. I saved intermediate results every 5 denoising steps to visualize the
+                  reverse trajectory.
+                </p>
+
+
+                <div class="result-box iterative-trajectory">
+
+                  <div class="thumb">
+                    <img src="media/90.png" alt="Noisy Campanile at t=90">
+                    <div class="caption">Noisy Campanile at \(t=90\)</div>
+                  </div>
+
+                  <div class="thumb">
+                    <img src="media/240.png" alt="Noisy Campanile at t=240">
+                    <div class="caption">Noisy Campanile at \(t=240\)</div>
+                  </div>
+
+                  <div class="thumb">
+                    <img src="media/390.png" alt="Noisy Campanile at t=390">
+                    <div class="caption">Noisy Campanile at \(t=390\)</div>
+                  </div>
+
+                  <div class="thumb">
+                    <img src="media/540.png" alt="Noisy Campanile at t=540">
+                    <div class="caption">Noisy Campanile at \(t=540\)</div>
+                  </div>
+
+                  <div class="thumb">
+                    <img src="media/690.png" alt="Noisy Campanile at t=690">
+                    <div class="caption">Noisy Campanile at \(t=690\)</div>
+                  </div>
+
+                </div>
+
+
+                <p>
+                  The final reconstruction is compared with one-step denoising and Gaussian blurring:
+                </p>
+
+
+                <div class="result-box iterative-final-comparison">
+
+                  <div class="thumb">
+                    <img src="media/original.png" alt="Original Campanile">
+                    <div class="caption">Original Campanile</div>
+                  </div>
+
+
+                  <div class="thumb">
+                    <img src="media/iterative_deno.png" alt="Iteratively Denoised Campanile">
+                    <div class="caption">Iteratively Denoised Campanile</div>
+                  </div>
+
+
+                  <div class="thumb">
+                    <img src="media/onestep_deno.png" alt="One-Step Denoised Campanile">
+                    <div class="caption">One-Step Denoised Campanile</div>
+                  </div>
+
+
+                  <div class="thumb">
+                    <img src="media/gaus_deno.png" alt="Gaussian Blurred Campanile">
+                    <div class="caption">Gaussian Blurred Campanile</div>
+                  </div>
+
+                </div>
+
+
+                <p>
+                  The iterative denoising process achieves the best reconstruction quality.
+                  Compared with one-step denoising, it avoids forcing the model to recover all
+                  missing information in a single prediction. Instead, the image is gradually
+                  projected back onto the natural image manifold through multiple reverse diffusion
+                  steps.
+                </p>
+
+
+              </li>
+
             </ol>
           </div>
         </div>
