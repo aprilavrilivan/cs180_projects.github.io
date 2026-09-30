@@ -854,6 +854,65 @@
       line-height: 1.35;
     }
 
+    /* Part 1.5: generation from noise */
+    .generation-study {
+      padding: clamp(18px, 2.8vw, 30px) !important;
+    }
+
+    .project-main .generation-content {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .project-main .generation-content > li {
+      margin: 0;
+    }
+
+    .project-main .generation-content > li > p:first-of-type {
+      margin-top: 0;
+      color: var(--project-text);
+      font-size: clamp(16px, 1.7vw, 19px);
+      font-weight: 680;
+      line-height: 1.55;
+    }
+
+    .project-main .generation-content > li > p:last-of-type {
+      margin-bottom: 0;
+    }
+
+    .project-main .generation-content .result-box.generation-gallery {
+      display: grid;
+      width: min(100%, 820px);
+      margin: 26px auto 0;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .project-main .generation-gallery .thumb {
+      max-width: none;
+      border-radius: 13px;
+      background: var(--project-paper-soft);
+      box-shadow: none;
+    }
+
+    .project-main .generation-gallery img {
+      width: 100%;
+      aspect-ratio: 1;
+      background: #fff;
+      image-rendering: auto;
+      object-fit: cover;
+    }
+
+    .project-main .generation-gallery .caption {
+      margin: 0;
+      padding: 8px 7px 9px;
+      border-top: 1px solid var(--project-border);
+      background: var(--project-paper-soft);
+      font-size: 11px;
+      line-height: 1.35;
+    }
+
     @media (max-width: 760px) {
       .forward-diffusion-study {
         padding: 14px !important;
@@ -898,6 +957,19 @@
 
       .project-main .iterative-step .result-box.iterative-final-comparison {
         grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .generation-study {
+        padding: 14px !important;
+      }
+
+      .project-main .generation-content .result-box.generation-gallery {
+        gap: 6px;
+      }
+
+      .project-main .generation-gallery .caption {
+        padding: 6px 3px 7px;
+        font-size: 9px;
       }
     }
   </style>
@@ -1727,34 +1799,58 @@
           <div class="mini-hd">
             <span>Part 1</span>
             <span class="hint">1.5</span>
-            <button class="mini-toggle" type="button" data-target="#1.5-bo">Hide</button>
+            <button class="mini-toggle" type="button" data-target="#1.5-body">Hide</button>
           </div>
-          <div class="mini-bd" id="1.5-body">
-            <ol>
-              <li><p>To generate arbitarily denoised images, we could add noise to the Campanile image to time t=1000 (let i_start = 0), which tranforms it into a pure noise image. Then we perform the same 
-              iteratively denoise process till time =0, and see what kind of clean images the model would output:</p>
-              <div class="result-box">
+
+          <div class="mini-bd generation-study" id="1.5-body">
+            <ol class="generation-content">
+              <li>
+                <p>
+                  In addition to denoising existing images, diffusion models can also generate new
+                  images starting from pure Gaussian noise.
+                </p>
+
+                <p>
+                  To demonstrate this capability, I first apply the forward diffusion process to
+                  transform the Campanile image into a nearly pure noise image at timestep \(t=1000\)
+                  (\(i_{\text{start}}=0\)). Then, instead of reconstructing the original image in one
+                  step, I apply the iterative reverse diffusion process from \(t=1000\) back to
+                  \(t=0\).
+                </p>
+
+                <p>
+                  Since the reverse process is guided by the learned image prior of the diffusion
+                  model rather than the original image content, different random noise samples can
+                  produce different generated images:
+                </p>
+
+                <div class="result-box generation-gallery">
                   <div class="thumb">
-                    <img src="media/sample1.png" alt="Box filter result 1">
-                    <div class="caption">sample1</div>
+                    <img src="media/sample1.png" alt="Sample 1">
+                    <div class="caption">Sample 1</div>
                   </div>
+
                   <div class="thumb">
-                    <img src="media/sample2.png" alt="Box filter result 1">
-                    <div class="caption">sample2</div>
+                    <img src="media/sample2.png" alt="Sample 2">
+                    <div class="caption">Sample 2</div>
                   </div>
+
                   <div class="thumb">
-                    <img src="media/sample3.png" alt="Box filter result 1">
-                    <div class="caption">sample3</div>
+                    <img src="media/sample3.png" alt="Sample 3">
+                    <div class="caption">Sample 3</div>
                   </div>
+
                   <div class="thumb">
-                    <img src="media/sample4.png" alt="Box filter result 1">
-                    <div class="caption">sample4</div>
+                    <img src="media/sample4.png" alt="Sample 4">
+                    <div class="caption">Sample 4</div>
                   </div>
+
                   <div class="thumb">
-                    <img src="media/sample5.png" alt="Box filter result 1">
-                    <div class="caption">sample5</div>
+                    <img src="media/sample5.png" alt="Sample 5">
+                    <div class="caption">Sample 5</div>
                   </div>
                 </div>
+
               </li>
             </ol>
           </div>
