@@ -1004,6 +1004,87 @@
       line-height: 1.35;
     }
 
+    /* Parts 1.7.0–1.7.1: SDEdit studies */
+    .sdedit-study {
+      padding: clamp(18px, 2.8vw, 30px) !important;
+    }
+
+    .project-main .sdedit-steps {
+      margin: 0;
+      padding: 0;
+      counter-reset: sdedit-step;
+      list-style: none;
+    }
+
+    .project-main .sdedit-step {
+      margin: 0;
+      padding: 0;
+      counter-increment: sdedit-step;
+    }
+
+    .project-main .sdedit-step + .sdedit-step {
+      margin-top: 30px;
+      padding-top: 28px;
+      border-top: 1px solid var(--project-border);
+    }
+
+    .project-main .sdedit-step::before {
+      content: counter(sdedit-step, decimal-leading-zero);
+      display: inline-grid;
+      min-width: 30px;
+      height: 30px;
+      margin-bottom: 14px;
+      padding: 0 8px;
+      place-items: center;
+      border: 1px solid color-mix(in srgb, var(--project-accent) 32%, var(--project-border));
+      border-radius: 9px;
+      background: var(--project-accent-soft);
+      color: var(--project-accent);
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: .06em;
+    }
+
+    .project-main .sdedit-step > p:first-of-type {
+      margin-top: 0;
+      color: var(--project-text);
+      font-size: clamp(16px, 1.7vw, 19px);
+      font-weight: 680;
+      line-height: 1.55;
+    }
+
+    .project-main .sdedit-step .result-box.sdedit-gallery {
+      display: grid;
+      width: min(100%, 980px);
+      margin: 24px auto;
+      grid-template-columns: repeat(7, minmax(0, 1fr));
+      gap: 9px;
+    }
+
+    .project-main .sdedit-gallery .thumb {
+      max-width: none;
+      border-radius: 12px;
+      background: var(--project-paper-soft);
+      box-shadow: none;
+    }
+
+    .project-main .sdedit-gallery img {
+      width: 100%;
+      aspect-ratio: 1;
+      background: #fff;
+      object-fit: cover;
+    }
+
+    .project-main .sdedit-gallery .caption {
+      min-height: 44px;
+      margin: 0;
+      padding: 7px 4px 8px;
+      border-top: 1px solid var(--project-border);
+      background: var(--project-paper-soft);
+      font-size: 9px;
+      line-height: 1.3;
+    }
+
     @media (max-width: 760px) {
       .forward-diffusion-study {
         padding: 14px !important;
@@ -1077,6 +1158,26 @@
       }
 
       .project-main .cfg-gallery .caption {
+        padding: 6px 2px 7px;
+        font-size: 8px;
+      }
+
+      .sdedit-study {
+        padding: 14px !important;
+      }
+
+      .project-main .sdedit-step + .sdedit-step {
+        margin-top: 24px;
+        padding-top: 24px;
+      }
+
+      .project-main .sdedit-step .result-box.sdedit-gallery {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 7px;
+      }
+
+      .project-main .sdedit-gallery .caption {
+        min-height: 40px;
         padding: 6px 2px 7px;
         font-size: 8px;
       }
@@ -2217,100 +2318,146 @@
             <span class="hint">1.7.0</span>
             <button class="mini-toggle" type="button" data-target="#1.7.0-bo">Hide</button>
           </div>
-          <div class="mini-bd" id="1.7.0-body">
-            <ol>
-              <li><p>We know that the model tends to be more "hallucinative" when we add more noise to the original picture and use the model to 
-              denoise it back. The following are edits of the Campanile image, using the given prompt at noise levels [1, 3, 5, 7, 10, 20] with the conditional text prompt "a high quality photo":</p>
-              <div class="result-box">
+          <div class="mini-bd sdedit-study" id="1.7.0-body">
+            <ol class="sdedit-steps">
+              <li class="sdedit-step">
+                <p>
+                  In previous sections, we saw that diffusion models can gradually transform noisy images
+                  back into realistic images through the reverse diffusion process. This can be interpreted
+                  as projecting an image back onto the natural image manifold learned from the training data.
+                </p>
+
+                <p>
+                  This property enables image-to-image translation. Instead of starting from pure noise,
+                  we start from an existing image, add a controlled amount of noise, and then run the
+                  reverse diffusion process:
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  x_0 \rightarrow x_t \rightarrow x'_0
+                  \]
+                </div>
+
+                <p>
+                  The added noise determines how much freedom the diffusion model has during reconstruction.
+                  With a small noise level, most original structures are preserved and the output remains
+                  close to the input image. With a larger noise level, more information is destroyed, allowing
+                  the model to generate new details based on its learned image prior.
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \text{low noise} \rightarrow \text{preserve content}
+                  \]
+                  \[
+                  \text{high noise} \rightarrow \text{stronger editing}
+                  \]
+                </div>
+
+                <p>
+                  This technique is known as SDEdit. Here, I apply SDEdit to the Berkeley Campanile image
+                  using different noise levels. The conditional prompt is
+                  <code>"a high quality photo"</code>, and the editing strength is controlled by
+                  different starting indices:
+                </p>
+
+                <div class="result-box sdedit-gallery">
                   <div class="thumb">
-                    <img src="media/campanile1.png" alt="Box filter result 1">
+                    <img src="media/campanile1.png" alt="Campanile SDEdit result at i_start 1">
                     <div class="caption">SDEdit with i_start=1</div>
                   </div>
                   <div class="thumb">
-                    <img src="media/campanile3.png" alt="Box filter result 1">
+                    <img src="media/campanile3.png" alt="Campanile SDEdit result at i_start 3">
                     <div class="caption">SDEdit with i_start=3</div>
                   </div>
                   <div class="thumb">
-                    <img src="media/campanile5.png" alt="Box filter result 1">
+                    <img src="media/campanile5.png" alt="Campanile SDEdit result at i_start 5">
                     <div class="caption">SDEdit with i_start=5</div>
                   </div>
                   <div class="thumb">
-                    <img src="media/campanile7.png" alt="Box filter result 1">
+                    <img src="media/campanile7.png" alt="Campanile SDEdit result at i_start 7">
                     <div class="caption">SDEdit with i_start=7</div>
                   </div>
                   <div class="thumb">
-                    <img src="media/campanile10.png" alt="Box filter result 1">
+                    <img src="media/campanile10.png" alt="Campanile SDEdit result at i_start 10">
                     <div class="caption">SDEdit with i_start=10</div>
                   </div>                  
                   <div class="thumb">
-                    <img src="media/campanile20.png" alt="Box filter result 1">
+                    <img src="media/campanile20.png" alt="Campanile SDEdit result at i_start 20">
                     <div class="caption">SDEdit with i_start=20</div>
                   </div>
                   <div class="thumb">
-                    <img src="media/original.png" alt="Box filter result 1">
-                    <div class="caption">original companile</div>
+                    <img src="media/original.png" alt="Original Berkeley Campanile">
+                    <div class="caption">Original Campanile</div>
                   </div>
                 </div>
               </li>
-              <li><p>I also tested this on two of my own pictures:</p>
-              <div class="result-box">
+              <li class="sdedit-step">
+                <p>
+                  I further tested SDEdit on two additional images. As the noise level increases,
+                  the generated results gradually move away from the original images and become more
+                  strongly influenced by the diffusion model's learned image distribution.
+                </p>
+
+                <div class="result-box sdedit-gallery">
                   <div class="thumb">
-                    <img src="media/mypic1_1.png" alt="Box filter result 1">
+                    <img src="media/mypic1_1.png" alt="First personal image SDEdit result at i_start 1">
                     <div class="caption">SDEdit with i_start=1</div>
                   </div>
                   <div class="thumb">
-                    <img src="media/mypic1_3.png" alt="Box filter result 1">
+                    <img src="media/mypic1_3.png" alt="First personal image SDEdit result at i_start 3">
                     <div class="caption">SDEdit with i_start=3</div>
                   </div>
                   <div class="thumb">
-                    <img src="media/mypic1_5.png" alt="Box filter result 1">
+                    <img src="media/mypic1_5.png" alt="First personal image SDEdit result at i_start 5">
                     <div class="caption">SDEdit with i_start=5</div>
                   </div>
                   <div class="thumb">
-                    <img src="media/mypic1_7.png" alt="Box filter result 1">
+                    <img src="media/mypic1_7.png" alt="First personal image SDEdit result at i_start 7">
                     <div class="caption">SDEdit with i_start=7</div>
                   </div>
                   <div class="thumb">
-                    <img src="media/mypic1_10.png" alt="Box filter result 1">
+                    <img src="media/mypic1_10.png" alt="First personal image SDEdit result at i_start 10">
                     <div class="caption">SDEdit with i_start=10</div>
                   </div>                  
                   <div class="thumb">
-                    <img src="media/mypic1_20.png" alt="Box filter result 1">
+                    <img src="media/mypic1_20.png" alt="First personal image SDEdit result at i_start 20">
                     <div class="caption">SDEdit with i_start=20</div>
                   </div>
                   <div class="thumb">
-                    <img src="media/mypic1_original.png" alt="Box filter result 1">
-                    <div class="caption">original companile</div>
+                    <img src="media/mypic1_original.png" alt="Original first personal image">
+                    <div class="caption">Original image</div>
                   </div>
                 </div>
-                <div class="result-box">
+                <div class="result-box sdedit-gallery">
                   <div class="thumb">
-                    <img src="media/mypic2_1.png" alt="Box filter result 1">
+                    <img src="media/mypic2_1.png" alt="Second personal image SDEdit result at i_start 1">
                     <div class="caption">SDEdit with i_start=1</div>
                   </div>
                   <div class="thumb">
-                    <img src="media/mypic2_3.png" alt="Box filter result 1">
+                    <img src="media/mypic2_3.png" alt="Second personal image SDEdit result at i_start 3">
                     <div class="caption">SDEdit with i_start=3</div>
                   </div>
                   <div class="thumb">
-                    <img src="media/mypic2_5.png" alt="Box filter result 1">
+                    <img src="media/mypic2_5.png" alt="Second personal image SDEdit result at i_start 5">
                     <div class="caption">SDEdit with i_start=5</div>
                   </div>
                   <div class="thumb">
-                    <img src="media/mypic2_7.png" alt="Box filter result 1">
+                    <img src="media/mypic2_7.png" alt="Second personal image SDEdit result at i_start 7">
                     <div class="caption">SDEdit with i_start=7</div>
                   </div>
                   <div class="thumb">
-                    <img src="media/mypic2_10.png" alt="Box filter result 1">
+                    <img src="media/mypic2_10.png" alt="Second personal image SDEdit result at i_start 10">
                     <div class="caption">SDEdit with i_start=10</div>
                   </div>                  
                   <div class="thumb">
-                    <img src="media/mypic2_20.png" alt="Box filter result 1">
+                    <img src="media/mypic2_20.png" alt="Second personal image SDEdit result at i_start 20">
                     <div class="caption">SDEdit with i_start=20</div>
                   </div>
                   <div class="thumb">
-                    <img src="media/mypic2_original.png" alt="Box filter result 1">
-                    <div class="caption">original companile</div>
+                    <img src="media/mypic2_original.png" alt="Original second personal image">
+                    <div class="caption">Original image</div>
                   </div>
                 </div>
               </li>
@@ -2324,100 +2471,133 @@
             <span class="hint">1.7.1</span>
             <button class="mini-toggle" type="button" data-target="#1.7.1-bo">Hide</button>
           </div>
-          <div class="mini-bd" id="1.7.1-body">
-            <ol>
-              <li><p>When we start with some nonrealistic images (e.g. painting, a sketch, some scribbles), the above pipeline
-                tends to project it onto the natural image manifold. For example, the following pixel-style face from the web:</p>
-              <div class="result-box">
+          <div class="mini-bd sdedit-study" id="1.7.1-body">
+            <ol class="sdedit-steps">
+              <li class="sdedit-step">
+                <p>
+                  The same SDEdit pipeline can also be applied to non-realistic images, such as sketches,
+                  pixel art, or hand-drawn illustrations.
+                </p>
+
+                <p>
+                  These inputs are usually outside the natural image manifold learned by diffusion models.
+                  During denoising, the model does not simply reconstruct the original drawing. Instead,
+                  it gradually projects the input toward realistic images by combining the remaining input
+                  information with its learned visual prior.
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \text{non-realistic input}
+                  \rightarrow
+                  \text{diffusion projection}
+                  \rightarrow
+                  \text{natural image}
+                  \]
+                </div>
+
+                <p>
+                  For example, the following experiment starts from a pixel-style face downloaded from
+                  the web. By changing the noise level, the output gradually transitions from preserving
+                  the original pixel structure to generating a realistic human face.
+                </p>
+
+                <div class="result-box sdedit-gallery">
                   <div class="thumb">
-                    <img src="media/face1.png" alt="Box filter result 1">
+                    <img src="media/face1.png" alt="Pixel-style face SDEdit result at i_start 1">
                     <div class="caption">SDEdit with i_start=1</div>
                   </div>
                   <div class="thumb">
-                    <img src="media/face3.png" alt="Box filter result 1">
+                    <img src="media/face3.png" alt="Pixel-style face SDEdit result at i_start 3">
                     <div class="caption">SDEdit with i_start=3</div>
                   </div>
                   <div class="thumb">
-                    <img src="media/face5.png" alt="Box filter result 1">
+                    <img src="media/face5.png" alt="Pixel-style face SDEdit result at i_start 5">
                     <div class="caption">SDEdit with i_start=5</div>
                   </div>
                   <div class="thumb">
-                    <img src="media/face7.png" alt="Box filter result 1">
+                    <img src="media/face7.png" alt="Pixel-style face SDEdit result at i_start 7">
                     <div class="caption">SDEdit with i_start=7</div>
                   </div>
                   <div class="thumb">
-                    <img src="media/face10.png" alt="Box filter result 1">
+                    <img src="media/face10.png" alt="Pixel-style face SDEdit result at i_start 10">
                     <div class="caption">SDEdit with i_start=10</div>
                   </div>                  
                   <div class="thumb">
-                    <img src="media/face20.png" alt="Box filter result 1">
+                    <img src="media/face20.png" alt="Pixel-style face SDEdit result at i_start 20">
                     <div class="caption">SDEdit with i_start=20</div>
                   </div>
                   <div class="thumb">
-                    <img src="media/faceOriginal.png" alt="Box filter result 1">
-                    <div class="caption">original web pic</div>
+                    <img src="media/faceOriginal.png" alt="Original pixel-style face from the web">
+                    <div class="caption">Original web image</div>
                   </div>
                 </div>
               </li>
-              <li><p>I also tested this on two pictures drawn by myself:</p>
-              <div class="result-box">
+              <li class="sdedit-step">
+                <p>
+                  I also tested the same process on two hand-drawn images. The results demonstrate that
+                  diffusion models can transform simple sketches into realistic visual concepts by
+                  projecting them onto the learned natural image distribution.
+                </p>
+
+                <div class="result-box sdedit-gallery">
                   <div class="thumb">
-                    <img src="media/stickman1.png" alt="Box filter result 1">
+                    <img src="media/stickman1.png" alt="Stickman drawing SDEdit result at i_start 1">
                     <div class="caption">SDEdit with i_start=1</div>
                   </div>
                   <div class="thumb">
-                    <img src="media/stickman3.png" alt="Box filter result 1">
+                    <img src="media/stickman3.png" alt="Stickman drawing SDEdit result at i_start 3">
                     <div class="caption">SDEdit with i_start=3</div>
                   </div>
                   <div class="thumb">
-                    <img src="media/stickman5.png" alt="Box filter result 1">
+                    <img src="media/stickman5.png" alt="Stickman drawing SDEdit result at i_start 5">
                     <div class="caption">SDEdit with i_start=5</div>
                   </div>
                   <div class="thumb">
-                    <img src="media/stickman7.png" alt="Box filter result 1">
+                    <img src="media/stickman7.png" alt="Stickman drawing SDEdit result at i_start 7">
                     <div class="caption">SDEdit with i_start=7</div>
                   </div>
                   <div class="thumb">
-                    <img src="media/stickman10.png" alt="Box filter result 1">
+                    <img src="media/stickman10.png" alt="Stickman drawing SDEdit result at i_start 10">
                     <div class="caption">SDEdit with i_start=10</div>
                   </div>                  
                   <div class="thumb">
-                    <img src="media/stickman20.png" alt="Box filter result 1">
+                    <img src="media/stickman20.png" alt="Stickman drawing SDEdit result at i_start 20">
                     <div class="caption">SDEdit with i_start=20</div>
                   </div>
                   <div class="thumb">
-                    <img src="media/stickmanOriginal.png" alt="Box filter result 1">
-                    <div class="caption">original stickman</div>
+                    <img src="media/stickmanOriginal.png" alt="Original stickman drawing">
+                    <div class="caption">Original stickman</div>
                   </div>
                 </div>
-                <div class="result-box">
+                <div class="result-box sdedit-gallery">
                   <div class="thumb">
-                    <img src="media/gem1.png" alt="Box filter result 1">
+                    <img src="media/gem1.png" alt="Gem drawing SDEdit result at i_start 1">
                     <div class="caption">SDEdit with i_start=1</div>
                   </div>
                   <div class="thumb">
-                    <img src="media/gem3.png" alt="Box filter result 1">
+                    <img src="media/gem3.png" alt="Gem drawing SDEdit result at i_start 3">
                     <div class="caption">SDEdit with i_start=3</div>
                   </div>
                   <div class="thumb">
-                    <img src="media/gem5.png" alt="Box filter result 1">
+                    <img src="media/gem5.png" alt="Gem drawing SDEdit result at i_start 5">
                     <div class="caption">SDEdit with i_start=5</div>
                   </div>
                   <div class="thumb">
-                    <img src="media/gem7.png" alt="Box filter result 1">
+                    <img src="media/gem7.png" alt="Gem drawing SDEdit result at i_start 7">
                     <div class="caption">SDEdit with i_start=7</div>
                   </div>
                   <div class="thumb">
-                    <img src="media/gem10.png" alt="Box filter result 1">
+                    <img src="media/gem10.png" alt="Gem drawing SDEdit result at i_start 10">
                     <div class="caption">SDEdit with i_start=10</div>
                   </div>                  
                   <div class="thumb">
-                    <img src="media/gem20.png" alt="Box filter result 1">
+                    <img src="media/gem20.png" alt="Gem drawing SDEdit result at i_start 20">
                     <div class="caption">SDEdit with i_start=20</div>
                   </div>
                   <div class="thumb">
-                    <img src="media/gemOriginal.png" alt="Box filter result 1">
-                    <div class="caption">original germ</div>
+                    <img src="media/gemOriginal.png" alt="Original gem drawing">
+                    <div class="caption">Original gem</div>
                   </div>
                 </div>
               </li>
