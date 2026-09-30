@@ -202,6 +202,263 @@
       color: var(--muted);
       margin-top: 6px;
     }
+
+    /* Part 0.1: prompt study */
+    .deepfloyd-study {
+      display: grid;
+      gap: 22px;
+    }
+
+    .deepfloyd-setup {
+      padding: clamp(18px, 2.5vw, 28px);
+      border: 1px solid var(--project-border);
+      border-radius: 15px;
+      background:
+        radial-gradient(circle at 92% 5%, color-mix(in srgb, var(--project-accent) 10%, transparent), transparent 30%),
+        var(--project-paper-soft);
+    }
+
+    .deepfloyd-kicker,
+    .prompt-study__label,
+    .prompt-study__analysis-label {
+      display: inline-flex;
+      align-items: center;
+      width: fit-content;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: .1em;
+      line-height: 1;
+      text-transform: uppercase;
+    }
+
+    .deepfloyd-kicker {
+      margin-bottom: 12px;
+      padding: 7px 10px;
+      background: var(--project-accent-soft);
+      color: var(--project-accent-dark);
+    }
+
+    .deepfloyd-setup p {
+      max-width: 980px;
+      margin: 0;
+    }
+
+    .deepfloyd-setup p + p {
+      margin-top: 12px;
+    }
+
+    .deepfloyd-setup a {
+      color: var(--project-accent-dark);
+      font-weight: 650;
+      text-decoration-color: color-mix(in srgb, var(--project-accent) 44%, transparent);
+      text-underline-offset: 3px;
+    }
+
+    .deepfloyd-setup a:hover,
+    .deepfloyd-setup a:focus-visible {
+      color: var(--project-accent);
+      text-decoration-color: currentColor;
+    }
+
+    .project-main .deepfloyd-embedding-figure {
+      width: min(100%, 760px);
+      margin: 22px auto 0;
+      overflow: hidden;
+      border: 1px solid var(--project-border);
+      border-radius: 13px;
+      background: var(--project-paper);
+      box-shadow: 0 14px 32px rgb(62 47 35 / 8%);
+    }
+
+    .project-main .deepfloyd-embedding-figure img {
+      display: block;
+      width: 100%;
+      height: auto;
+    }
+
+    .project-main .deepfloyd-embedding-figure figcaption {
+      padding: 8px 12px 10px;
+      color: var(--project-muted);
+      font-size: 12px;
+      text-align: center;
+    }
+
+    .deepfloyd-run-note {
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr);
+      gap: 4px 14px;
+      align-items: start;
+      padding: 16px 18px;
+      border-left: 3px solid var(--project-accent);
+      border-radius: 0 11px 11px 0;
+      background: color-mix(in srgb, var(--project-accent-soft) 60%, var(--project-paper));
+    }
+
+    .deepfloyd-run-note strong {
+      grid-row: 1 / span 2;
+      color: var(--project-accent-dark);
+      font-size: 12px;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    .deepfloyd-run-note p {
+      margin: 0;
+    }
+
+    .deepfloyd-run-note code {
+      padding: 2px 6px;
+      border: 1px solid color-mix(in srgb, var(--project-accent) 24%, var(--project-border));
+      border-radius: 6px;
+      background: var(--project-paper);
+      color: var(--project-accent-dark);
+      font-size: .86em;
+    }
+
+    .prompt-study-list {
+      display: grid;
+      gap: 18px;
+    }
+
+    .prompt-study {
+      --prompt-analysis: #36756f;
+
+      overflow: hidden;
+      border: 1px solid var(--project-border);
+      border-radius: 15px;
+      background: var(--project-paper);
+      box-shadow: 0 12px 34px rgb(62 47 35 / 6%);
+      transition: border-color .18s ease, box-shadow .18s ease, transform .18s ease;
+    }
+
+    .prompt-study:hover {
+      border-color: color-mix(in srgb, var(--project-accent) 44%, var(--project-border));
+      box-shadow: 0 18px 38px rgb(62 47 35 / 10%);
+      transform: translateY(-2px);
+    }
+
+    [data-theme="dark"] .prompt-study {
+      --prompt-analysis: #68b7ad;
+    }
+
+    .prompt-study__prompt {
+      position: relative;
+      padding: 18px 20px 17px;
+      border-bottom: 1px solid color-mix(in srgb, var(--project-accent) 22%, var(--project-border));
+      background: linear-gradient(135deg, var(--project-accent-soft), color-mix(in srgb, var(--project-paper) 86%, transparent));
+    }
+
+    .prompt-study__prompt::after {
+      position: absolute;
+      top: 16px;
+      right: 18px;
+      color: color-mix(in srgb, var(--project-accent) 26%, transparent);
+      content: "“";
+      font-family: Georgia, serif;
+      font-size: 52px;
+      line-height: 1;
+    }
+
+    .prompt-study__label {
+      margin-bottom: 9px;
+      padding: 6px 9px;
+      background: var(--project-accent);
+      color: #fff;
+    }
+
+    .prompt-study__prompt blockquote {
+      position: relative;
+      z-index: 1;
+      max-width: 870px;
+      margin: 0;
+      color: var(--project-text);
+      font-size: clamp(15px, 1.55vw, 18px);
+      font-weight: 650;
+      line-height: 1.5;
+    }
+
+    .prompt-study__analysis {
+      margin: 15px 18px 0;
+      padding: 14px 16px 14px 18px;
+      border-left: 3px solid var(--prompt-analysis);
+      border-radius: 0 10px 10px 0;
+      background: color-mix(in srgb, var(--prompt-analysis) 8%, var(--project-paper));
+    }
+
+    .prompt-study__analysis-label {
+      margin-bottom: 7px;
+      color: var(--prompt-analysis);
+    }
+
+    .prompt-study__analysis p {
+      margin: 0;
+      color: var(--project-muted);
+      font-size: 14px;
+      line-height: 1.66;
+    }
+
+    .project-main .prompt-study .result-box {
+      display: grid;
+      margin: 0;
+      padding: 16px 18px 18px;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .project-main .prompt-study .result-box .thumb {
+      max-width: none;
+      border-radius: 11px;
+      box-shadow: none;
+    }
+
+    .project-main .prompt-study .result-box img {
+      aspect-ratio: 1;
+      object-fit: cover;
+    }
+
+    .project-main .prompt-study .caption {
+      margin: 0;
+      padding: 7px 8px 8px;
+      border-top: 1px solid var(--project-border);
+      background: var(--project-paper-soft);
+      font-size: 11px;
+      font-variant-numeric: tabular-nums;
+      line-height: 1.35;
+    }
+
+    @media (max-width: 760px) {
+      .deepfloyd-setup {
+        padding: 17px;
+      }
+
+      .deepfloyd-run-note {
+        grid-template-columns: 1fr;
+      }
+
+      .deepfloyd-run-note strong {
+        grid-row: auto;
+      }
+
+      .prompt-study__prompt {
+        padding: 16px;
+      }
+
+      .prompt-study__analysis {
+        margin: 13px 14px 0;
+      }
+
+      .project-main .prompt-study .result-box {
+        padding: 14px;
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .prompt-study {
+        transition: none;
+      }
+    }
   </style>
   <link rel="stylesheet" href="../portfolio-polish.css">
   <link rel="stylesheet" href="../project-detail.css?v=20260929d">
@@ -244,82 +501,134 @@
             <button class="mini-toggle" type="button" data-target="#0.1-bo">Hide</button>
           </div>
           <div class="mini-bd" id="0.1-body">
-            <ol>
-              <li><p>This part aims to play with DeepFloyd, which is a two stage diffusion model trained by Stability AI. The first stage produces images of size 64*64
-                  and the second stage takes the outputs of the first stage and generates images of size 256*256. The upsampling code is provided at the end of the 
-                  notebooks. 
-                  
-                  DeepFloyd was trained as a text-to-image model, which takes text prompts as input and outputs images that are aligned with the 
-                  text. However, a raw text string cannot be directly used as the model's input — we first need to convert it into a high-dimensional 
-                  vector (of 4096 dimensions in our case) that the model can understand, a.k.a. prompt embeddings. Therefore, what I did first is to
-                  first think of some imaginative prompts, and encode them to vectors using T5 Text Encoder Embeddings Generator (https://huggingface.co/spaces/jamesoncrate/CS180-T5-Encoder). 
-                  I created 11 prompts, as shown below in the generator's website:</p>
+            <div class="deepfloyd-study">
+              <section class="deepfloyd-setup" aria-labelledby="deepfloyd-setup-title">
+                <span class="deepfloyd-kicker" id="deepfloyd-setup-title">Model setup</span>
+                <p>
+                  This part aims to play with DeepFloyd, which is a two stage diffusion model trained by
+                  Stability AI. The first stage produces images of size 64*64 and the second stage takes the
+                  outputs of the first stage and generates images of size 256*256. The upsampling code is
+                  provided at the end of the notebooks.
+                </p>
+                <p>
+                  DeepFloyd was trained as a text-to-image model, which takes text prompts as input and
+                  outputs images that are aligned with the text. However, a raw text string cannot be directly
+                  used as the model's input — we first need to convert it into a high-dimensional vector (of
+                  4096 dimensions in our case) that the model can understand, a.k.a. prompt embeddings.
+                  Therefore, what I did first is to first think of some imaginative prompts, and encode them to
+                  vectors using the
+                  <a href="https://huggingface.co/spaces/jamesoncrate/CS180-T5-Encoder">T5 Text Encoder Embeddings Generator</a>.
+                  I created 11 prompts, as shown below in the generator's website:
+                </p>
+                <figure class="deepfloyd-embedding-figure">
+                  <img src="media/questions.png" alt="The eleven prompts entered in the T5 embedding generator">
+                  <figcaption>the prompts</figcaption>
+                </figure>
+              </section>
+
+              <div class="deepfloyd-run-note">
+                <strong>Sampling study</strong>
+                <p>
+                  Then I fed the embedded vectors to DeepFloyd, with random <code>seed = 100</code>. The
+                  following are three sets of results.
+                </p>
+              </div>
+
+              <div class="prompt-study-list">
+                <article class="prompt-study">
+                  <header class="prompt-study__prompt">
+                    <span class="prompt-study__label">Prompt 01</span>
+                    <blockquote>a wide angle photo of the campanile reflected in a rain puddle at night</blockquote>
+                  </header>
+                  <div class="prompt-study__analysis">
+                    <span class="prompt-study__analysis-label">Analysis</span>
+                    <p>
+                      The three pictures are all clear, and they all matches the key words in prompt: wide
+                      angle/campanile/reflect/rain puddle/night. As the inference steps grow, the pictures
+                      gradually contain more details (because the model can diffuse more noise), and the angles
+                      of camera becomes wider.
+                    </p>
+                  </div>
                   <div class="result-box">
-                    <div class="thumb large-box">
-                      <img src="media/questions.png" alt="Box filter result 1">
-                      <div class="caption">the prompts</div>
-                    </div>
-                  </div>
-                </li>
-              <li>
-                <p>Then I fed the embedded vectors to DeepFloyd, with random seed = 100. The following are three sets of results</p>
-                <p>--------------------------------------------------------------------------------------------------------------------------</p>
-                <p>Prompt: "a wide angle photo of the campanile reflected in a rain puddle at night"</p>
-                <p>Reflect: The three pictures are all clear, and they all matches the key words in prompt: wide angle/campanile/reflect/rain puddle/night. As the inference 
-                  steps grow, the pictures gradually contain more details (because the model can diffuse more noise), and the angles of camera becomes wider.</p>
-                <div class="result-box">
                     <div class="thumb">
-                      <img src="media/prompt1_20.png" alt="Box filter result 1">
+                      <img src="media/prompt1_20.png" alt="Campanile prompt result with 20 inference steps">
                       <div class="caption">20 num_inference_steps</div>
                     </div>
                     <div class="thumb">
-                      <img src="media/prompt1_40.png" alt="Box filter result 1">
+                      <img src="media/prompt1_40.png" alt="Campanile prompt result with 40 inference steps">
                       <div class="caption">40 num_inference_steps</div>
                     </div>
                     <div class="thumb">
-                      <img src="media/prompt1_80.png" alt="Box filter result 1">
+                      <img src="media/prompt1_80.png" alt="Campanile prompt result with 80 inference steps">
                       <div class="caption">80 num_inference_steps</div>
                     </div>
                   </div>
-                <p>Prompt: "a watercolor painting of robots studying under paper lanterns in a quiet library"</p>
-                <p>Reflect: All three pictures didn't manage to obey all the instructions in the prompt: Only the third picture captures the detail 
-                  "paper lanters", and only the second image captures the detail "library", but it doesn't show the keyword "studying". The robots tend to have 
-                  wrong number of legs, and their hands can't be characterized well.
-                  But anyway, at least all three pictures follow the instruction of "watercolor painting" and "robotics", and overall, the images are clear, with more details added
-                  as the inference steps grow, which aligns the observation in the first set of images.</p>
-                <div class="result-box">
+                </article>
+
+                <article class="prompt-study">
+                  <header class="prompt-study__prompt">
+                    <span class="prompt-study__label">Prompt 02</span>
+                    <blockquote>a watercolor painting of robots studying under paper lanterns in a quiet library</blockquote>
+                  </header>
+                  <div class="prompt-study__analysis">
+                    <span class="prompt-study__analysis-label">Analysis</span>
+                    <p>
+                      All three pictures didn't manage to obey all the instructions in the prompt: Only the
+                      third picture captures the detail "paper lanters", and only the second image captures the
+                      detail "library", but it doesn't show the keyword "studying". The robots tend to have
+                      wrong number of legs, and their hands can't be characterized well. But anyway, at least
+                      all three pictures follow the instruction of "watercolor painting" and "robotics", and
+                      overall, the images are clear, with more details added as the inference steps grow, which
+                      aligns the observation in the first set of images.
+                    </p>
+                  </div>
+                  <div class="result-box">
                     <div class="thumb">
-                      <img src="media/prompt2_20.png" alt="Box filter result 1">
+                      <img src="media/prompt2_20.png" alt="Watercolor robot prompt result with 20 inference steps">
                       <div class="caption">20 num_inference_steps</div>
                     </div>
                     <div class="thumb">
-                      <img src="media/prompt2_40.png" alt="Box filter result 1">
+                      <img src="media/prompt2_40.png" alt="Watercolor robot prompt result with 40 inference steps">
                       <div class="caption">40 num_inference_steps</div>
                     </div>
                     <div class="thumb">
-                      <img src="media/prompt2_80.png" alt="Box filter result 1">
+                      <img src="media/prompt2_80.png" alt="Watercolor robot prompt result with 80 inference steps">
                       <div class="caption">80 num_inference_steps</div>
                     </div>
                   </div>
-                <p>Prompt: "an aerial photograph of terraced rice fields shaped like a spiral galaxy"</p>
-                <p>Reflect: The terraced rice fields are more and more shaped like a spiral galaxy as the inference steps grow, indicating that the model could better understand the semantic in the prompt as the inference time becomes longer. Overall, the three
-                    images all obeys the instructions in the prompt, and are all clear without distinct noise。</p>
-                <div class="result-box">
+                </article>
+
+                <article class="prompt-study">
+                  <header class="prompt-study__prompt">
+                    <span class="prompt-study__label">Prompt 03</span>
+                    <blockquote>an aerial photograph of terraced rice fields shaped like a spiral galaxy</blockquote>
+                  </header>
+                  <div class="prompt-study__analysis">
+                    <span class="prompt-study__analysis-label">Analysis</span>
+                    <p>
+                      The terraced rice fields are more and more shaped like a spiral galaxy as the inference
+                      steps grow, indicating that the model could better understand the semantic in the prompt
+                      as the inference time becomes longer. Overall, the three images all obeys the instructions
+                      in the prompt, and are all clear without distinct noise。
+                    </p>
+                  </div>
+                  <div class="result-box">
                     <div class="thumb">
-                      <img src="media/prompt3_20.png" alt="Box filter result 1">
+                      <img src="media/prompt3_20.png" alt="Terraced rice field prompt result with 20 inference steps">
                       <div class="caption">20 num_inference_steps</div>
                     </div>
                     <div class="thumb">
-                      <img src="media/prompt3_40.png" alt="Box filter result 1">
+                      <img src="media/prompt3_40.png" alt="Terraced rice field prompt result with 40 inference steps">
                       <div class="caption">40 num_inference_steps</div>
                     </div>
                     <div class="thumb">
-                      <img src="media/prompt3_80.png" alt="Box filter result 1">
+                      <img src="media/prompt3_80.png" alt="Terraced rice field prompt result with 80 inference steps">
                       <div class="caption">80 num_inference_steps</div>
                     </div>
                   </div>
-              </li>
-            </ol>
+                </article>
+              </div>
+            </div>
           </div>
         </div>
     </section>
