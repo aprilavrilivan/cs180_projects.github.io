@@ -594,6 +594,135 @@
       line-height: 1.35;
     }
 
+    /* Parts 1.2–1.3: classical and learned denoising */
+    .denoising-study {
+      --study-color: var(--project-accent);
+
+      padding: clamp(18px, 2.8vw, 30px) !important;
+    }
+
+    .denoising-study--learned {
+      --study-color: #39766f;
+    }
+
+    [data-theme="dark"] .denoising-study--learned {
+      --study-color: #72b9af;
+    }
+
+    .project-main .denoising-steps {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .project-main .denoising-step {
+      position: relative;
+      margin: 0;
+      padding: clamp(22px, 3vw, 34px);
+      overflow: hidden;
+      border: 1px solid var(--project-border);
+      border-radius: 16px;
+      background:
+        linear-gradient(180deg, color-mix(in srgb, var(--study-color) 5%, var(--project-paper)), var(--project-paper) 150px);
+      box-shadow: 0 14px 38px rgb(62 47 35 / 6%);
+    }
+
+    .project-main .denoising-step::before {
+      position: absolute;
+      top: 0;
+      right: 0;
+      left: 0;
+      height: 3px;
+      background: var(--study-color);
+      content: "";
+    }
+
+    .project-main .denoising-step > p:first-of-type {
+      margin-top: 0;
+      color: var(--project-text);
+      font-size: clamp(16px, 1.7vw, 19px);
+      font-weight: 680;
+      line-height: 1.55;
+    }
+
+    .project-main .denoising-step > p:last-of-type {
+      margin-bottom: 0;
+    }
+
+    .project-main .denoising-step code {
+      padding: 2px 6px;
+      border: 1px solid color-mix(in srgb, var(--study-color) 24%, var(--project-border));
+      border-radius: 6px;
+      background: color-mix(in srgb, var(--study-color) 8%, var(--project-paper));
+      color: var(--project-text);
+      font-size: .88em;
+    }
+
+    .denoising-equation {
+      border-color: color-mix(in srgb, var(--study-color) 26%, var(--project-border));
+      background:
+        linear-gradient(135deg, color-mix(in srgb, var(--study-color) 9%, var(--project-paper)), var(--project-paper));
+    }
+
+    .project-main .denoising-study .denoising-step .result-box.gaussian-results {
+      display: grid;
+      width: min(100%, 760px);
+      margin: 25px auto 0;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .project-main .denoising-study .result-box.gaussian-results .thumb,
+    .project-main .denoising-comparisons .result-box.denoising-row .thumb {
+      max-width: none;
+      border-radius: 13px;
+      background: var(--project-paper-soft);
+      box-shadow: none;
+    }
+
+    .project-main .denoising-study .result-box.gaussian-results img,
+    .project-main .denoising-comparisons .result-box.denoising-row img {
+      width: 100%;
+      aspect-ratio: 1;
+      background: #fff;
+      image-rendering: auto;
+      object-fit: cover;
+    }
+
+    .project-main .denoising-study .result-box.gaussian-results .caption,
+    .project-main .denoising-comparisons .result-box.denoising-row .caption {
+      min-height: 48px;
+      margin: 0;
+      padding: 8px 7px 9px;
+      border-top: 1px solid var(--project-border);
+      background: var(--project-paper-soft);
+      font-size: 11px;
+      line-height: 1.35;
+    }
+
+    .project-main .denoising-comparisons {
+      display: grid;
+      width: min(100%, 820px);
+      gap: 12px;
+      margin: 22px auto 24px;
+    }
+
+    .project-main .denoising-comparisons .result-box.denoising-row {
+      display: grid;
+      width: 100%;
+      margin: 0;
+      padding: 12px;
+      border: 1px solid var(--project-border);
+      border-radius: 15px;
+      background: var(--project-paper-soft);
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .project-main .denoising-comparisons .denoising-row .thumb:last-child {
+      border-color: color-mix(in srgb, var(--study-color) 48%, var(--project-border));
+    }
+
     @media (max-width: 760px) {
       .forward-diffusion-study {
         padding: 14px !important;
@@ -610,6 +739,18 @@
 
       .project-main .forward-step .result-box.noise-level-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .denoising-study {
+        padding: 14px !important;
+      }
+
+      .project-main .denoising-step {
+        padding: 19px 16px;
+      }
+
+      .project-main .denoising-comparisons .result-box.denoising-row {
+        padding: 10px;
       }
     }
   </style>
@@ -1025,25 +1166,45 @@
             <span class="hint">1.2</span>
             <button class="mini-toggle" type="button" data-target="#1.2-bo">Hide</button>
           </div>
-          <div class="mini-bd" id="1.2-body">
-            <ol>
-              <li><p>Using classical method (i.e. Gaussian Blurring) to denoise the above images is hard. I tried my best to denoise them
-                    by increasing the Gaussian kernal size w.r.t larger noise step, but it's still hard to identify the campanile when 
-                    noise step gets larger.</p>
-                <div class="result-box">
-                    <div class="thumb">
-                      <img src="media/blur250.png" alt="Box filter result 1">
-                      <div class="caption">Gaussian Blur Denoising at t=250</div>
-                    </div>
-                    <div class="thumb">
-                      <img src="media/blur500.png" alt="Box filter result 1">
-                      <div class="caption">Gaussian Blur Denoising at t=500</div>
-                    </div>
-                    <div class="thumb">
-                      <img src="media/blur750.png" alt="Box filter result 1">
-                      <div class="caption">Gaussian Blur Denoising at t=250</div>
-                    </div>
+
+          <div class="mini-bd denoising-study denoising-study--classical" id="1.2-body">
+            <ol class="denoising-steps">
+              <li class="denoising-step">
+                <p>
+                  Before applying diffusion-based denoising, I first experimented with a classical
+                  image processing approach: Gaussian blurring.
+                </p>
+
+                <p>
+                  Gaussian filtering reduces noise by averaging neighboring pixels, which works well
+                  for removing high-frequency noise. However, it does not learn the underlying
+                  structure or semantic information of the image. Therefore, when the noise level
+                  becomes large, simply smoothing the image cannot recover the missing structures.
+                </p>
+
+                <p>
+                  I increased the Gaussian kernel size according to the noise level in an attempt to
+                  remove stronger noise. However, as shown below, the Campanile structure becomes
+                  increasingly difficult to identify at larger noise steps.
+                </p>
+
+                <div class="result-box gaussian-results">
+                  <div class="thumb">
+                    <img src="media/blur250.png" alt="Gaussian Blur Denoising t=250">
+                    <div class="caption">Gaussian Blur Denoising at \(t=250\)</div>
                   </div>
+
+                  <div class="thumb">
+                    <img src="media/blur500.png" alt="Gaussian Blur Denoising t=500">
+                    <div class="caption">Gaussian Blur Denoising at \(t=500\)</div>
+                  </div>
+
+                  <div class="thumb">
+                    <img src="media/blur750.png" alt="Gaussian Blur Denoising t=750">
+                    <div class="caption">Gaussian Blur Denoising at \(t=750\)</div>
+                  </div>
+                </div>
+
               </li>
             </ol>
           </div>
@@ -1055,59 +1216,102 @@
             <span class="hint">1.3</span>
             <button class="mini-toggle" type="button" data-target="#1.3-bo">Hide</button>
           </div>
-          <div class="mini-bd" id="1.3-body">
-            <ol>
-              <li><p>It would be a better choice to use One-Step Denoising by the stage_1.unet of the DeepFloyd model. The model takes in the 
-                    [noise image, prompt "a high quality photo", noise step t], and outputs the estimated one-step noise e. We can use the reverse
-                     formula to get clean x_0:</p>
-                  <div class="result-box">
-                    <div class="thumb">
-                      <img src="media/reverseFormula.png" alt="Box filter result 1">
-                    </div>
-                  </div>
+
+          <div class="mini-bd denoising-study denoising-study--learned" id="1.3-body">
+            <ol class="denoising-steps">
+              <li class="denoising-step">
+                <p>
+                  Since classical Gaussian filtering cannot reliably recover the image structure at high noise levels,
+                  a better approach is to use a learned denoiser. Here, I use the <code>stage_1.unet</code> of the
+                  DeepFloyd model for one-step denoising.
+                </p>
+
+                <p>
+                  The model takes as input a noisy image \(x_t\), the prompt <code>"a high quality photo"</code>,
+                  and the timestep \(t\), and predicts the noise component \(\epsilon_\theta(x_t, t)\) contained in
+                  the image. Recall the forward diffusion formulation:
+                </p>
+
+                <div class="equation-block denoising-equation">
+                  \[
+                  x_t = \sqrt{\bar{\alpha}_t}x_0 + \sqrt{1-\bar{\alpha}_t}\epsilon
+                  \]
+                </div>
+
+                <p>
+                  Once the noise is estimated, we can invert this relation to recover an estimate of the clean image:
+                </p>
+
+                <div class="equation-block denoising-equation">
+                  \[
+                  \hat{x}_0 =
+                  \frac{x_t - \sqrt{1-\bar{\alpha}_t}\,\epsilon_\theta(x_t,t)}
+                  {\sqrt{\bar{\alpha}_t}}
+                  \]
+                </div>
+
+                <p>
+                  This gives a one-step estimate of the original image directly from a noisy observation.
+                  Compared with Gaussian blur, the learned denoiser is able to restore more meaningful image structure,
+                  since it leverages a pretrained image prior instead of only performing local smoothing.
+                </p>
+
                 <p>Here are the results:</p>
-                <div class="result-box">
+
+                <div class="denoising-comparisons">
+                  <div class="result-box denoising-row">
                     <div class="thumb">
-                      <img src="media/original.png" alt="Box filter result 1">
+                      <img src="media/original.png" alt="Original Campanile">
                       <div class="caption">Original Campanile</div>
                     </div>
                     <div class="thumb">
-                      <img src="media/blur250.png" alt="Box filter result 1">
-                      <div class="caption">Noisy Campanile at t=250</div>
+                      <img src="media/250.png" alt="Noisy Campanile at t=250">
+                      <div class="caption">Noisy Campanile at \(t=250\)</div>
                     </div>
                     <div class="thumb">
-                      <img src="media/deno250.png" alt="Box filter result 1">
-                      <div class="caption">One-Step Denoised Campanile at t=250</div>
+                      <img src="media/deno250.png" alt="One-Step Denoised Campanile at t=250">
+                      <div class="caption">One-Step Denoised Campanile at \(t=250\)</div>
                     </div>
                   </div>
-                <div class="result-box">
+
+                  <div class="result-box denoising-row">
                     <div class="thumb">
-                      <img src="media/original.png" alt="Box filter result 1">
+                      <img src="media/original.png" alt="Original Campanile">
                       <div class="caption">Original Campanile</div>
                     </div>
                     <div class="thumb">
-                      <img src="media/blur500.png" alt="Box filter result 1">
-                      <div class="caption">Noisy Campanile at t=500</div>
+                      <img src="media/500.png" alt="Noisy Campanile at t=500">
+                      <div class="caption">Noisy Campanile at \(t=500\)</div>
                     </div>
                     <div class="thumb">
-                      <img src="media/deno500.png" alt="Box filter result 1">
-                      <div class="caption">One-Step Denoised Campanile at t=500</div>
+                      <img src="media/deno500.png" alt="One-Step Denoised Campanile at t=500">
+                      <div class="caption">One-Step Denoised Campanile at \(t=500\)</div>
                     </div>
                   </div>
-                <div class="result-box">
+
+                  <div class="result-box denoising-row">
                     <div class="thumb">
-                      <img src="media/original.png" alt="Box filter result 1">
+                      <img src="media/original.png" alt="Original Campanile">
                       <div class="caption">Original Campanile</div>
                     </div>
                     <div class="thumb">
-                      <img src="media/blur750.png" alt="Box filter result 1">
-                      <div class="caption">Noisy Campanile at t=750</div>
+                      <img src="media/750.png" alt="Noisy Campanile at t=750">
+                      <div class="caption">Noisy Campanile at \(t=750\)</div>
                     </div>
                     <div class="thumb">
-                      <img src="media/deno750.png" alt="Box filter result 1">
-                      <div class="caption">One-Step Denoised Campanile at t=750</div>
+                      <img src="media/deno750.png" alt="One-Step Denoised Campanile at t=750">
+                      <div class="caption">One-Step Denoised Campanile at \(t=750\)</div>
                     </div>
                   </div>
+                </div>
+
+                <p>
+                  As expected, one-step denoising works reasonably well at lower noise levels, but becomes less accurate
+                  as \(t\) increases. When the input is extremely noisy, much of the original information has already been
+                  destroyed, making it difficult to fully reconstruct the image in a single reverse step. This motivates
+                  the iterative denoising process used in diffusion sampling, where the image is refined gradually across
+                  many timesteps instead of being recovered all at once.
+                </p>
               </li>
             </ol>
           </div>
