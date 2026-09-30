@@ -222,8 +222,8 @@
   </header>
 
   <main class="wrap">
-    <h1 class="page-title">Fun With Diffusion Models!</h1>
-    <p class="lead">This project aims to explore Diffusion Models</span>.</p>
+    <h1 class="page-title">Fun With Diffusion and Flow-Matching Models!</h1>
+    <p class="lead">This project aims to explore Diffusion Models and Flow-Matching Models</span>.</p>
     <div class="actions" style="margin-bottom: 24px; flex-wrap: wrap;" aria-label="Project 5 code notebooks">
       <a class="btn primary" href="https://github.com/aprilavrilivan/cs180_projects.github.io/blob/main/6/code/project5a_diffusion.ipynb">Part A Notebook ↗</a>
       <a class="btn ghost" href="https://github.com/aprilavrilivan/cs180_projects.github.io/blob/main/6/code/project5b_flow_matching.ipynb">Part B Notebook ↗</a>
@@ -245,8 +245,14 @@
           </div>
           <div class="mini-bd" id="0.1-body">
             <ol>
-              <li><p>This part aims to play with DeepFloyd, which is a two stage diffusion model trained by Stability AI. The first step
-                  I did is to create some imaginative prompts, and encode them to vectors using T5 Text Encoder Embeddings Generator. 
+              <li><p>This part aims to play with DeepFloyd, which is a two stage diffusion model trained by Stability AI. The first stage produces images of size 64*64
+                  and the second stage takes the outputs of the first stage and generates images of size 256*256. The upsampling code is provided at the end of the 
+                  notebooks. 
+                  
+                  DeepFloyd was trained as a text-to-image model, which takes text prompts as input and outputs images that are aligned with the 
+                  text. However, a raw text string cannot be directly used as the model's input — we first need to convert it into a high-dimensional 
+                  vector (of 4096 dimensions in our case) that the model can understand, a.k.a. prompt embeddings. Therefore, what I did first is to
+                  first think of some imaginative prompts, and encode them to vectors using T5 Text Encoder Embeddings Generator (https://huggingface.co/spaces/jamesoncrate/CS180-T5-Encoder). 
                   I created 11 prompts, as shown below in the generator's website:</p>
                   <div class="result-box">
                     <div class="thumb large-box">
