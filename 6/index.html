@@ -913,6 +913,105 @@
       line-height: 1.35;
     }
 
+    /* Part 1.6: classifier-free guidance */
+    .cfg-study {
+      padding: clamp(18px, 2.8vw, 30px) !important;
+    }
+
+    .project-main .cfg-content {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .project-main .cfg-content > li {
+      margin: 0;
+    }
+
+    .project-main .cfg-content > li > p:first-of-type {
+      margin-top: 0;
+      color: var(--project-text);
+      font-size: clamp(16px, 1.7vw, 19px);
+      font-weight: 680;
+      line-height: 1.55;
+    }
+
+    .project-main .cfg-content > li > p:last-of-type {
+      margin-bottom: 0;
+    }
+
+    .project-main .cfg-objectives {
+      display: grid;
+      margin: 18px 0 24px;
+      padding: 0;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px 24px;
+      list-style: none;
+    }
+
+    .project-main .cfg-objectives li {
+      margin: 0;
+      padding: 4px 0 4px 14px;
+      border-left: 2px solid var(--project-accent);
+    }
+
+    .project-main .cfg-equation--primary {
+      border-color: color-mix(in srgb, var(--project-accent) 52%, var(--project-border));
+      background:
+        linear-gradient(135deg, color-mix(in srgb, var(--project-accent-soft) 88%, var(--project-paper)), var(--project-paper));
+    }
+
+    .project-main .cfg-content .result-box.cfg-code-figure,
+    .project-main .cfg-content .result-box.cfg-gallery {
+      display: grid;
+      width: min(100%, 880px);
+      margin: 25px auto;
+      gap: 12px;
+    }
+
+    .project-main .cfg-content .result-box.cfg-code-figure {
+      grid-template-columns: 1fr;
+    }
+
+    .project-main .cfg-content .result-box.cfg-gallery {
+      width: min(100%, 820px);
+      margin-bottom: 0;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+    }
+
+    .project-main .cfg-code-figure .thumb,
+    .project-main .cfg-gallery .thumb {
+      max-width: none;
+      border-radius: 13px;
+      background: var(--project-paper-soft);
+      box-shadow: none;
+    }
+
+    .project-main .cfg-code-figure img {
+      width: 100%;
+      height: auto;
+      background: #fff;
+      object-fit: contain;
+    }
+
+    .project-main .cfg-gallery img {
+      width: 100%;
+      aspect-ratio: 1;
+      background: #fff;
+      image-rendering: auto;
+      object-fit: cover;
+    }
+
+    .project-main .cfg-code-figure .caption,
+    .project-main .cfg-gallery .caption {
+      margin: 0;
+      padding: 8px 7px 9px;
+      border-top: 1px solid var(--project-border);
+      background: var(--project-paper-soft);
+      font-size: 11px;
+      line-height: 1.35;
+    }
+
     @media (max-width: 760px) {
       .forward-diffusion-study {
         padding: 14px !important;
@@ -970,6 +1069,24 @@
       .project-main .generation-gallery .caption {
         padding: 6px 3px 7px;
         font-size: 9px;
+      }
+
+      .cfg-study {
+        padding: 14px !important;
+      }
+
+      .project-main .cfg-objectives {
+        grid-template-columns: 1fr;
+        gap: 8px;
+      }
+
+      .project-main .cfg-content .result-box.cfg-gallery {
+        gap: 6px;
+      }
+
+      .project-main .cfg-gallery .caption {
+        padding: 6px 2px 7px;
+        font-size: 8px;
       }
     }
   </style>
@@ -1917,43 +2034,234 @@
           <div class="mini-hd">
             <span>Part 1</span>
             <span class="hint">1.6</span>
-            <button class="mini-toggle" type="button" data-target="#1.6-bo">Hide</button>
+            <button class="mini-toggle" type="button" data-target="#1.6-body">Hide</button>
           </div>
-          <div class="mini-bd" id="1.6-body">
-            <ol>
-              <li><p>To make the above randomly sampled images perform higher quality, we can adopt the CFG trick: which is that at each denoising stage, 
-              we run the model twice, one with prompt "a high quality photo", another with null prompt. Then we do weighted average to the output noise and 
-              run a strided denoising step. Here are the critical code snippets in the function iterative_denoise_cfg:</p>
-              <div class="result-box">
-                <div class="thumb large-box">
-                    <img src="media/CFGCode.png" alt="Box filter result 1">
-                    <div class="caption">code snippets of weighted averaging noise</div>
-                  </div>
-              </div>
-              <p>Here are five sampled diffution output images using CFG. The quality is much higher than that in the previous srection.</p>
-              <div class="result-box">
-                  <div class="thumb">
-                    <img src="media/CFG1.png" alt="Box filter result 1">
-                    <div class="caption">sample1</div>
-                  </div>
-                  <div class="thumb">
-                    <img src="media/CFG2.png" alt="Box filter result 1">
-                    <div class="caption">sample2</div>
-                  </div>
-                  <div class="thumb">
-                    <img src="media/CFG3.png" alt="Box filter result 1">
-                    <div class="caption">sample3</div>
-                  </div>
-                  <div class="thumb">
-                    <img src="media/CFG4.png" alt="Box filter result 1">
-                    <div class="caption">sample4</div>
-                  </div>
-                  <div class="thumb">
-                    <img src="media/CFG5.png" alt="Box filter result 1">
-                    <div class="caption">sample5</div>
-                  </div>
+
+          <div class="mini-bd cfg-study" id="1.6-body">
+            <ol class="cfg-content">
+
+              <li>
+
+                <p>
+                  Although diffusion models can generate images from pure noise, the samples in the
+                  previous section are completely random and lack strong control over the generated
+                  content.
+                </p>
+
+                <p>
+                  To make diffusion models generate images following a desired condition (such as a
+                  text prompt), we can introduce <strong>Classifier-Free Guidance (CFG)</strong>.
+                </p>
+
+
+                <p>
+                  In conditional diffusion models, the UNet predicts the noise component conditioned
+                  on an additional input \(c\):
+                </p>
+
+
+                <div class="equation-block">
+                  \[
+                  \epsilon_\theta(x_t,t,c)
+                  \]
                 </div>
+
+
+                <p>
+                  where \(c\) represents the condition, such as the text embedding of a prompt:
+                </p>
+
+
+                <div class="equation-block">
+                  \[
+                  c = \text{"a high quality photo"}
+                  \]
+                </div>
+
+
+                <p>
+                  However, directly using only the conditional prediction does not always produce the
+                  best results. The model needs to balance two objectives:
+                </p>
+
+
+                <ul class="cfg-objectives">
+                  <li>
+                    maintaining the general image prior learned from the dataset;
+                  </li>
+                  <li>
+                    following the specific condition provided by the prompt.
+                  </li>
+                </ul>
+
+
+                <p>
+                  CFG achieves this by running the UNet twice at each denoising step:
+                </p>
+
+
+                <p>
+                  First, we obtain an unconditional noise prediction by providing an empty prompt:
+                </p>
+
+
+                <div class="equation-block">
+                  \[
+                  \epsilon_u
+                  =
+                  \epsilon_\theta(x_t,t,\emptyset)
+                  \]
+                </div>
+
+
+                <p>
+                  This represents the model's natural denoising direction without any external
+                  guidance.
+                </p>
+
+
+                <p>
+                  Then, we obtain a conditional noise prediction using the actual prompt:
+                </p>
+
+
+                <div class="equation-block">
+                  \[
+                  \epsilon_c
+                  =
+                  \epsilon_\theta(x_t,t,c)
+                  \]
+                </div>
+
+
+                <p>
+                  The difference between these two predictions:
+                </p>
+
+
+                <div class="equation-block">
+                  \[
+                  \epsilon_c-\epsilon_u
+                  \]
+                </div>
+
+
+                <p>
+                  represents the additional denoising direction introduced by the condition. CFG
+                  amplifies this direction using a guidance scale \(\gamma\):
+                </p>
+
+
+                <div class="equation-block cfg-equation--primary">
+                  \[
+                  \boxed{
+                  \epsilon
+                  =
+                  \epsilon_u
+                  +
+                  \gamma(\epsilon_c-\epsilon_u)
+                  }
+                  \]
+                </div>
+
+
+                <p>
+                  When \(\gamma=0\), the model performs unconditional generation. When
+                  \(\gamma=1\), it becomes standard conditional diffusion. Increasing \(\gamma\)
+                  strengthens the influence of the prompt and makes the generated image better align
+                  with the condition.
+                </p>
+
+
+                <p>
+                  Intuitively, CFG does not directly create a new image. Instead, during every reverse
+                  diffusion step, it modifies the predicted noise direction so that the sampling
+                  trajectory is pushed closer to the desired condition.
+                </p>
+
+
+                <div class="equation-block">
+                  \[
+                  x_t
+                  \rightarrow
+                  \epsilon
+                  \rightarrow
+                  x_{t'}
+                  \rightarrow ...
+                  \rightarrow x_0
+                  \]
+                </div>
+
+
+                <p>
+                  In my implementation, the <code>iterative_denoise_cfg</code> function follows the
+                  same reverse diffusion process as before, but replaces the original noise prediction
+                  with the CFG-guided noise estimate.
+                </p>
+
+
+                <p>
+                  The critical implementation is shown below:
+                </p>
+
+
+                <div class="result-box cfg-code-figure">
+
+                  <div class="thumb large-box">
+                    <img src="media/CFGCode.png" alt="CFG implementation">
+                    <div class="caption">
+                      CFG noise combination in iterative_denoise_cfg
+                    </div>
+                  </div>
+
+                </div>
+
+
+                <p>
+                  Using CFG with a guidance scale of \(\gamma=7\), the generated images become much
+                  more realistic and better aligned with the prompt compared with the unconditional
+                  samples from the previous section:
+                </p>
+
+
+                <div class="result-box cfg-gallery">
+
+                  <div class="thumb">
+                    <img src="media/CFG1.png" alt="Sample 1 with CFG">
+                    <div class="caption">Sample 1 with CFG</div>
+                  </div>
+
+
+                  <div class="thumb">
+                    <img src="media/CFG2.png" alt="Sample 2 with CFG">
+                    <div class="caption">Sample 2 with CFG</div>
+                  </div>
+
+
+                  <div class="thumb">
+                    <img src="media/CFG3.png" alt="Sample 3 with CFG">
+                    <div class="caption">Sample 3 with CFG</div>
+                  </div>
+
+
+                  <div class="thumb">
+                    <img src="media/CFG4.png" alt="Sample 4 with CFG">
+                    <div class="caption">Sample 4 with CFG</div>
+                  </div>
+
+
+                  <div class="thumb">
+                    <img src="media/CFG5.png" alt="Sample 5 with CFG">
+                    <div class="caption">Sample 5 with CFG</div>
+                  </div>
+
+
+                </div>
+
+
               </li>
+
+
             </ol>
           </div>
         </div>
