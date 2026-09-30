@@ -1164,6 +1164,86 @@
       font-weight: 650;
     }
 
+    /* Parts 1.8–1.9: multi-prompt compositions */
+    .project-main .composition-equation--primary {
+      border-color: color-mix(in srgb, var(--project-accent) 52%, var(--project-border));
+      background:
+        linear-gradient(135deg, color-mix(in srgb, var(--project-accent-soft) 88%, var(--project-paper)), var(--project-paper));
+    }
+
+    .project-main .composition-prompts {
+      line-height: 1.8;
+    }
+
+    .project-main .composition-step .result-box.composition-code-pair,
+    .project-main .composition-step .result-box.composition-code-merge,
+    .project-main .composition-step .result-box.composition-result-pair,
+    .project-main .composition-step .result-box.composition-result-single {
+      display: grid;
+      margin: 24px auto;
+      gap: 12px;
+    }
+
+    .project-main .composition-step .result-box.composition-code-pair {
+      width: min(100%, 980px);
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      align-items: start;
+    }
+
+    .project-main .composition-step .result-box.composition-code-merge {
+      width: min(100%, 800px);
+      grid-template-columns: 1fr;
+    }
+
+    .project-main .composition-step .result-box.composition-result-pair {
+      width: min(100%, 560px);
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .project-main .composition-step .result-box.composition-result-single {
+      width: min(100%, 310px);
+      grid-template-columns: 1fr;
+    }
+
+    .project-main .composition-code-pair .thumb,
+    .project-main .composition-code-merge .thumb,
+    .project-main .composition-result-pair .thumb,
+    .project-main .composition-result-single .thumb {
+      max-width: none;
+      border-radius: 13px;
+      background: var(--project-paper-soft);
+      box-shadow: none;
+    }
+
+    .project-main .composition-code-pair img,
+    .project-main .composition-code-merge img {
+      width: 100%;
+      height: auto;
+      background: #fff;
+      object-fit: contain;
+    }
+
+    .project-main .composition-result-pair img,
+    .project-main .composition-result-single img {
+      width: 100%;
+      aspect-ratio: 1;
+      background: #fff;
+      object-fit: cover;
+    }
+
+    .project-main .composition-code-pair .caption,
+    .project-main .composition-code-merge .caption,
+    .project-main .composition-result-pair .caption,
+    .project-main .composition-result-single .caption {
+      min-height: 44px;
+      margin: 0;
+      padding: 8px 7px 9px;
+      border-top: 1px solid var(--project-border);
+      background: var(--project-paper-soft);
+      font-size: 10px;
+      line-height: 1.35;
+    }
+
     @media (max-width: 760px) {
       .forward-diffusion-study {
         padding: 14px !important;
@@ -1275,6 +1355,28 @@
 
       .project-main .guided-prompt {
         padding: 11px 13px;
+      }
+
+      .project-main .composition-step .result-box.composition-code-pair {
+        grid-template-columns: 1fr;
+      }
+
+      .project-main .composition-step .result-box.composition-result-pair {
+        width: min(100%, 420px);
+        gap: 8px;
+      }
+
+      .project-main .composition-step .result-box.composition-result-single {
+        width: min(100%, 260px);
+      }
+
+      .project-main .composition-code-pair .caption,
+      .project-main .composition-code-merge .caption,
+      .project-main .composition-result-pair .caption,
+      .project-main .composition-result-single .caption {
+        min-height: 40px;
+        padding: 6px 4px 7px;
+        font-size: 9px;
       }
     }
   </style>
@@ -3335,55 +3437,237 @@
             <span class="hint">1.8</span>
             <button class="mini-toggle" type="button" data-target="#1.8-bo">Hide</button>
           </div>
-          <div class="mini-bd" id="1.8-body">
-            <ol>
-              <li><p>Then, I implemented a visual anagram using diffusion. The picture describes different scenes when fliped upsidedown. To do this, I did two CFGs in one timestep, one for upright picture and one for upside uown picture,
-                and then average them together</p>
-              <div class="result-box">
+          <div class="mini-bd sdedit-study composition-study" id="1.8-body">
+            <ol class="sdedit-steps">
+
+              <li class="sdedit-step composition-step">
+                <p>
+                  Beyond generating images from a single text prompt,
+                  we can also combine multiple CFG predictions to
+                  satisfy different visual conditions simultaneously.
+                  One interesting application is
+                  <strong>Visual Anagrams</strong>, where the same
+                  image reveals different subjects when rotated
+                  by 180 degrees.
+                </p>
+
+                <p>
+                  The key idea is to guide the diffusion process with
+                  two different prompts at every denoising step:
+                  one for the upright image and another for its
+                  upside-down version.
+                </p>
+
+                <p>
+                  First, given the current noisy image \(x_t\),
+                  I compute a CFG-guided noise prediction using
+                  the first prompt \(p_1\):
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \epsilon_1
+                  =
+                  \operatorname{CFG}(x_t,t,p_1)
+                  \]
+                </div>
+
+                <p>
+                  Next, I rotate the current image by 180 degrees
+                  and compute another CFG prediction using the
+                  second prompt \(p_2\):
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \epsilon_2'
+                  =
+                  \operatorname{CFG}
+                  (\operatorname{flip}(x_t),t,p_2)
+                  \]
+                </div>
+
+                <p>
+                  Since the second prediction is computed in the
+                  rotated coordinate system, we must flip it back
+                  before combining the two predictions. Otherwise,
+                  their spatial positions would not align.
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \epsilon_2
+                  =
+                  \operatorname{flip}(\epsilon_2')
+                  \]
+                </div>
+
+                <p>
+                  Finally, I average the two aligned noise
+                  predictions to obtain a single guided estimate:
+                </p>
+
+                <div class="equation-block composition-equation--primary">
+                  \[
+                  \boxed{
+                  \hat{\epsilon}
+                  =
+                  \frac{\epsilon_1+\epsilon_2}{2}
+                  }
+                  \]
+                </div>
+
+                <p>
+                  This combined estimate replaces the usual CFG
+                  noise prediction in the reverse diffusion step.
+                  By repeating this operation throughout sampling,
+                  the model attempts to generate an image that
+                  satisfies both prompts under their respective
+                  orientations.
+                </p>
+
+                <p>
+                  The critical implementation is shown below:
+                </p>
+
+                <div class="result-box composition-code-pair">
+
                   <div class="thumb">
-                    <img src="media/anacode1.png" alt="Box filter result 1">
-                    <div class="caption">CFG for upright</div>
+                    <img
+                      src="media/anacode1.png"
+                      alt="CFG implementation for upright image"
+                    >
+                    <div class="caption">
+                      CFG for the upright image
+                    </div>
                   </div>
+
                   <div class="thumb">
-                    <img src="media/anacode2.png" alt="Box filter result 1">
-                    <div class="caption">CFG for upsidedown</div>
+                    <img
+                      src="media/anacode2.png"
+                      alt="CFG implementation for rotated image"
+                    >
+                    <div class="caption">
+                      CFG for the upside-down image
+                    </div>
                   </div>
-              </div>
-              <div class="result-box">
+
+                </div>
+
+                <div class="result-box composition-code-merge">
+
                   <div class="thumb large-box">
-                    <img src="media/anacode3.png" alt="Box filter result 1">
-                    <div class="caption">merge the noise together</div>
+                    <img
+                      src="media/anacode3.png"
+                      alt="Combining aligned noise predictions"
+                    >
+                    <div class="caption">
+                      Averaging the aligned noise predictions
+                    </div>
                   </div>
+
                 </div>
+
               </li>
-              <li>
-                <p>p1 = "A cat"</p>
-                <p>p2 = "A dragon"</p>
-              <div class="result-box">
+
+
+              <li class="sdedit-step composition-step">
+                <p>
+                  For my first experiment, I used two prompts
+                  describing different animals:
+                </p>
+
+                <p class="guided-prompt composition-prompts">
+                  <strong>Prompt 1:</strong> "A cat"
+                  <br>
+                  <strong>Prompt 2:</strong> "A dragon"
+                </p>
+
+                <div class="result-box composition-result-pair">
+
                   <div class="thumb">
-                    <img src="media/anagram_1.png" alt="Box filter result 1">
-                    <div class="caption">upright</div>
+                    <img
+                      src="media/anagram_1.png"
+                      alt="Upright visual anagram"
+                    >
+                    <div class="caption">
+                      Upright
+                    </div>
                   </div>
+
                   <div class="thumb">
-                    <img src="media/anagram_2.png" alt="Box filter result 1">
-                    <div class="caption">upsidedown</div>
+                    <img
+                      src="media/anagram_2.png"
+                      alt="Upside-down visual anagram"
+                    >
+                    <div class="caption">
+                      Upside-down
+                    </div>
                   </div>
+
                 </div>
+
+                <p>
+                  The two orientations share the same underlying
+                  pixels but encourage different interpretations.
+                  The result also illustrates the difficulty of
+                  satisfying two competing prompts: the dragon
+                  features are more apparent, while the cat
+                  interpretation is less distinct.
+                </p>
+
               </li>
-              <li>
-                <p>p1 = "A hooded person sitting on a rooftop"</P>
-                <p>p2 = "A fox face with bright eyes" </p>
-              <div class="result-box">
+
+
+              <li class="sdedit-step composition-step">
+                <p>
+                  For my second experiment, I tried two subjects
+                  with more compatible visual structures:
+                </p>
+
+                <p class="guided-prompt composition-prompts">
+                  <strong>Prompt 1:</strong>
+                  "A hooded person sitting on a rooftop"
+                  <br>
+                  <strong>Prompt 2:</strong>
+                  "A fox face with bright eyes"
+                </p>
+
+                <div class="result-box composition-result-pair">
+
                   <div class="thumb">
-                    <img src="media/anagram_3.png" alt="Box filter result 1">
-                    <div class="caption">upright</div>
+                    <img
+                      src="media/anagram_3.png"
+                      alt="Upright hooded person"
+                    >
+                    <div class="caption">
+                      Upright
+                    </div>
                   </div>
+
                   <div class="thumb">
-                    <img src="media/anagram_4.png" alt="Box filter result 1">
-                    <div class="caption">upsidedown</div>
+                    <img
+                      src="media/anagram_4.png"
+                      alt="Upside-down fox face"
+                    >
+                    <div class="caption">
+                      Upside-down
+                    </div>
                   </div>
+
                 </div>
+
+                <p>
+                  This experiment demonstrates how shared visual
+                  structures can support two different interpretations.
+                  More generally, Visual Anagrams show that diffusion
+                  guidance can combine multiple semantic constraints
+                  under different spatial transformations, rather
+                  than relying on a single prompt.
+                </p>
+
               </li>
+
             </ol>
           </div>
         </div>
@@ -3394,47 +3678,246 @@
             <span class="hint">1.9</span>
             <button class="mini-toggle" type="button" data-target="#1.9-bo">Hide</button>
           </div>
-          <div class="mini-bd" id="1.9-body">
-            <ol>
-              <li><p>We can also create hybrid pictures using the same diffusion pipeline. The hybrid picture performs different meanings when 
-              looked from close to far. To realize this, I did two CFGs in a single timestep with different guiding prompts. Then, I merge the 
-              low frequency part of the noise from the first CFG with the high frequency part of the noise from the second CFG, and performs a 
-              denoising step. The critical code snippets are shown below:</p>
-              <div class="result-box">
+          <div class="mini-bd sdedit-study composition-study" id="1.9-body">
+            <ol class="sdedit-steps">
+
+              <li class="sdedit-step composition-step">
+                <p>
+                  Another way to combine multiple CFG predictions
+                  is through <strong>Hybrid Images</strong>, which
+                  can convey different visual meanings depending
+                  on the viewing distance.
+                </p>
+
+                <p>
+                  The underlying idea comes from frequency-based
+                  image processing. Low spatial frequencies
+                  describe broad shapes and overall image
+                  structure, while high spatial frequencies
+                  capture finer details, textures, and edges.
+                  When viewed from a distance, high-frequency
+                  details become less distinguishable, allowing
+                  low-frequency structures to dominate perception.
+                </p>
+
+                <p>
+                  Instead of combining two completed images,
+                  I apply this frequency decomposition directly
+                  to the CFG noise predictions at each denoising
+                  step. This allows two different prompts to
+                  influence the same diffusion sampling trajectory.
+                </p>
+
+                <p>
+                  First, I compute two CFG-guided noise predictions
+                  using different text prompts:
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \epsilon_1
+                  =
+                  \operatorname{CFG}(x_t,t,p_1)
+                  \]
+                  \[
+                  \epsilon_2
+                  =
+                  \operatorname{CFG}(x_t,t,p_2)
+                  \]
+                </div>
+
+                <p>
+                  I then apply a Gaussian low-pass filter to
+                  the first prediction to extract its
+                  low-frequency components:
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \epsilon_{\mathrm{low}}
+                  =
+                  G_\sigma * \epsilon_1
+                  \]
+                </div>
+
+                <p>
+                  Similarly, I extract the high-frequency
+                  components of the second prediction by
+                  subtracting its Gaussian-blurred version:
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \epsilon_{\mathrm{high}}
+                  =
+                  \epsilon_2-G_\sigma * \epsilon_2
+                  \]
+                </div>
+
+                <p>
+                  Here, \(G_\sigma\) denotes the Gaussian kernel,
+                  and \(*\) represents convolution.
+                </p>
+
+                <p>
+                  Finally, I combine these two frequency
+                  components to obtain the guided noise estimate:
+                </p>
+
+                <div class="equation-block composition-equation--primary">
+                  \[
+                  \boxed{
+                  \hat{\epsilon}
+                  =
+                  \epsilon_{\mathrm{low}}
+                  +
+                  \epsilon_{\mathrm{high}}
+                  }
+                  \]
+                </div>
+
+                <p>
+                  The combined prediction is then used in the
+                  regular reverse diffusion step. Repeating this
+                  operation encourages the generated image to
+                  incorporate the broad structures associated
+                  with the first prompt and the finer details
+                  associated with the second.
+                </p>
+
+                <p>
+                  The critical implementation is shown below:
+                </p>
+
+                <div class="result-box composition-code-pair">
+
                   <div class="thumb">
-                    <img src="media/hybrid1.png" alt="Box filter result 1">
-                    <div class="caption">CFG for prompt 1</div>
+                    <img
+                      src="media/hybrid1.png"
+                      alt="CFG implementation for the first prompt"
+                    >
+                    <div class="caption">
+                      CFG for the low-frequency prompt
+                    </div>
                   </div>
+
                   <div class="thumb">
-                    <img src="media/hybrid2.png" alt="Box filter result 1">
-                    <div class="caption">CFG for prompt 2</div>
+                    <img
+                      src="media/hybrid2.png"
+                      alt="CFG implementation for the second prompt"
+                    >
+                    <div class="caption">
+                      CFG for the high-frequency prompt
+                    </div>
                   </div>
-              </div>
-              <div class="result-box">
+
+                </div>
+
+                <div class="result-box composition-code-merge">
+
                   <div class="thumb large-box">
-                    <img src="media/merge_noise.png" alt="Box filter result 1">
-                    <div class="caption">merge the noise(with diff freq) together</div>
+                    <img
+                      src="media/merge_noise.png"
+                      alt="Frequency-based noise prediction fusion"
+                    >
+                    <div class="caption">
+                      Combining low- and high-frequency
+                      noise predictions
+                    </div>
                   </div>
+
                 </div>
+
               </li>
-              <li>
-                <p>p1(low freq) = "A mushroom"</p>
-                <p>p2(high freq) = "A flower"</p>
-              <div class="result-box">
+
+
+              <li class="sdedit-step composition-step">
+                <p>
+                  For my first hybrid image, I combined the
+                  following prompts:
+                </p>
+
+                <p class="guided-prompt composition-prompts">
+                  <strong>Low-frequency prompt:</strong>
+                  "A mushroom"
+                  <br>
+                  <strong>High-frequency prompt:</strong>
+                  "A flower"
+                </p>
+
+                <div class="result-box composition-result-single">
+
                   <div class="thumb">
-                    <img src="media/hybrid_1.png" alt="Box filter result 1">
+                    <img
+                      src="media/hybrid_1.png"
+                      alt="Hybrid image combining a mushroom and a flower"
+                    >
+                    <div class="caption">
+                      Hybrid Image: Mushroom and Flower
+                    </div>
                   </div>
+
                 </div>
+
+                <p>
+                  The resulting image combines the broad
+                  mushroom-like structure with flower-like
+                  details, allowing the two subjects to share
+                  a single visual composition.
+                </p>
+
               </li>
-              <li>
-                <p>p1(low freq) = "A mountain"</P>
-                <p>p2(high freq) = "A Christmas tree" </p>
-              <div class="result-box">
+
+
+              <li class="sdedit-step composition-step">
+                <p>
+                  For my second experiment, I combined two
+                  subjects with similar large-scale silhouettes:
+                </p>
+
+                <p class="guided-prompt composition-prompts">
+                  <strong>Low-frequency prompt:</strong>
+                  "A mountain"
+                  <br>
+                  <strong>High-frequency prompt:</strong>
+                  "A Christmas tree"
+                </p>
+
+                <div class="result-box composition-result-single">
+
                   <div class="thumb">
-                    <img src="media/hybrid_2.png" alt="Box filter result 1">
+                    <img
+                      src="media/hybrid_2.png"
+                      alt="Hybrid image combining a mountain and a Christmas tree"
+                    >
+                    <div class="caption">
+                      Hybrid Image: Mountain and Christmas Tree
+                    </div>
                   </div>
+
                 </div>
+
+                <p>
+                  Here, the large-scale mountain silhouette
+                  is combined with finer structures associated
+                  with a Christmas tree. The two subjects
+                  share a similar overall shape, making
+                  their visual features easier to combine.
+                </p>
+
+                <p>
+                  These experiments demonstrate another way
+                  to combine multiple guidance signals during
+                  diffusion sampling. Unlike Visual Anagrams,
+                  which combine predictions under different
+                  spatial orientations, Hybrid Images combine
+                  predictions from different spatial-frequency
+                  bands to encourage multiple visual
+                  interpretations within a single image.
+                </p>
+
               </li>
+
             </ol>
           </div>
         </div>
