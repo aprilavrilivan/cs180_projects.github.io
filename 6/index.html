@@ -1244,6 +1244,204 @@
       line-height: 1.35;
     }
 
+    /* Part 2.1.1–2.1.2: UNet architecture overview */
+    .project-main .unet-overview {
+      display: grid;
+      gap: 22px;
+      margin: 0 0 30px;
+      padding: 2px 0 30px;
+      border-bottom: 1px solid var(--project-border);
+    }
+
+    .project-main .unet-overview__header {
+      max-width: 980px;
+    }
+
+    .project-main .unet-overview__eyebrow {
+      display: inline-flex;
+      margin-bottom: 9px;
+      padding: 6px 9px;
+      border-radius: 999px;
+      background: var(--project-accent-soft);
+      color: var(--project-accent-dark);
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: .1em;
+      line-height: 1;
+      text-transform: uppercase;
+    }
+
+    .project-main .unet-overview h3 {
+      margin: 0;
+      color: var(--project-text);
+      font-size: clamp(1.24rem, 2.3vw, 1.72rem);
+      line-height: 1.25;
+      letter-spacing: -.025em;
+    }
+
+    .project-main .unet-overview__header p {
+      max-width: 900px;
+      margin: 10px 0 0;
+      color: var(--project-muted);
+    }
+
+    .project-main .unet-objective {
+      display: grid;
+      grid-template-columns: minmax(220px, .8fr) minmax(320px, 1.2fr);
+      gap: 18px;
+      align-items: center;
+      padding: 17px 19px;
+      border-left: 3px solid var(--project-accent);
+      border-radius: 0 12px 12px 0;
+      background: color-mix(in srgb, var(--project-accent-soft) 52%, var(--project-paper));
+    }
+
+    .project-main .unet-objective__copy strong {
+      display: block;
+      margin-bottom: 5px;
+      color: var(--project-accent-dark);
+      font-size: 11px;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    .project-main .unet-objective__copy p {
+      margin: 0;
+    }
+
+    .project-main .unet-objective .equation-block {
+      margin: 0;
+      padding: 14px 16px;
+      background: var(--project-paper);
+    }
+
+    .project-main .unet-figure {
+      width: min(100%, 1120px);
+      margin: 0 auto;
+      overflow: hidden;
+      border: 1px solid var(--project-border);
+      border-radius: 14px;
+      background: #fff;
+      box-shadow: 0 14px 34px rgb(62 47 35 / 7%);
+    }
+
+    .project-main .unet-figure a {
+      display: block;
+      cursor: zoom-in;
+    }
+
+    .project-main .unet-figure img {
+      display: block;
+      width: 100%;
+      height: auto;
+    }
+
+    .project-main .unet-figure figcaption {
+      padding: 10px 14px 12px;
+      border-top: 1px solid var(--project-border);
+      background: var(--project-paper-soft);
+      color: var(--project-muted);
+      font-size: 11px;
+      line-height: 1.45;
+      text-align: center;
+    }
+
+    .project-main .unet-figure figcaption a {
+      display: inline;
+      color: var(--project-accent-dark);
+      font-weight: 650;
+      text-underline-offset: 3px;
+    }
+
+    .project-main .unet-stage-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .project-main .unet-stage {
+      min-width: 0;
+      padding: 15px 2px 0;
+      border-top: 2px solid color-mix(in srgb, var(--project-accent) 62%, var(--project-border));
+    }
+
+    .project-main .unet-stage span {
+      color: var(--project-accent-dark);
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    .project-main .unet-stage h4 {
+      margin: 6px 0 7px;
+      color: var(--project-text);
+      font-size: .92rem;
+      line-height: 1.35;
+    }
+
+    .project-main .unet-stage p {
+      margin: 0;
+      color: var(--project-muted);
+      font-size: .81rem;
+      line-height: 1.55;
+    }
+
+    .project-main .unet-ops-heading {
+      margin: 2px 0 -8px;
+    }
+
+    .project-main .unet-ops-heading h4 {
+      margin: 0 0 6px;
+      color: var(--project-text);
+      font-size: 1.03rem;
+    }
+
+    .project-main .unet-ops-heading p {
+      margin: 0;
+      color: var(--project-muted);
+    }
+
+    .project-main .unet-ops-list {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px 18px;
+      margin: 0;
+    }
+
+    .project-main .unet-ops-list > div {
+      min-width: 0;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--project-border);
+    }
+
+    .project-main .unet-ops-list dt {
+      margin-bottom: 4px;
+      color: var(--project-text);
+      font-size: .82rem;
+      font-weight: 760;
+    }
+
+    .project-main .unet-ops-list dd {
+      margin: 0;
+      color: var(--project-muted);
+      font-size: .76rem;
+      line-height: 1.5;
+    }
+
+    .project-main .unet-overview__takeaway {
+      margin: 0;
+      padding: 14px 16px;
+      border-radius: 11px;
+      background: var(--project-paper-soft);
+      color: var(--project-muted);
+      font-size: .84rem;
+    }
+
+    .project-main .unet-overview__takeaway strong {
+      color: var(--project-text);
+    }
+
     @media (max-width: 760px) {
       .forward-diffusion-study {
         padding: 14px !important;
@@ -1376,6 +1574,33 @@
       .project-main .composition-result-single .caption {
         min-height: 40px;
         padding: 6px 4px 7px;
+        font-size: 9px;
+      }
+
+      .project-main .unet-overview {
+        gap: 17px;
+        margin-bottom: 24px;
+        padding-bottom: 24px;
+      }
+
+      .project-main .unet-objective {
+        grid-template-columns: 1fr;
+        gap: 12px;
+        padding: 14px 15px;
+      }
+
+      .project-main .unet-stage-grid {
+        grid-template-columns: 1fr;
+        gap: 14px;
+      }
+
+      .project-main .unet-ops-list {
+        grid-template-columns: 1fr;
+        gap: 0;
+      }
+
+      .project-main .unet-figure figcaption {
+        padding: 8px 10px 10px;
         font-size: 9px;
       }
     }
@@ -3938,6 +4163,159 @@
             <button class="mini-toggle" type="button" data-target="#2.1.1～2.1.2-bo">Hide</button>
           </div>
           <div class="mini-bd" id="2.1.1～2.1.2-body">
+            <section class="unet-overview" aria-labelledby="unet-overview-heading">
+              <header class="unet-overview__header">
+                <span class="unet-overview__eyebrow">Architecture overview</span>
+                <h3 id="unet-overview-heading">How the denoising UNet is organized</h3>
+                <p>
+                  Before training the denoiser, I used the unconditional UNet specified by the
+                  assignment: an encoder–decoder whose contracting and expanding paths are joined
+                  by channel-wise skip connections.
+                </p>
+              </header>
+
+              <div class="unet-objective">
+                <div class="unet-objective__copy">
+                  <strong>Learning objective</strong>
+                  <p>
+                    Given a noisy image \(z\), the network \(D_\theta\) predicts its clean target
+                    \(x\). Training minimizes the expected pixel-wise squared reconstruction error.
+                  </p>
+                </div>
+                <div class="equation-block">
+                  \[
+                  L=\mathbb{E}_{z,x}\left\lVert D_\theta(z)-x\right\rVert^2
+                  \]
+                </div>
+              </div>
+
+              <figure class="unet-figure unet-figure--architecture">
+                <a href="media/unet_architecture.png" target="_blank" rel="noopener">
+                  <img
+                    src="media/unet_architecture.png"
+                    alt="Unconditional UNet with two downsampling stages, a one-by-one bottleneck, two upsampling stages, and skip connections"
+                    width="1757"
+                    height="785"
+                    decoding="async"
+                  >
+                </a>
+                <figcaption>
+                  Unconditional UNet architecture. Click to inspect the full-resolution diagram.
+                  Source: <a href="https://cal-cs180.github.io/fa25/hw/proj5/partb.html" target="_blank" rel="noopener">CS180 Project 5 instructions</a>.
+                </figcaption>
+              </figure>
+
+              <div class="unet-stage-grid" aria-label="UNet stages">
+                <article class="unet-stage">
+                  <span>01 · Stem</span>
+                  <h4>\(1\times28\times28 \rightarrow D\times28\times28\)</h4>
+                  <p>
+                    A ConvBlock lifts the grayscale input into \(D\) feature channels while
+                    preserving its spatial resolution.
+                  </p>
+                </article>
+                <article class="unet-stage">
+                  <span>02 · Encoder</span>
+                  <h4>\(28\rightarrow14\rightarrow7\)</h4>
+                  <p>
+                    Two DownBlocks progressively reduce the spatial size and expand the channel
+                    capacity from \(D\) to \(2D\), building increasingly global features.
+                  </p>
+                </article>
+                <article class="unet-stage">
+                  <span>03 · Bottleneck</span>
+                  <h4>\(2D\times7\times7 \leftrightarrow 2D\times1\times1\)</h4>
+                  <p>
+                    Flatten compresses the lowest-resolution feature map to a global representation;
+                    Unflatten expands it back to the \(7\times7\) decoding stage.
+                  </p>
+                </article>
+                <article class="unet-stage">
+                  <span>04 · Decoder + skips</span>
+                  <h4>\(7\rightarrow14\rightarrow28\)</h4>
+                  <p>
+                    UpBlocks restore resolution. Encoder features are concatenated at matching
+                    scales before a final ConvBlock and \(3\times3\) convolution return one channel.
+                  </p>
+                </article>
+              </div>
+
+              <div class="unet-ops-heading">
+                <h4>Building blocks and tensor operations</h4>
+                <p>
+                  The architecture is assembled from a small set of resolution-preserving,
+                  downsampling, upsampling, bottleneck, and feature-fusion operations.
+                </p>
+              </div>
+
+              <figure class="unet-figure unet-figure--operations">
+                <a href="media/unet_operations.png" target="_blank" rel="noopener">
+                  <img
+                    src="media/unet_operations.png"
+                    alt="Standard UNet operations including Conv, DownConv, UpConv, Flatten, Unflatten, Concat, ConvBlock, DownBlock, and UpBlock"
+                    width="1724"
+                    height="723"
+                    decoding="async"
+                  >
+                </a>
+                <figcaption>
+                  Primitive and composed UNet operations. Click to inspect the full-resolution diagram.
+                  Source: <a href="https://cal-cs180.github.io/fa25/hw/proj5/partb.html" target="_blank" rel="noopener">CS180 Project 5 instructions</a>.
+                </figcaption>
+              </figure>
+
+              <dl class="unet-ops-list">
+                <div>
+                  <dt>Conv / ConvBlock</dt>
+                  <dd>
+                    A \(3\times3\), stride-1, padding-1 convolution followed by BatchNorm and GELU;
+                    ConvBlock applies two such Conv operations without changing resolution.
+                  </dd>
+                </div>
+                <div>
+                  <dt>DownConv / DownBlock</dt>
+                  <dd>
+                    A \(3\times3\), stride-2, padding-1 convolution halves height and width;
+                    DownBlock follows it with a ConvBlock.
+                  </dd>
+                </div>
+                <div>
+                  <dt>UpConv / UpBlock</dt>
+                  <dd>
+                    A \(4\times4\), stride-2, padding-1 transposed convolution doubles height and
+                    width; UpBlock then refines the features with a ConvBlock.
+                  </dd>
+                </div>
+                <div>
+                  <dt>Flatten</dt>
+                  <dd>
+                    Average pooling over the \(7\times7\) feature map, followed by GELU, produces a
+                    \(1\times1\) global representation.
+                  </dd>
+                </div>
+                <div>
+                  <dt>Unflatten</dt>
+                  <dd>
+                    A \(7\times7\) transposed convolution, BatchNorm, and GELU expand the
+                    \(1\times1\) bottleneck back to \(7\times7\).
+                  </dd>
+                </div>
+                <div>
+                  <dt>Concat</dt>
+                  <dd>
+                    Features with the same spatial dimensions are concatenated channel-wise with
+                    <code>torch.cat()</code>, carrying encoder detail into the decoder.
+                  </dd>
+                </div>
+              </dl>
+
+              <p class="unet-overview__takeaway">
+                <strong>Design intuition.</strong> The downsampling path captures broad context, the
+                bottleneck summarizes the image globally, and the skip connections preserve the
+                fine spatial information that the decoder needs to reconstruct a clean digit.
+              </p>
+            </section>
+
             <ol>
               <li><p>In this section, I first constructed a standard UNet following the official instruction. The ultimate goal in this section
                 is to train a UNet that translate a noisy image back to its clean version. To do this, I first create a set of noisy images by 
