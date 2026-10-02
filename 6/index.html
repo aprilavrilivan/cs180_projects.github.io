@@ -785,6 +785,28 @@
       padding-left: 5px;
     }
 
+    .project-main .posterior-derivation {
+      margin: 28px 0 30px;
+      padding-left: clamp(16px, 2.2vw, 26px);
+      border-left: 2px solid color-mix(in srgb, var(--project-accent) 44%, var(--project-border));
+    }
+
+    .project-main .posterior-derivation > p:first-child {
+      margin-top: 0;
+    }
+
+    .project-main .posterior-derivation > p:last-child {
+      margin-bottom: 0;
+    }
+
+    .project-main .posterior-derivation .equation-block {
+      width: min(100%, 860px);
+    }
+
+    .project-main .posterior-derivation strong {
+      color: var(--project-accent-dark);
+    }
+
     .project-main .iterative-step .result-box.iterative-wide-figure,
     .project-main .iterative-step .result-box.iterative-code-grid,
     .project-main .iterative-step .result-box.iterative-trajectory,
@@ -1318,6 +1340,7 @@
     .project-main .unet-figure {
       width: min(100%, 1120px);
       margin: 0 auto;
+      justify-self: center;
       overflow: hidden;
       border: 1px solid var(--project-border);
       border-radius: 14px;
@@ -1506,11 +1529,14 @@
       width: min(100%, 940px);
       margin: 24px auto;
       grid-template-columns: minmax(0, 1fr);
+      place-items: start center;
     }
 
     .project-main .unet-experiment-step .result-box .thumb.large-box {
       width: 100%;
       max-width: none;
+      margin-inline: auto;
+      justify-self: center;
       overflow: hidden;
       border-radius: 13px;
       background: var(--project-paper-soft);
@@ -1521,6 +1547,7 @@
       display: block;
       width: 100%;
       height: auto;
+      margin-inline: auto;
       background: #fff;
       object-fit: contain;
     }
@@ -1541,6 +1568,11 @@
       .project-main .unet-experiment-step + .unet-experiment-step {
         margin-top: 24px;
         padding-top: 24px;
+      }
+
+      .project-main .posterior-derivation {
+        margin: 24px 0 26px;
+        padding-left: 12px;
       }
 
       .forward-diffusion-study {
@@ -2262,7 +2294,7 @@
           <div class="mini-hd">
             <span class="hint">1.4</span>
             <span>Iterative Denoising</span>
-            <button class="mini-toggle" type="button" data-target="#1.4-bo">Hide</button>
+            <button class="mini-toggle" type="button" data-target="#1.4-body">Hide</button>
           </div>
 
           <div class="mini-bd iterative-study" id="1.4-body">
@@ -2322,82 +2354,265 @@
                   \]
                 </div>
 
-                <p>
-                  A natural question is: after obtaining \(\hat{x}_0\), why not simply add a smaller
-                  amount of noise back to generate \(x_{t'}\)?
-                </p>
+                <div class="posterior-derivation">
+                  <p>
+                    A natural question is: after obtaining \(\hat{x}_0\),
+                    why not simply use the forward diffusion formula to
+                    add a smaller amount of noise and directly generate
+                    \(x_{t'}\), where \(t'&lt;t\)?
+                  </p>
 
-                <p>
-                  For example, one possible approach would be:
-                </p>
+                  <p>
+                    For example, we could independently sample:
+                  </p>
 
-                <div class="equation-block">
-                  \[
-                  x_{t'}
-                  =
-                  \sqrt{\bar{\alpha}_{t'}}\hat{x}_0
-                  +
-                  \sqrt{1-\bar{\alpha}_{t'}}z
-                  \]
+                  <div class="equation-block">
+                    \[
+                    x_{t'}
+                    =
+                    \sqrt{\bar{\alpha}_{t'}}\hat{x}_0
+                    +
+                    \sqrt{1-\bar{\alpha}_{t'}}z,
+                    \qquad z\sim\mathcal{N}(0,I)
+                    \]
+                  </div>
+
+                  <p>
+                    However, this samples from the forward marginal
+                    distribution \(q(x_{t'}\mid x_0)\). While it produces
+                    an image with the desired noise level, the newly sampled
+                    noise \(z\) is independent of our current observation
+                    \(x_t\). Therefore, it does not account for the
+                    relationship between these two states along the
+                    forward diffusion process.
+                  </p>
+
+                  <p>
+                    What we actually need is a different distribution:
+                    given both the original image \(x_0\) and the current
+                    noisy observation \(x_t\), what intermediate state
+                    \(x_{t'}\) could have produced this particular
+                    observation?
+                  </p>
+
+                  <div class="equation-block">
+                    \[
+                    \boxed{
+                    q(x_{t'}\mid x_t,x_0)
+                    \neq
+                    q(x_{t'}\mid x_0)
+                    }
+                    \]
+                  </div>
+
+                  <p>
+                    This is the key distinction between the
+                    <strong>forward marginal</strong> and the
+                    <strong>conditional posterior</strong>.
+                    Fortunately, since we explicitly defined the
+                    Gaussian forward process in Part 1.1, this posterior
+                    can be derived analytically using Bayes' rule.
+                  </p>
+
+                  <p>
+                    Recall that we already know the distribution of an
+                    intermediate noisy image given the original image:
+                  </p>
+
+                  <div class="equation-block">
+                    \[
+                    q(x_{t'}\mid x_0)
+                    =
+                    \mathcal{N}\left(
+                    \sqrt{\bar{\alpha}_{t'}}x_0,\,
+                    (1-\bar{\alpha}_{t'})I
+                    \right)
+                    \]
+                  </div>
+
+                  <p>
+                    We also know the forward transition from \(t'\)
+                    to \(t\). To account for our strided timesteps,
+                    let us define:
+                  </p>
+
+                  <div class="equation-block">
+                    \[
+                    a=\frac{\bar{\alpha}_t}{\bar{\alpha}_{t'}},
+                    \qquad
+                    b=1-a
+                    \]
+                  </div>
+
+                  <p>
+                    The transition across these two timesteps is then:
+                  </p>
+
+                  <div class="equation-block">
+                    \[
+                    q(x_t\mid x_{t'})
+                    =
+                    \mathcal{N}\left(
+                    \sqrt{a}x_{t'},\,bI
+                    \right)
+                    \]
+                  </div>
+
+                  <p>
+                    Notice that both distributions are completely determined
+                    by our original forward diffusion formulation, without
+                    involving any neural network.
+                  </p>
+
+                  <p>
+                    Now, applying Bayes' rule and using the Markov property
+                    of the forward process, we obtain:
+                  </p>
+
+                  <div class="equation-block">
+                    \[
+                    \boxed{
+                    q(x_{t'}\mid x_t,x_0)
+                    \propto
+                    \underbrace{q(x_t\mid x_{t'})}
+                    _{\text{Forward transition}}
+                    \cdot
+                    \underbrace{q(x_{t'}\mid x_0)}
+                    _{\text{Forward marginal}}
+                    }
+                    \]
+                  </div>
+
+                  <p>
+                    Intuitively, this posterior imposes two constraints
+                    simultaneously: the intermediate state \(x_{t'}\)
+                    should be consistent with the original image \(x_0\),
+                    while also being capable of producing the already
+                    observed \(x_t\) through the forward process.
+                  </p>
+
+                  <p>
+                    Since the two terms are Gaussian, their product
+                    is also Gaussian. Completing the square gives:
+                  </p>
+
+                  <div class="equation-block">
+                    \[
+                    q(x_{t'}\mid x_t,x_0)
+                    =
+                    \mathcal{N}\left(
+                    \tilde{\mu}(x_t,x_0),\,
+                    \tilde{\beta}I
+                    \right)
+                    \]
+                  </div>
+
+                  <p>
+                    where the posterior mean and variance are:
+                  </p>
+
+                  <div class="equation-block">
+                    \[
+                    \boxed{
+                    \tilde{\mu}(x_t,x_0)
+                    =
+                    \frac{\sqrt{\bar{\alpha}_{t'}}b}
+                    {1-\bar{\alpha}_t}x_0
+                    +
+                    \frac{\sqrt{a}(1-\bar{\alpha}_{t'})}
+                    {1-\bar{\alpha}_t}x_t
+                    }
+                    \]
+
+                    \[
+                    \tilde{\beta}
+                    =
+                    \frac{1-\bar{\alpha}_{t'}}
+                    {1-\bar{\alpha}_t}b
+                    \]
+                  </div>
+
+                  <p>
+                    This explains where the seemingly complicated
+                    reverse diffusion formula comes from: it is not
+                    an arbitrarily designed interpolation, but the
+                    conditional Gaussian distribution derived from
+                    our known forward process.
+                  </p>
+
+                  <p>
+                    An important consequence is that conditioning
+                    on the current observation \(x_t\) also reduces
+                    the uncertainty of the intermediate state.
+                    Instead of independently sampling any possible
+                    noisy image at timestep \(t'\), we sample from
+                    those that are probabilistically consistent
+                    with the observed \(x_t\).
+                  </p>
+
+                  <p>
+                    There is just one remaining problem: during actual
+                    generation, we do not know the true \(x_0\).
+                    This is precisely where our UNet comes in.
+                    We use the previously predicted clean image
+                    \(\hat{x}_0\) in place of the unknown \(x_0\)
+                    when constructing the reverse transition.
+                  </p>
+
+                  <p>
+                    Therefore, our actual iterative denoising step becomes:
+                  </p>
+
+                  <div class="equation-block">
+                    \[
+                    \boxed{
+                    x_{t'}
+                    =
+                    \frac{\sqrt{\bar{\alpha}_{t'}}b}
+                    {1-\bar{\alpha}_t}\hat{x}_0
+                    +
+                    \frac{\sqrt{a}(1-\bar{\alpha}_{t'})}
+                    {1-\bar{\alpha}_t}x_t
+                    +
+                    v_\sigma
+                    }
+                    \]
+                  </div>
+
+                  <p>
+                    Here, the first two terms form the estimated posterior
+                    mean, while \(v_\sigma\) introduces stochasticity
+                    according to the sampler's variance setting.
+                    In our DeepFloyd implementation, the latter is
+                    handled by the provided <code>add_variance</code>
+                    function using the model's predicted variance.
+                  </p>
+
+                  <p>
+                    Thus, each reverse step consists of three operations:
+                  </p>
+
+                  <ol class="iterative-process-list">
+                    <li>
+                      Predict the noise in the current image using the UNet.
+                    </li>
+                    <li>
+                      Recover an estimate of the clean image \(\hat{x}_0\).
+                    </li>
+                    <li>
+                      Use the Gaussian posterior, conditioned on both
+                      \(x_t\) and \(\hat{x}_0\), to sample a less noisy
+                      image \(x_{t'}\).
+                    </li>
+                  </ol>
+
+                  <p>
+                    Repeating this transition allows the model to gradually
+                    refine the image through a sequence of smaller denoising
+                    steps, rather than attempting to reconstruct everything
+                    in a single prediction.
+                  </p>
                 </div>
-
-                <p>
-                  However, this ignores the information contained in the current noisy image \(x_t\).
-                  The reverse process should not randomly generate a new noisy image from
-                  \(\hat{x}_0\); instead, it should follow a consistent trajectory from the current
-                  state \(x_t\) toward the clean image.
-                </p>
-
-                <p>
-                  Therefore, diffusion models use the posterior transition:
-                </p>
-
-                <div class="equation-block">
-                  \[
-                  q(x_{t'}|x_t,x_0)
-                  \]
-                </div>
-
-                <p>
-                  which combines information from both the current noisy image and the estimated clean
-                  image. The resulting transition is:
-                </p>
-
-                <div class="equation-block">
-                  \[
-                  x_{t'}=
-                  \frac{\sqrt{\bar{\alpha}_{t'}}\beta_t}
-                  {1-\bar{\alpha}_t}\hat{x}_0
-                  +
-                  \frac{\sqrt{\alpha_t}(1-\bar{\alpha}_{t'})}
-                  {1-\bar{\alpha}_t}x_t
-                  +
-                  v_\sigma
-                  \]
-                </div>
-
-                <p>
-                  This equation can be interpreted as a weighted combination of:
-                </p>
-
-                <ol class="iterative-process-list">
-                  <li>
-                    the predicted clean image \(\hat{x}_0\), which provides the denoising direction;
-                  </li>
-
-                  <li>
-                    the current noisy state \(x_t\), which preserves trajectory consistency;
-                  </li>
-
-                  <li>
-                    a small random noise term \(v_\sigma\), which maintains stochastic sampling.
-                  </li>
-                </ol>
-
-                <p>
-                  Therefore, each reverse step only solves a small denoising problem instead of
-                  reconstructing all missing information from a highly noisy image at once.
-                </p>
 
                 <p>
                   I implemented the <code>iterative_denoise</code> function following the reverse
