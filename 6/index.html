@@ -1442,7 +1442,107 @@
       color: var(--project-text);
     }
 
+    /* Part 2.1: flat experiment sequence beneath the architecture overview */
+    .unet-study {
+      padding: clamp(18px, 2.8vw, 30px) !important;
+    }
+
+    .project-main .unet-experiment-list {
+      display: grid;
+      gap: 0;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+      counter-reset: unet-experiment;
+    }
+
+    .project-main .unet-experiment-step {
+      position: relative;
+      min-width: 0;
+      margin: 0;
+      padding: 0;
+      counter-increment: unet-experiment;
+    }
+
+    .project-main .unet-experiment-step + .unet-experiment-step {
+      margin-top: 30px;
+      padding-top: 30px;
+      border-top: 1px solid var(--project-border);
+    }
+
+    .project-main .unet-experiment-step::before {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 34px;
+      height: 24px;
+      margin-bottom: 14px;
+      padding: 0 8px;
+      border: 1px solid color-mix(in srgb, var(--project-accent) 34%, var(--project-border));
+      border-radius: 999px;
+      background: var(--project-accent-soft);
+      color: var(--project-accent-dark);
+      content: counter(unet-experiment, decimal-leading-zero);
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: .08em;
+      line-height: 1;
+    }
+
+    .project-main .unet-experiment-step > p:first-of-type {
+      margin-top: 0;
+      color: var(--project-text);
+      font-size: clamp(.94rem, 1.45vw, 1.06rem);
+      font-weight: 680;
+      line-height: 1.62;
+    }
+
+    .project-main .unet-experiment-step > p:last-of-type {
+      margin-bottom: 0;
+    }
+
+    .project-main .unet-experiment-step .result-box {
+      display: grid;
+      width: min(100%, 940px);
+      margin: 24px auto;
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .project-main .unet-experiment-step .result-box .thumb.large-box {
+      width: 100%;
+      max-width: none;
+      overflow: hidden;
+      border-radius: 13px;
+      background: var(--project-paper-soft);
+      box-shadow: 0 12px 30px rgb(62 47 35 / 6%);
+    }
+
+    .project-main .unet-experiment-step .result-box img {
+      display: block;
+      width: 100%;
+      height: auto;
+      background: #fff;
+      object-fit: contain;
+    }
+
+    .project-main .unet-experiment-step .result-box .caption {
+      margin: 0;
+      padding: 9px 12px 10px;
+      border-top: 1px solid var(--project-border);
+      background: var(--project-paper-soft);
+      line-height: 1.4;
+    }
+
     @media (max-width: 760px) {
+      .unet-study {
+        padding: 14px !important;
+      }
+
+      .project-main .unet-experiment-step + .unet-experiment-step {
+        margin-top: 24px;
+        padding-top: 24px;
+      }
+
       .forward-diffusion-study {
         padding: 14px !important;
       }
@@ -4159,227 +4259,656 @@
         <div class="mini-box" id="2.1">
           <div class="mini-hd">
             <span class="hint">2.1</span>
-            <span>UNet as the denoiser</span>
-            <button class="mini-toggle" type="button" data-target="#2.1-body">Hide</button>
+            <span>UNet as the Denoiser</span>
+            <button class="mini-toggle" type="button"
+                    data-target="#2.1-body">Hide</button>
           </div>
-          <div class="mini-bd" id="2.1-body">
-            <section class="unet-overview" aria-labelledby="unet-overview-heading">
+
+          <div class="mini-bd unet-study" id="2.1-body">
+
+            <!-- ============================================ -->
+            <!-- UNet Architecture Overview                   -->
+            <!-- ============================================ -->
+
+            <section class="unet-overview"
+                     aria-labelledby="unet-overview-heading">
+
               <header class="unet-overview__header">
-                <span class="unet-overview__eyebrow">Architecture overview</span>
-                <h3 id="unet-overview-heading">How the denoising UNet is organized</h3>
+                <span class="unet-overview__eyebrow">
+                  Architecture Overview
+                </span>
+
+                <h3 id="unet-overview-heading">
+                  Building a Denoising UNet from Scratch
+                </h3>
+
                 <p>
-                  Before training the denoiser, I used the unconditional UNet specified by the
-                  assignment: an encoder–decoder whose contracting and expanding paths are joined
-                  by channel-wise skip connections.
+                  Before implementing Flow Matching, I first built
+                  an unconditional UNet as a simple image denoiser.
+                  The network follows an encoder-decoder architecture
+                  with skip connections, allowing it to capture both
+                  global image structure and fine spatial details.
                 </p>
               </header>
 
-              <div class="unet-objective">
-                <div class="unet-objective__copy">
-                  <strong>Learning objective</strong>
-                  <p>
-                    Given a noisy image \(z\), the network \(D_\theta\) predicts its clean target
-                    \(x\). Training minimizes the expected pixel-wise squared reconstruction error.
-                  </p>
-                </div>
-                <div class="equation-block">
-                  \[
-                  L=\mathbb{E}_{z,x}\left\lVert D_\theta(z)-x\right\rVert^2
-                  \]
-                </div>
-              </div>
+
+              <!-- Overall architecture -->
 
               <figure class="unet-figure unet-figure--architecture">
-                <a href="media/unet_architecture.png" target="_blank" rel="noopener">
+                <a href="media/unet_architecture.png"
+                   target="_blank" rel="noopener">
+
                   <img
                     src="media/unet_architecture.png"
-                    alt="Unconditional UNet with two downsampling stages, a one-by-one bottleneck, two upsampling stages, and skip connections"
+                    alt="Unconditional UNet encoder-decoder architecture with skip connections"
                     width="1757"
                     height="785"
                     decoding="async"
                   >
                 </a>
+
                 <figcaption>
-                  Unconditional UNet architecture. Click to inspect the full-resolution diagram.
-                  Source: <a href="https://cal-cs180.github.io/fa25/hw/proj5/partb.html" target="_blank" rel="noopener">CS180 Project 5 instructions</a>.
+                  Overall UNet architecture.
+                  Source:
+                  <a href="https://cal-cs180.github.io/fa25/hw/proj5/partb.html"
+                     target="_blank" rel="noopener">
+                    CS180 Project 5 instructions
+                  </a>.
                 </figcaption>
               </figure>
 
+
+              <!-- Main stages -->
+
               <div class="unet-stage-grid" aria-label="UNet stages">
+
                 <article class="unet-stage">
-                  <span>01 · Stem</span>
-                  <h4>\(1\times28\times28 \rightarrow D\times28\times28\)</h4>
+                  <span>01 · Input Stem</span>
+
+                  <h4>
+                    \(1\times28\times28
+                    \rightarrow D\times28\times28\)
+                  </h4>
+
                   <p>
-                    A ConvBlock lifts the grayscale input into \(D\) feature channels while
-                    preserving its spatial resolution.
+                    An initial ConvBlock maps the grayscale input
+                    into \(D\) feature channels while preserving
+                    its spatial resolution.
                   </p>
                 </article>
+
+
                 <article class="unet-stage">
                   <span>02 · Encoder</span>
-                  <h4>\(28\rightarrow14\rightarrow7\)</h4>
+
+                  <h4>
+                    \(28\rightarrow14\rightarrow7\)
+                  </h4>
+
                   <p>
-                    Two DownBlocks progressively reduce the spatial size and expand the channel
-                    capacity from \(D\) to \(2D\), building increasingly global features.
+                    Two DownBlocks progressively reduce the spatial
+                    resolution while increasing channel capacity,
+                    allowing the network to capture broader context.
                   </p>
                 </article>
+
+
                 <article class="unet-stage">
                   <span>03 · Bottleneck</span>
-                  <h4>\(2D\times7\times7 \leftrightarrow 2D\times1\times1\)</h4>
+
+                  <h4>
+                    \(2D\times7\times7
+                    \leftrightarrow2D\times1\times1\)
+                  </h4>
+
                   <p>
-                    Flatten compresses the lowest-resolution feature map to a global representation;
-                    Unflatten expands it back to the \(7\times7\) decoding stage.
+                    Flatten compresses the lowest-resolution features
+                    into a global representation, which Unflatten
+                    expands back to the decoder's initial feature map.
                   </p>
                 </article>
+
+
                 <article class="unet-stage">
-                  <span>04 · Decoder + skips</span>
-                  <h4>\(7\rightarrow14\rightarrow28\)</h4>
+                  <span>04 · Decoder + Skips</span>
+
+                  <h4>
+                    \(7\rightarrow14\rightarrow28\)
+                  </h4>
+
                   <p>
-                    UpBlocks restore resolution. Encoder features are concatenated at matching
-                    scales before a final ConvBlock and \(3\times3\) convolution return one channel.
+                    Two UpBlocks restore the original resolution.
+                    Skip connections concatenate encoder features
+                    at matching scales, helping recover spatial
+                    details lost during downsampling.
                   </p>
                 </article>
+
               </div>
 
+
+              <!-- Building blocks -->
+
               <div class="unet-ops-heading">
-                <h4>Building blocks and tensor operations</h4>
+                <h4>Building Blocks</h4>
+
                 <p>
-                  The architecture is assembled from a small set of resolution-preserving,
-                  downsampling, upsampling, bottleneck, and feature-fusion operations.
+                  The architecture is constructed from the
+                  following operations:
                 </p>
               </div>
 
               <figure class="unet-figure unet-figure--operations">
-                <a href="media/unet_operations.png" target="_blank" rel="noopener">
+                <a href="media/unet_operations.png"
+                   target="_blank" rel="noopener">
+
                   <img
                     src="media/unet_operations.png"
-                    alt="Standard UNet operations including Conv, DownConv, UpConv, Flatten, Unflatten, Concat, ConvBlock, DownBlock, and UpBlock"
+                    alt="UNet primitive and composed operations"
                     width="1724"
                     height="723"
                     decoding="async"
                   >
                 </a>
+
                 <figcaption>
-                  Primitive and composed UNet operations. Click to inspect the full-resolution diagram.
-                  Source: <a href="https://cal-cs180.github.io/fa25/hw/proj5/partb.html" target="_blank" rel="noopener">CS180 Project 5 instructions</a>.
+                  Primitive operations and composed UNet blocks.
+                  Source:
+                  <a href="https://cal-cs180.github.io/fa25/hw/proj5/partb.html"
+                     target="_blank" rel="noopener">
+                    CS180 Project 5 instructions
+                  </a>.
                 </figcaption>
               </figure>
 
+
               <dl class="unet-ops-list">
+
                 <div>
                   <dt>Conv / ConvBlock</dt>
                   <dd>
-                    A \(3\times3\), stride-1, padding-1 convolution followed by BatchNorm and GELU;
-                    ConvBlock applies two such Conv operations without changing resolution.
+                    Conv consists of a \(3\times3\) convolution,
+                    BatchNorm, and GELU. ConvBlock stacks two
+                    Conv operations to extract features without
+                    changing spatial resolution.
                   </dd>
                 </div>
+
                 <div>
                   <dt>DownConv / DownBlock</dt>
                   <dd>
-                    A \(3\times3\), stride-2, padding-1 convolution halves height and width;
-                    DownBlock follows it with a ConvBlock.
+                    A stride-2 convolution halves the spatial
+                    dimensions, followed by a ConvBlock for
+                    further feature extraction.
                   </dd>
                 </div>
+
                 <div>
                   <dt>UpConv / UpBlock</dt>
                   <dd>
-                    A \(4\times4\), stride-2, padding-1 transposed convolution doubles height and
-                    width; UpBlock then refines the features with a ConvBlock.
+                    A transposed convolution doubles the spatial
+                    dimensions, followed by a ConvBlock to refine
+                    the upsampled features.
                   </dd>
                 </div>
+
                 <div>
-                  <dt>Flatten</dt>
+                  <dt>Flatten / Unflatten</dt>
                   <dd>
-                    Average pooling over the \(7\times7\) feature map, followed by GELU, produces a
-                    \(1\times1\) global representation.
+                    Flatten uses average pooling to compress
+                    the \(7\times7\) feature map into a \(1\times1\)
+                    representation. Unflatten uses a transposed
+                    convolution to restore the \(7\times7\) map.
                   </dd>
                 </div>
+
                 <div>
-                  <dt>Unflatten</dt>
+                  <dt>Skip Connections</dt>
                   <dd>
-                    A \(7\times7\) transposed convolution, BatchNorm, and GELU expand the
-                    \(1\times1\) bottleneck back to \(7\times7\).
+                    Encoder and decoder features at matching
+                    resolutions are concatenated channel-wise,
+                    preserving fine-grained information for
+                    image reconstruction.
                   </dd>
                 </div>
-                <div>
-                  <dt>Concat</dt>
-                  <dd>
-                    Features with the same spatial dimensions are concatenated channel-wise with
-                    <code>torch.cat()</code>, carrying encoder detail into the decoder.
-                  </dd>
-                </div>
+
               </dl>
 
+
               <p class="unet-overview__takeaway">
-                <strong>Design intuition.</strong> The downsampling path captures broad context, the
-                bottleneck summarizes the image globally, and the skip connections preserve the
-                fine spatial information that the decoder needs to reconstruct a clean digit.
+                <strong>Design intuition.</strong>
+                The encoder captures increasingly global features,
+                while the decoder reconstructs the image with
+                the help of spatial details preserved through
+                skip connections. This makes UNet a suitable
+                backbone for learning image denoising.
               </p>
+
             </section>
 
-            <ol>
-              <li><p>In this section, I first constructed a standard UNet following the official instruction. The ultimate goal in this section
-                is to train a UNet that translate a noisy image back to its clean version. To do this, I first create a set of noisy images by 
-                adding Gaussian noise to clean images, visualized as below:
-                  <div class="result-box">
-                    <div class="thumb large-box">
-                      <img src="media/noise_number.png" alt="Box filter result 1">
-                      <div class="caption">clean pics adding noise with sigma=[0.0, 0.2, 0.4, 0.5, 0.6, 0.8, 1.0]</div>
-                    </div>
-                  </div>
-              </li>
-              <li><p>Then  I set up a training pipeline to train the UNet, with the following parameters:</p> 
+
+            <!-- ============================================ -->
+            <!-- Experiments                                  -->
+            <!-- ============================================ -->
+
+            <ol class="unet-experiment-list">
+
+
+              <!-- 01: Construct noisy training data -->
+
+              <li class="unet-experiment-step">
+                <p>
+                  The first task is to train the UNet to recover
+                  clean MNIST digits from noisy observations.
+                  To construct the training inputs, I add
+                  Gaussian noise to each clean image \(x\):
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \boxed{
+                  z=x+\sigma\epsilon,
+                  \qquad
+                  \epsilon\sim\mathcal{N}(0,I)
+                  }
+                  \]
+                </div>
+
+                <p>
+                  Here, \(\sigma\) controls the noise magnitude.
+                  A small \(\sigma\) preserves most of the original
+                  digit, while a larger value makes the image
+                  increasingly corrupted and difficult to recover.
+                </p>
+
+                <p>
+                  The following shows MNIST images corrupted
+                  with different noise levels:
+                </p>
+
                 <div class="result-box">
-                    <div class="thumb large-box">
-                      <img src="media/train_para.png" alt="Box filter result 1">
-                      <div class="caption">Sample along rays function</div>
+                  <div class="thumb large-box">
+
+                    <img
+                      src="media/noise_number.png"
+                      alt="MNIST digits with different Gaussian noise levels"
+                    >
+
+                    <div class="caption">
+                      Gaussian noise levels:
+                      \(\sigma=[0.0,0.2,0.4,0.5,0.6,0.8,1.0]\)
                     </div>
+
                   </div>
-                <p>Here is the mse_loss during training:</p>
-                  <div class="result-box">
-                    <div class="thumb large-box">
-                      <img src="media/loss_curve.png" alt="Box filter result 1">
-                      <div class="caption">The loss curve</div>
-                    </div>
-                  </div>
-                <p>And here is the comparism of the original clean images, the images adding noise with sigma=0.5, the prediction from the first epoch and the 
-                prediction from the 5th epoch of training;</p>
-                <div class="result-box">
-                    <div class="thumb large-box">
-                      <img src="media/prediction.png" alt="Box filter result 1">
-                    </div>
-                  </div>
-              </li>
-              <li>
-                <p>Then, I did the OOD test, which used the well trained UNet to predict noisy pictures with sigma values: sigma=[0.0, 0.2, 0.4, 0.5, 0.6, 0.8, 1.0] :</p>
-                <div class="result-box">
-                    <div class="thumb large-box">
-                      <img src="media/OOD.png" alt="Box filter result 1">
-                    </div>
-                  </div>
-              </li>
-              <li>
-                <p>The last experiment is to train the UNet to denoise pure noise. I used the same model training hyperparameters as in 2.1.2.1, but
-                with input pictures of pure noise. The following is the loss curve during training:</p>
-                <div class="result-box">
-                    <div class="thumb large-box">
-                      <img src="media/losscurvenoise.png" alt="Box filter result 1">
-                    </div>
-                  </div>
-                <p>Here is the prediction on random pure noise by model trained after 1 epoch and 5 epochs:</p>
-                <div class="result-box">
-                    <div class="thumb large-box">
-                      <img src="media/average1.png" alt="Box filter result 1">
-                    </div>
-                  </div>
-                <p>We can see that no matter what random noise we feed in, the model tends to output something that looks like a blurry “9”. 
-                  This is basically the model collapsing to an “average digit” over the training set. The reason is that with an MSE loss, 
-                  the best prediction for a given input is the conditional mean E[x｜z]. But here z is pure Gaussian noise and it has almost 
-                  no relationship with the target clean image x, so E[x｜z] is roughly just E[x], i.e., the dataset mean
-                  (similar to a centroid in clustering). Since the input doesn’t provide any useful hint about which digit it 
-                  should reconstruct, predicting this average-looking digit is an easy way to reduce the overall squared error.
+                </div>
+
+                <p>
+                  The denoising task is therefore a supervised
+                  regression problem: given the corrupted input
+                  \(z\), predict its corresponding clean image \(x\).
                 </p>
               </li>
+
+
+
+              <!-- 02: Train single-step denoiser -->
+
+              <li class="unet-experiment-step">
+                <p>
+                  I then trained the unconditional UNet as a
+                  <strong>single-step denoiser</strong>.
+                  For this experiment, the training noise level
+                  is fixed at \(\sigma=0.5\), and the network
+                  is trained for 5 epochs.
+                </p>
+
+                <p>
+                  The model directly predicts a clean image
+                  from its noisy observation:
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \hat{x}=D_\theta(z)
+                  \]
+                </div>
+
+                <p>
+                  I use Mean Squared Error (MSE) to supervise
+                  the reconstruction:
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \boxed{
+                  \mathcal{L}_{\mathrm{denoise}}
+                  =
+                  \mathbb{E}_{x,\epsilon}
+                  \left[
+                  \left\|
+                  D_\theta(x+0.5\epsilon)-x
+                  \right\|_2^2
+                  \right]
+                  }
+                  \]
+                </div>
+
+                <p>
+                  Notice that the UNet performs the reconstruction
+                  in a single forward pass. Unlike diffusion or
+                  Flow Matching sampling, there is no iterative
+                  denoising trajectory involved at this stage.
+                </p>
+
+                <p>
+                  The training configuration is shown below:
+                </p>
+
+                <div class="result-box">
+                  <div class="thumb large-box">
+
+                    <img
+                      src="media/train_para.png"
+                      alt="Single-step UNet training configuration"
+                    >
+
+                    <div class="caption">
+                      Training hyperparameters
+                    </div>
+
+                  </div>
+                </div>
+
+
+                <p>
+                  The following curve shows the reconstruction
+                  loss throughout training:
+                </p>
+
+                <div class="result-box">
+                  <div class="thumb large-box">
+
+                    <img
+                      src="media/loss_curve.png"
+                      alt="Single-step denoising training loss curve"
+                    >
+
+                    <div class="caption">
+                      Training MSE loss
+                    </div>
+
+                  </div>
+                </div>
+
+
+                <p>
+                  To visualize the learning progress, I compared
+                  the clean target images, their noisy versions
+                  at \(\sigma=0.5\), and the UNet predictions
+                  after the first and fifth epochs:
+                </p>
+
+                <div class="result-box">
+                  <div class="thumb large-box">
+
+                    <img
+                      src="media/prediction.png"
+                      alt="Denoising predictions after epochs 1 and 5"
+                    >
+
+                    <div class="caption">
+                      Original images, noisy inputs, and
+                      denoising results after Epochs 1 and 5
+                    </div>
+
+                  </div>
+                </div>
+
+                <p>
+                  After training, the UNet can recover recognizable
+                  digit structures from moderately noisy inputs.
+                  Compared with the first epoch, the fifth-epoch
+                  predictions show clearer shapes and more stable
+                  reconstruction.
+                </p>
+
+                <p>
+                  This demonstrates that a simple UNet can learn
+                  a useful image prior for denoising, even without
+                  explicitly modeling the diffusion process.
+                </p>
+
+              </li>
+
+
+
+              <!-- 03: OOD noise-level testing -->
+
+              <li class="unet-experiment-step">
+                <p>
+                  However, the previous model was trained with
+                  only one noise level, \(\sigma=0.5\).
+                  An interesting question is whether the learned
+                  denoising behavior can generalize to unseen
+                  levels of corruption.
+                </p>
+
+                <p>
+                  To test this, I kept the trained UNet fixed
+                  and evaluated it on MNIST images with:
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \sigma
+                  \in
+                  \{0.0,0.2,0.4,0.5,0.6,0.8,1.0\}
+                  \]
+                </div>
+
+                <p>
+                  Here, \(\sigma=0.5\) corresponds to the training
+                  noise level, while the remaining values test
+                  generalization to different noise magnitudes.
+                  No additional training or fine-tuning was performed.
+                </p>
+
+                <div class="result-box">
+                  <div class="thumb large-box">
+
+                    <img
+                      src="media/OOD.png"
+                      alt="OOD denoising results across different noise levels"
+                    >
+
+                    <div class="caption">
+                      OOD noise-level evaluation
+                    </div>
+
+                  </div>
+                </div>
+
+                <p>
+                  The model retains some denoising ability at
+                  nearby noise levels, but its reconstruction
+                  becomes less reliable as the corruption grows
+                  substantially beyond the training level.
+                  At higher noise levels, more digit information
+                  is destroyed, making accurate recovery harder.
+                </p>
+
+                <p>
+                  One limitation is that the current UNet receives
+                  only the noisy image, without explicitly knowing
+                  the noise magnitude \(\sigma\). It must therefore
+                  infer how much denoising is needed from the
+                  corrupted image itself.
+                </p>
+
+                <p>
+                  This motivates a model that can explicitly
+                  account for different noise levels rather than
+                  learning a denoising mapping at only one
+                  fixed corruption strength.
+                </p>
+
+              </li>
+
+
+
+              <!-- 04: Denoising from pure random noise -->
+
+              <li class="unet-experiment-step">
+                <p>
+                  Finally, I pushed the single-step denoising idea
+                  further: what if we train the same UNet to directly
+                  generate an MNIST digit from pure Gaussian noise?
+                </p>
+
+                <p>
+                  Instead of corrupting an existing digit, I now
+                  sample the network input independently from
+                  the clean target image:
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  z\sim\mathcal{N}(0,I),
+                  \qquad z\perp x
+                  \]
+                </div>
+
+                <p>
+                  The training objective remains unchanged:
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \mathcal{L}
+                  =
+                  \mathbb{E}_{z,x}
+                  \left[
+                  \|D_\theta(z)-x\|_2^2
+                  \right]
+                  \]
+                </div>
+
+                <p>
+                  I trained the model for another 5 epochs
+                  using the same architecture and training
+                  hyperparameters as before. The corresponding
+                  loss curve is shown below:
+                </p>
+
+                <div class="result-box">
+                  <div class="thumb large-box">
+
+                    <img
+                      src="media/losscurvenoise.png"
+                      alt="Training loss when predicting MNIST from pure noise"
+                    >
+
+                    <div class="caption">
+                      Training loss: Pure Gaussian noise to MNIST
+                    </div>
+
+                  </div>
+                </div>
+
+
+                <p>
+                  Interestingly, the model does not learn to
+                  generate diverse digits. Regardless of the
+                  random noise input, it tends to predict a
+                  similar blurry image, visually resembling
+                  the average digit in the dataset:
+                </p>
+
+                <div class="result-box">
+                  <div class="thumb large-box">
+
+                    <img
+                      src="media/average1.png"
+                      alt="Pure-noise predictions after epochs 1 and 5"
+                    >
+
+                    <div class="caption">
+                      Predictions from independent Gaussian
+                      noise after Epochs 1 and 5
+                    </div>
+
+                  </div>
+                </div>
+
+
+                <p>
+                  <strong>Why does this happen?</strong>
+                  The result can be explained directly from
+                  the MSE objective.
+                </p>
+
+                <p>
+                  For a given input \(z\), the optimal prediction
+                  under squared error is the conditional
+                  expectation of the target:
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  D_\theta^*(z)
+                  =
+                  \mathbb{E}[x\mid z]
+                  \]
+                </div>
+
+                <p>
+                  However, in this experiment, the Gaussian noise
+                  \(z\) is sampled independently of the target
+                  digit \(x\). Therefore, knowing \(z\) provides
+                  no information about which digit should be
+                  reconstructed:
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \boxed{
+                  \mathbb{E}[x\mid z]
+                  =
+                  \mathbb{E}[x]
+                  }
+                  \]
+                </div>
+
+                <p>
+                  In other words, the MSE-optimal model predicts
+                  the dataset's mean image rather than generating
+                  a different digit for each noise sample.
+                  The blurry average-looking output is therefore
+                  an expected consequence of the learning objective,
+                  not simply a failure of the UNet architecture.
+                </p>
+
+                <p>
+                  <strong>This motivates Flow Matching.</strong>
+                  Instead of learning a single-step mapping from
+                  independent random noise to a clean image,
+                  we can construct a continuous path connecting
+                  the noise and data distributions, and train
+                  a network to predict the velocity along
+                  that path.
+                </p>
+
+                <p>
+                  During generation, we then start from Gaussian
+                  noise and iteratively follow the learned
+                  velocity field to obtain a new image.
+                  This is what I explore in the next section.
+                </p>
+
+              </li>
+
             </ol>
+
           </div>
         </div>
         <!-- Small step box -->
