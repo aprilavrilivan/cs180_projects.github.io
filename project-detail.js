@@ -72,11 +72,13 @@
         const miniHead = box.querySelector(':scope > .mini-hd');
         if (!miniHead) return;
 
-        const labels = [...miniHead.children]
-          .filter((element) => element.tagName === 'SPAN')
-          .map((element) => element.textContent.trim())
-          .filter(Boolean);
-        const label = labels.length > 1 ? `${labels[1]} · ${labels[0]}` : labels[0];
+        const numberLabel = miniHead.querySelector(':scope > .hint')?.textContent.trim();
+        const titleLabel = [...miniHead.children]
+          .find((element) => element.tagName === 'SPAN' && !element.classList.contains('hint'))
+          ?.textContent.trim();
+        const label = numberLabel && titleLabel
+          ? `${numberLabel} · ${titleLabel}`
+          : numberLabel || titleLabel;
         if (!label) return;
 
         const subsectionId = `project-subsection-${sectionIndex + 1}-${subIndex + 1}-${slugify(label)}`;

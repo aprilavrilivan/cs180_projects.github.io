@@ -784,17 +784,22 @@ body.project-detail::before {
   }
 
   .project-main .mini-box .mini-hd {
-    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-columns: auto minmax(0, 1fr) auto;
   }
 
   .project-main .mini-box .mini-hd .hint {
-    grid-row: 2;
+    grid-row: 1;
     grid-column: 1;
   }
 
-  .project-main .mini-toggle {
-    grid-row: 1 / span 2;
+  .project-main .mini-box .mini-hd > span:not(.hint) {
+    grid-row: 1;
     grid-column: 2;
+  }
+
+  .project-main .mini-toggle {
+    grid-row: 1;
+    grid-column: 3;
   }
 
   .project-main .tbl thead {
