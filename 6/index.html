@@ -2195,8 +2195,8 @@
               <li class="denoising-step">
                 <p>
                   Since classical Gaussian filtering cannot reliably recover the image structure at high noise levels,
-                  a better approach is to use a learned denoiser. Here, I use the <code>stage_1.unet</code> of the
-                  DeepFloyd model for one-step denoising.
+                  a better approach is to use a learned denoiser. Here, I use the pretrained DeepFloyd model
+                  for one-step denoising.
                 </p>
 
                 <p>
@@ -2331,7 +2331,7 @@
                 </div>
 
                 <p>
-                  At each reverse step, the UNet first predicts the noise component contained in the
+                  At each reverse step, the pretrained DeepFloyd model first predicts the noise component contained in the
                   current noisy image:
                 </p>
 
@@ -2553,7 +2553,7 @@
                   <p>
                     There is just one remaining problem: during actual
                     generation, we do not know the true \(x_0\).
-                    This is precisely where our UNet comes in.
+                    This is precisely where the pretrained DeepFloyd model comes in.
                     We use the previously predicted clean image
                     \(\hat{x}_0\) in place of the unknown \(x_0\)
                     when constructing the reverse transition.
@@ -2594,7 +2594,7 @@
 
                   <ol class="iterative-process-list">
                     <li>
-                      Predict the noise in the current image using the UNet.
+                      Predict the noise in the current image using the DeepFloyd model.
                     </li>
                     <li>
                       Recover an estimate of the clean image \(\hat{x}_0\).
@@ -2838,7 +2838,7 @@
 
 
                 <p>
-                  In conditional diffusion models, the UNet predicts the noise component conditioned
+                  In conditional diffusion models, the DeepFloyd model predicts the noise component conditioned
                   on an additional input \(c\):
                 </p>
 
@@ -2879,7 +2879,7 @@
 
 
                 <p>
-                  CFG achieves this by running the UNet twice at each denoising step:
+                  CFG achieves this by running the DeepFloyd model twice at each denoising step:
                 </p>
 
 
