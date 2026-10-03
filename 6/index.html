@@ -5487,467 +5487,478 @@
         <div class="mini-box" id="2.2">
           <div class="mini-hd">
             <span class="hint">2.2</span>
-            <span>Flow matching MNIST</span>
+            <span>Flow Matching on MNIST</span>
             <button class="mini-toggle" type="button" data-target="#2.2-body">Hide</button>
           </div>
+
           <div class="mini-bd flow-matching-study" id="2.2-body">
+
+            <!-- ============================================ -->
+            <!-- Flow Matching: Motivation and Formulation     -->
+            <!-- ============================================ -->
             <section class="fm-overview" aria-labelledby="fm-overview-heading">
               <header class="fm-overview__header">
                 <span class="fm-overview__eyebrow">Flow Matching Overview</span>
-                <h3 id="fm-overview-heading">Learning a Continuous Path from Noise to MNIST</h3>
+                <h3 id="fm-overview-heading">Learning How to Move from Noise to Data</h3>
                 <p>
-                  The one-step experiment in Part 2.1 shows why generation cannot be learned as a
-                  direct regression from independent Gaussian noise to an arbitrary clean digit.
-                  Flow Matching replaces that ambiguous jump with a continuous trajectory whose
-                  velocity can be supervised at every intermediate time.
+                  The final experiment in Part 2.1 exposed a limitation of direct noise-to-image
+                  regression: when the input is independent Gaussian noise, an MSE-trained denoiser
+                  tends to predict the mean image rather than generate diverse digits. Instead of
+                  asking a network to recover an arbitrary clean image in one step, Flow Matching
+                  (FM) constructs a continuous path between noise and data and learns how samples
+                  should move along it.
                 </p>
               </header>
 
               <div class="fm-concept-grid" aria-label="Flow Matching construction">
                 <article class="fm-concept">
                   <span>01 · Endpoints</span>
-                  <h4>Noise and data</h4>
+                  <h4>Pair noise with data</h4>
                   <p>
-                    Sample a noise image \(x_0\sim\mathcal{N}(0,I)\) and an independent clean
-                    MNIST image \(x_1\sim p_{\mathrm{data}}\).
+                    Independently sample a Gaussian noise image
+                    \(x_0\sim\mathcal{N}(0,I)\) and a clean MNIST image
+                    \(x_1\sim p_{\mathrm{data}}\).
                   </p>
                 </article>
-
                 <article class="fm-concept">
-                  <span>02 · Probability path</span>
-                  <h4>Linear interpolation</h4>
+                  <span>02 · Intermediate state</span>
+                  <h4>Define a simple path</h4>
                   <p>
-                    A time value \(t\in[0,1]\) selects an intermediate point between the two
-                    endpoints, moving from noise at \(t=0\) to data at \(t=1\).
+                    Linearly interpolate between the endpoints. The time \(t\in[0,1]\)
+                    moves from pure noise at \(t=0\) to the clean digit at \(t=1\).
                   </p>
                 </article>
-
                 <article class="fm-concept">
-                  <span>03 · Learning target</span>
-                  <h4>Velocity field</h4>
+                  <span>03 · Supervision</span>
+                  <h4>Predict velocity, not pixels</h4>
                   <p>
-                    The model predicts the direction \(x_1-x_0\) that transports the current
-                    sample along this path toward the clean image distribution.
+                    Differentiating this path gives an exact velocity target for
+                    each sampled pair: \(x_1-x_0\). The UNet learns a time-dependent
+                    velocity field from these targets.
                   </p>
                 </article>
               </div>
 
+              <p>
+                For this linear interpolation, both the intermediate point and its
+                target velocity have particularly simple forms:
+              </p>
               <div class="equation-block fm-equation-stack">
                 \[
-                x_t=(1-t)x_0+tx_1,
-                \qquad
-                u(x_t,t)=\frac{d x_t}{dt}=x_1-x_0
+                  \boxed{x_t=(1-t)x_0+tx_1}
                 \]
-
                 \[
-                \mathcal{L}_{\mathrm{FM}}
-                =
-                \mathbb{E}_{x_0,x_1,t}
-                \left[
-                \left\|u_\theta(x_t,t)-(x_1-x_0)\right\|_2^2
-                \right]
+                  \boxed{\frac{dx_t}{dt}=x_1-x_0}
                 \]
               </div>
-
+              <p>
+                We therefore train a time-conditioned UNet \(u_\theta(x_t,t)\)
+                with the Flow Matching objective:
+              </p>
+              <div class="equation-block">
+                \[
+                  \mathcal{L}_{\mathrm{FM}}
+                  =\mathbb{E}_{x_0,x_1,t}\left[
+                  \left\|u_\theta(x_t,t)-(x_1-x_0)\right\|_2^2
+                  \right].
+                \]
+              </div>
+              <p>
+                A subtle distinction from the failed experiment in Part 2.1 is worth
+                emphasizing. Although \(x_0\) and \(x_1\) are independently sampled here too,
+                we no longer ask the network to infer the particular endpoint \(x_1\) from
+                \(x_0\) alone. We supervise a <em>local velocity</em> using the intermediate
+                state \(x_t\) and its time \(t\). When multiple sampled paths pass through
+                the same location, the MSE-optimal prediction is their conditional mean velocity:
+              </p>
+              <div class="equation-block">
+                \[
+                  u^*(x,t)=\mathbb{E}[x_1-x_0\mid x_t=x].
+                \]
+              </div>
+              <p>
+                This defines a velocity field that can be integrated to move the noise
+                distribution toward the data distribution. Individual training paths are
+                straight lines, but a trajectory obtained by following the learned field
+                during sampling need not be straight.
+              </p>
               <p class="fm-overview__takeaway">
-                <strong>Core idea.</strong> Training observes the exact velocity for randomly
-                sampled points on the path. Generation then starts from fresh Gaussian noise and
-                numerically follows the learned velocity field until it reaches \(t=1\).
+                <strong>Core idea.</strong> Training learns how an image should move at a
+                randomly sampled point in time; generation starts from fresh Gaussian
+                noise and follows the learned velocity field from \(t=0\) to \(t=1\).
               </p>
             </section>
 
+            <!-- ============================================ -->
+            <!-- Experiments                                  -->
+            <!-- ============================================ -->
             <ol class="fm-stages">
+
+              <!-- 01. Time-conditioned FM -->
               <li class="fm-stage" id="fm-time-conditioned">
                 <header class="fm-stage__header">
                   <span>Time conditioning</span>
-                  <h3>From a Denoiser to a Time-Conditioned Flow Model</h3>
+                  <h3>Turning the Denoising UNet into a Velocity Model</h3>
                   <p>
-                    The velocity required near pure noise is different from the velocity required
-                    near a nearly complete digit. The network must therefore receive the normalized
-                    scalar \(t\) together with \(x_t\), so it knows where the current sample lies on
-                    the transport path.
+                    The same image-like state can require different updates depending on
+                    where it lies along the path. I therefore extend the UNet from Part 2.1
+                    to take both the intermediate image \(x_t\) and the normalized time
+                    \(t\), and change its output from a clean-image estimate to a velocity.
                   </p>
                 </header>
 
                 <figure class="fm-figure fm-figure--architecture">
                   <a href="media/conditional_arch_fm.png" target="_blank" rel="noopener">
-                    <img
-                      src="media/conditional_arch_fm.png"
-                      alt="Time-conditioned UNet architecture with FCBlock conditioning injected into two decoder stages"
-                      width="2900"
-                      height="1376"
-                      decoding="async"
-                    >
+                    <img src="media/conditional_arch_fm.png"
+                         alt="Time-conditioned UNet with two FCBlock conditioning paths"
+                         width="2900" height="1376" decoding="async">
                   </a>
                   <figcaption>
-                    Time-conditioned UNet. The two FCBlock outputs modulate decoder features at
-                    different spatial scales. Source:
-                    <a href="https://cal-cs180.github.io/fa25/hw/proj5/partb.html" target="_blank" rel="noopener">CS180 Project 5 instructions</a>.
+                    Time-conditioned UNet architecture. Source:
+                    <a href="https://cal-cs180.github.io/fa25/hw/proj5/partb.html"
+                       target="_blank" rel="noopener">CS180 Project 5 instructions</a>.
                   </figcaption>
                 </figure>
 
-                <div class="fm-explanation-grid">
-                  <div>
-                    <h4>Why inject time twice?</h4>
-                    <p>
-                      One embedding modulates the \(7\times7\) feature map after the bottleneck,
-                      while the other modulates the following \(14\times14\) decoder stage. This
-                      gives both coarse and finer reconstruction layers direct access to the same
-                      noise-time signal.
-                    </p>
-                  </div>
-
-                  <div>
-                    <h4>What does an FCBlock do?</h4>
-                    <p>
-                      It maps the scalar \(t\) into the channel dimension needed by a decoder
-                      feature map. Broadcasting then applies that embedding to every spatial
-                      location in the corresponding feature tensor.
-                    </p>
-                  </div>
+                <p>
+                  Following the provided architecture, two FCBlocks embed the scalar time
+                  \(t\) into vectors that match the channel dimensions of two decoder
+                  stages. These embeddings are broadcast spatially and multiply the
+                  corresponding feature maps:
+                </p>
+                <div class="equation-block">
+                  \[
+                    t_1=\mathrm{FC}_1(t),\qquad t_2=\mathrm{FC}_2(t)
+                  \]
+                  \[
+                    h_{7\times7}\leftarrow h_{7\times7}\odot t_1,
+                    \qquad
+                    h_{14\times14}\leftarrow h_{14\times14}\odot t_2.
+                  \]
                 </div>
+                <p>
+                  Injecting time at two resolutions lets the decoder adjust both
+                  coarse features and finer spatial features as the sample evolves.
+                </p>
 
                 <figure class="fm-figure fm-figure--compact">
                   <a href="media/fc_long.png" target="_blank" rel="noopener">
-                    <img
-                      src="media/fc_long.png"
-                      alt="FCBlock containing two linear layers with a GELU activation"
-                      width="1382"
-                      height="283"
-                      loading="lazy"
-                      decoding="async"
-                    >
+                    <img src="media/fc_long.png"
+                         alt="FCBlock used to encode the conditioning scalar"
+                         width="1382" height="283" loading="lazy" decoding="async">
                   </a>
                   <figcaption>
-                    FCBlock used to embed the conditioning signal. Source:
-                    <a href="https://cal-cs180.github.io/fa25/hw/proj5/partb.html" target="_blank" rel="noopener">CS180 Project 5 instructions</a>.
+                    FCBlock used for time embedding. Source:
+                    <a href="https://cal-cs180.github.io/fa25/hw/proj5/partb.html"
+                       target="_blank" rel="noopener">CS180 Project 5 instructions</a>.
                   </figcaption>
                 </figure>
 
-                <div class="equation-block">
-                  \[
-                  t_1=\mathrm{FC}_1(t),
-                  \qquad
-                  t_2=\mathrm{FC}_2(t)
-                  \]
-                  \[
-                  h_{7\times7}\leftarrow h_{7\times7}\odot t_1,
-                  \qquad
-                  h_{14\times14}\leftarrow h_{14\times14}\odot t_2
-                  \]
-                </div>
-
                 <div class="fm-section-heading">
                   <span>Training</span>
-                  <h4>Supervising the Velocity at Random Points on the Path</h4>
+                  <h4>Supervising Velocity at Random Timesteps</h4>
                 </div>
-
                 <p>
-                  For every batch, I sample a clean image \(x_1\), Gaussian noise \(x_0\), and a
-                  uniformly random time \(t\). I construct \(x_t\) by interpolation and train the
-                  network to predict the constant target velocity \(x_1-x_0\). Resampling both
-                  \(x_0\) and \(t\) every iteration exposes the model to the full path instead of a
-                  fixed set of corruptions.
+                  In each training iteration, I sample an MNIST image \(x_1\), an
+                  independent noise image \(x_0\), and a random \(t\sim U[0,1]\).
+                  The interpolation formula constructs \(x_t\) directly; no rollout of
+                  earlier states is needed. The network then predicts
+                  \(u_\theta(x_t,t)\) and is supervised by the known displacement
+                  \(x_1-x_0\). Resampling the image pair and time across iterations
+                  trains the field over the entire interval.
                 </p>
 
                 <figure class="fm-figure fm-figure--algorithm">
                   <a href="media/algo1_t_only_fm.png" target="_blank" rel="noopener">
-                    <img
-                      src="media/algo1_t_only_fm.png"
-                      alt="Algorithm for training a time-conditioned Flow Matching model"
-                      width="1450"
-                      height="460"
-                      loading="lazy"
-                      decoding="async"
-                    >
+                    <img src="media/algo1_t_only_fm.png"
+                         alt="Training algorithm for the time-conditioned Flow Matching model"
+                         width="1450" height="460" loading="lazy" decoding="async">
                   </a>
                   <figcaption>
                     Time-conditioned Flow Matching training loop. Source:
-                    <a href="https://cal-cs180.github.io/fa25/hw/proj5/partb.html" target="_blank" rel="noopener">CS180 Project 5 instructions</a>.
+                    <a href="https://cal-cs180.github.io/fa25/hw/proj5/partb.html"
+                       target="_blank" rel="noopener">CS180 Project 5 instructions</a>.
                   </figcaption>
                 </figure>
 
                 <dl class="fm-parameter-grid">
-                  <div>
-                    <dt>Data</dt>
-                    <dd>MNIST · batch size 64</dd>
-                  </div>
-                  <div>
-                    <dt>Model</dt>
-                    <dd>Time-conditioned UNet · \(D=64\)</dd>
-                  </div>
-                  <div>
-                    <dt>Optimizer</dt>
-                    <dd>Adam · initial learning rate \(10^{-2}\)</dd>
-                  </div>
-                  <div>
-                    <dt>Schedule</dt>
-                    <dd>Exponential decay · \(\gamma=0.1^{1/N_{\mathrm{epochs}}}\)</dd>
-                  </div>
+                  <div><dt>Data</dt><dd>MNIST · batch size 64</dd></div>
+                  <div><dt>Model</dt><dd>Time-conditioned UNet · \(D=64\)</dd></div>
+                  <div><dt>Optimizer</dt><dd>Adam · initial learning rate \(10^{-2}\)</dd></div>
+                  <div><dt>Schedule</dt><dd>ExponentialLR · \(\gamma_{\mathrm{LR}}=0.1^{1/N_{\mathrm{epochs}}}\)</dd></div>
                 </dl>
 
                 <p>
-                  I trained this time-conditioned model for 20 epochs. The loss decreases rapidly
-                  at the beginning and then settles into a slower refinement phase as the network
-                  learns velocities across the entire interval \(t\in[0,1]\).
+                  I trained the model for 20 epochs. The training curve below tracks
+                  how accurately the predicted velocities match the linear-path targets.
                 </p>
-
                 <figure class="fm-result fm-result--loss">
-                  <img src="media/fmloss.png" alt="Training loss for the time-conditioned Flow Matching model" loading="lazy">
-                  <figcaption>Training loss over 20 epochs.</figcaption>
+                  <img src="media/fmloss.png"
+                       alt="Training loss for time-conditioned Flow Matching"
+                       loading="lazy">
+                  <figcaption>Velocity-regression loss over 20 epochs.</figcaption>
                 </figure>
 
                 <div class="fm-section-heading">
                   <span>Sampling</span>
-                  <h4>Integrating the Learned Velocity Field</h4>
+                  <h4>Generating Images by Integrating the Learned Field</h4>
                 </div>
-
                 <p>
-                  At inference time, there is no paired clean image. I initialize \(x_0\) with new
-                  Gaussian noise and use explicit Euler steps to integrate the learned field from
-                  \(t=0\) to \(t=1\). Each update moves the image a small distance in the velocity
-                  direction predicted for its current state and time.
+                  Once trained, the model no longer needs a paired clean MNIST image.
+                  We draw fresh Gaussian noise and solve the learned ordinary differential
+                  equation (ODE), starting at \(t=0\):
                 </p>
-
                 <div class="equation-block">
                   \[
-                  x_{t+\Delta t}
-                  =
-                  x_t+\Delta t\,u_\theta(x_t,t),
-                  \qquad
-                  \Delta t=\frac{1}{T}
+                    \frac{dx_t}{dt}=u_\theta(x_t,t),
+                    \qquad x_0\sim\mathcal N(0,I).
                   \]
                 </div>
+                <p>
+                  As specified in the assignment, I approximate this continuous process
+                  using explicit Euler integration. Each update moves the current image
+                  a short distance in the predicted velocity direction:
+                </p>
+                <div class="equation-block">
+                  \[
+                    \boxed{x_{t+\Delta t}=x_t+\Delta t\,u_\theta(x_t,t)},
+                    \qquad \Delta t=\frac1T.
+                  \]
+                </div>
+                <p>
+                  Unlike training, sampling is iterative: the output of one Euler step
+                  becomes the input to the next, until we reach \(t=1\).
+                </p>
 
                 <figure class="fm-figure fm-figure--algorithm">
                   <a href="media/algo2_t_only_fm.png" target="_blank" rel="noopener">
-                    <img
-                      src="media/algo2_t_only_fm.png"
-                      alt="Algorithm for sampling from a time-conditioned Flow Matching model"
-                      width="1442"
-                      height="380"
-                      loading="lazy"
-                      decoding="async"
-                    >
+                    <img src="media/algo2_t_only_fm.png"
+                         alt="Euler sampling algorithm for time-conditioned Flow Matching"
+                         width="1442" height="380" loading="lazy" decoding="async">
                   </a>
                   <figcaption>
-                    Euler sampling with the time-conditioned velocity model. Source:
-                    <a href="https://cal-cs180.github.io/fa25/hw/proj5/partb.html" target="_blank" rel="noopener">CS180 Project 5 instructions</a>.
+                    Sampling by Euler integration. Source:
+                    <a href="https://cal-cs180.github.io/fa25/hw/proj5/partb.html"
+                       target="_blank" rel="noopener">CS180 Project 5 instructions</a>.
                   </figcaption>
                 </figure>
 
+                <p>
+                  The following grids show independently generated samples at different
+                  training checkpoints:
+                </p>
                 <div class="fm-epoch-grid fm-epoch-grid--two" aria-label="Time-conditioned sampling results">
                   <figure class="fm-result">
-                    <img src="media/fm1.png" alt="Time-conditioned Flow Matching samples after epoch 1" loading="lazy">
+                    <img src="media/fm1.png" alt="Time-conditioned samples at Epoch 1" loading="lazy">
                     <figcaption>Epoch 1</figcaption>
                   </figure>
                   <figure class="fm-result">
-                    <img src="media/fm5.png" alt="Time-conditioned Flow Matching samples after epoch 5" loading="lazy">
+                    <img src="media/fm5.png" alt="Time-conditioned samples at Epoch 5" loading="lazy">
                     <figcaption>Epoch 5</figcaption>
                   </figure>
                   <figure class="fm-result">
-                    <img src="media/fm10.png" alt="Time-conditioned Flow Matching samples after epoch 10" loading="lazy">
+                    <img src="media/fm10.png" alt="Time-conditioned samples at Epoch 10" loading="lazy">
                     <figcaption>Epoch 10</figcaption>
                   </figure>
                   <figure class="fm-result">
-                    <img src="media/fm20.png" alt="Time-conditioned Flow Matching samples after epoch 20" loading="lazy">
+                    <img src="media/fm20.png" alt="Time-conditioned samples at Epoch 20" loading="lazy">
                     <figcaption>Epoch 20</figcaption>
                   </figure>
                 </div>
-
                 <p class="fm-analysis">
-                  <strong>Observation.</strong> Recognizable digit-like strokes already emerge after
-                  one epoch, but many samples remain distorted or ambiguous. By Epoch 20, the
-                  contours are more coherent and the set covers a broader range of digit shapes.
-                  The time-only model can generate diverse samples, but it cannot choose which class
-                  a particular noise seed should become.
+                  <strong>Observation.</strong> Digit-like strokes emerge early but many
+                  samples are initially distorted. With further training, the generated
+                  contours become more recognizable. The time-only model can produce
+                  different digits from different noise samples, but it does not let us
+                  specify which digit to generate. This motivates class conditioning.
                 </p>
               </li>
 
+              <!-- 02. Class-conditioned FM + CFG -->
               <li class="fm-stage" id="fm-class-conditioned">
                 <header class="fm-stage__header">
                   <span>Class conditioning</span>
-                  <h3>Controlling the Generated Digit with Classifier-Free Guidance</h3>
+                  <h3>Controlling Which Digit the Flow Generates</h3>
                   <p>
-                    To control the output class, I extend the velocity model to
-                    \(u_\theta(x_t,t,c)\), where \(c\) is a one-hot encoding of the target digit.
-                    Two additional FCBlocks project this class vector into the same decoder scales
-                    used by the time embeddings.
+                    To move from generation to controllable generation, I extend the
+                    velocity model to \(u_\theta(x_t,t,c)\), where \(c\) is a one-hot
+                    vector specifying the desired MNIST class (0–9). This adds semantic
+                    information without changing the interpolation path or its velocity target.
                   </p>
                 </header>
 
+                <p>
+                  Two additional FCBlocks embed the class vector and inject it into
+                  the same decoder stages used for time conditioning. Following the
+                  assignment, the class embeddings modulate the features while the
+                  time embeddings are added:
+                </p>
                 <div class="equation-block fm-equation-stack">
                   \[
-                  h_{7\times7}\leftarrow c_1\odot h_{7\times7}+t_1,
-                  \qquad
-                  h_{14\times14}\leftarrow c_2\odot h_{14\times14}+t_2
-                  \]
-                  \[
-                  c=\mathbf{0}
-                  \quad\text{with probability}\quad
-                  p_{\mathrm{uncond}}=0.1
+                    h_{7\times7}\leftarrow c_1\odot h_{7\times7}+t_1,
+                    \qquad
+                    h_{14\times14}\leftarrow c_2\odot h_{14\times14}+t_2.
                   \]
                 </div>
 
                 <p>
-                  Dropping the class vector for 10% of training examples teaches the same network
-                  both conditional and unconditional velocity estimates. The interpolation path and
-                  target \(x_1-x_0\) remain unchanged; the label only tells the model which subset of
-                  the MNIST distribution should be reached.
+                  To support Classifier-Free Guidance (CFG), I randomly drop the class
+                  condition for 10% of training examples by replacing the one-hot input
+                  with a zero vector:
                 </p>
-
-                <figure class="fm-figure fm-figure--algorithm">
-                  <a href="media/algo3_c_fm.png" target="_blank" rel="noopener">
-                    <img
-                      src="media/algo3_c_fm.png"
-                      alt="Algorithm for training a class-conditioned Flow Matching model with conditioning dropout"
-                      width="1454"
-                      height="546"
-                      loading="lazy"
-                      decoding="async"
-                    >
-                  </a>
-                  <figcaption>
-                    Class-conditioned training with 10% conditioning dropout. Source:
-                    <a href="https://cal-cs180.github.io/fa25/hw/proj5/partb.html" target="_blank" rel="noopener">CS180 Project 5 instructions</a>.
-                  </figcaption>
-                </figure>
-
-                <p>
-                  During sampling, I use classifier-free guidance to amplify the component of the
-                  velocity that depends on the requested class. For each Euler step, the model is
-                  evaluated once with \(c=\mathbf{0}\) and once with the desired one-hot vector.
-                </p>
-
                 <div class="equation-block">
                   \[
-                  u_{\mathrm{CFG}}
-                  =
-                  u_\theta(x_t,t,\mathbf{0})
-                  +
-                  \gamma\left(
-                  u_\theta(x_t,t,c)-u_\theta(x_t,t,\mathbf{0})
-                  \right),
-                  \qquad \gamma=5
+                    c\leftarrow\mathbf 0
+                    \quad\text{with probability}\quad
+                    p_{\mathrm{uncond}}=0.1.
                   \]
                 </div>
-
+                <p>
+                  This trains a single network to produce both class-conditioned and
+                  unconditioned velocity estimates. The training target remains
+                  \(x_1-x_0\); only the information available to the model changes.
+                </p>
                 <figure class="fm-figure fm-figure--algorithm">
-                  <a href="media/algo4_c_fm.png" target="_blank" rel="noopener">
-                    <img
-                      src="media/algo4_c_fm.png"
-                      alt="Algorithm for class-conditioned Flow Matching sampling with classifier-free guidance"
-                      width="1456"
-                      height="536"
-                      loading="lazy"
-                      decoding="async"
-                    >
+                  <a href="media/algo3_c_fm.png" target="_blank" rel="noopener">
+                    <img src="media/algo3_c_fm.png"
+                         alt="Class-conditioned Flow Matching training with condition dropout"
+                         width="1454" height="546" loading="lazy" decoding="async">
                   </a>
                   <figcaption>
-                    Class-conditioned sampling with classifier-free guidance. Source:
-                    <a href="https://cal-cs180.github.io/fa25/hw/proj5/partb.html" target="_blank" rel="noopener">CS180 Project 5 instructions</a>.
+                    Class-conditioned training with 10% condition dropout. Source:
+                    <a href="https://cal-cs180.github.io/fa25/hw/proj5/partb.html"
+                       target="_blank" rel="noopener">CS180 Project 5 instructions</a>.
                   </figcaption>
                 </figure>
 
                 <p>
-                  I trained the class-conditioned model for 10 epochs. The loss curve records the
-                  velocity-regression objective, while the sampling grids show four independently
-                  generated examples for each requested digit from 0 through 9.
+                  At sampling time, I query the model twice at every Euler step: once
+                  without a class label and once with the requested class. Their difference
+                  captures the extra velocity contribution associated with that condition.
+                  CFG amplifies it using guidance scale \(\gamma=5\):
                 </p>
-
-                <figure class="fm-result fm-result--loss">
-                  <img src="media/conditionedFMloss.png" alt="Training loss for the class-conditioned Flow Matching model" loading="lazy">
-                  <figcaption>Class-conditioned Flow Matching loss over 10 epochs.</figcaption>
+                <div class="equation-block">
+                  \[
+                    \boxed{
+                    u_{\mathrm{CFG}}
+                    =u_\theta(x_t,t,\mathbf 0)
+                    +\gamma\Bigl[
+                      u_\theta(x_t,t,c)-u_\theta(x_t,t,\mathbf 0)
+                    \Bigr]
+                    },\qquad\gamma=5.
+                  \]
+                </div>
+                <p>
+                  Importantly, CFG here modifies the <em>velocity</em>, rather than the
+                  noise prediction used in Part A's DDPM sampler. The guided velocity
+                  is then substituted directly into the Euler update:
+                </p>
+                <div class="equation-block">
+                  \[
+                    x_{t+\Delta t}=x_t+\Delta t\,u_{\mathrm{CFG}}(x_t,t,c).
+                  \]
+                </div>
+                <figure class="fm-figure fm-figure--algorithm">
+                  <a href="media/algo4_c_fm.png" target="_blank" rel="noopener">
+                    <img src="media/algo4_c_fm.png"
+                         alt="Class-conditioned Flow Matching sampling with CFG"
+                         width="1456" height="536" loading="lazy" decoding="async">
+                  </a>
+                  <figcaption>
+                    Class-conditioned Euler sampling with CFG. Source:
+                    <a href="https://cal-cs180.github.io/fa25/hw/proj5/partb.html"
+                       target="_blank" rel="noopener">CS180 Project 5 instructions</a>.
+                  </figcaption>
                 </figure>
 
+                <p>
+                  I trained this class-conditioned model for 10 epochs. The loss curve
+                  measures velocity-prediction error, while each sampling grid contains
+                  four independent generations for every requested digit from 0 to 9.
+                </p>
+                <figure class="fm-result fm-result--loss">
+                  <img src="media/conditionedFMloss.png"
+                       alt="Class-conditioned Flow Matching training loss" loading="lazy">
+                  <figcaption>Class-conditioned velocity loss over 10 epochs.</figcaption>
+                </figure>
                 <div class="fm-epoch-grid fm-epoch-grid--three" aria-label="Class-conditioned sampling results">
                   <figure class="fm-result">
-                    <img src="media/fmcond1.png" alt="Class-conditioned Flow Matching samples after epoch 1" loading="lazy">
+                    <img src="media/fmcond1.png" alt="Class-conditioned samples at Epoch 1" loading="lazy">
                     <figcaption>Epoch 1</figcaption>
                   </figure>
                   <figure class="fm-result">
-                    <img src="media/fmcond5.png" alt="Class-conditioned Flow Matching samples after epoch 5" loading="lazy">
+                    <img src="media/fmcond5.png" alt="Class-conditioned samples at Epoch 5" loading="lazy">
                     <figcaption>Epoch 5</figcaption>
                   </figure>
                   <figure class="fm-result">
-                    <img src="media/fmcond10.png" alt="Class-conditioned Flow Matching samples after epoch 10" loading="lazy">
+                    <img src="media/fmcond10.png" alt="Class-conditioned samples at Epoch 10" loading="lazy">
                     <figcaption>Epoch 10</figcaption>
                   </figure>
                 </div>
-
                 <p class="fm-analysis">
-                  <strong>Observation.</strong> Class conditioning makes the organization of the
-                  samples explicit: each column corresponds to its requested label. Early outputs
-                  already follow the intended classes, while later epochs sharpen stroke geometry
-                  and reduce ambiguous shapes. Compared with time-only generation, the model now
-                  provides direct semantic control without giving up the ability to sample from
-                  noise.
+                  <strong>Observation.</strong> The class-conditioned samples become more
+                  recognizable over training, with each group corresponding to its
+                  requested label. Different random seeds still produce variations in
+                  handwriting within a class. Compared with the time-only model, this
+                  version lets us guide <em>what</em> is generated, not just generate
+                  an unspecified digit.
                 </p>
               </li>
 
+              <!-- 03. Scheduler experiment -->
               <li class="fm-stage" id="fm-scheduler-ablation">
                 <header class="fm-stage__header">
-                  <span>Scheduler ablation</span>
-                  <h3>Training without Exponential Learning-Rate Decay</h3>
+                  <span>Training variation</span>
+                  <h3>Can the Model Train without a Learning-Rate Scheduler?</h3>
                   <p>
-                    I also tested whether the class-conditioned model could retain its performance
-                    without the exponential scheduler. A fixed learning rate of \(10^{-2}\) would
-                    remain too aggressive late in training, so I reduced it to \(2\times10^{-3}\)
-                    and increased the training duration from 10 to 20 epochs.
+                    The preceding run used exponential learning-rate decay. I next
+                    tested an alternative training recipe without the scheduler. Rather
+                    than keeping the original initial learning rate of \(10^{-2}\)
+                    constant, I lowered it to \(2\times10^{-3}\) and extended training
+                    from 10 to 20 epochs.
                   </p>
                 </header>
-
                 <dl class="fm-parameter-grid fm-parameter-grid--ablation">
-                  <div>
-                    <dt>Scheduler</dt>
-                    <dd>Removed</dd>
-                  </div>
-                  <div>
-                    <dt>Learning rate</dt>
-                    <dd>\(10^{-2}\rightarrow2\times10^{-3}\)</dd>
-                  </div>
-                  <div>
-                    <dt>Training length</dt>
-                    <dd>10 epochs → 20 epochs</dd>
-                  </div>
+                  <div><dt>Scheduler</dt><dd>ExponentialLR → none</dd></div>
+                  <div><dt>Learning rate</dt><dd>\(10^{-2}\) (initial) → fixed \(2\times10^{-3}\)</dd></div>
+                  <div><dt>Training length</dt><dd>10 → 20 epochs</dd></div>
                 </dl>
-
                 <p>
-                  The lower constant learning rate trades fast initial progress for more stable
-                  updates throughout the full run. Extending the training horizon gives the model
-                  enough optimization steps to compensate for the smaller step size.
+                  The smaller fixed learning rate is intended to avoid overly large
+                  updates late in training, while the additional epochs provide more
+                  optimization steps. The resulting loss and generated samples are shown below.
                 </p>
-
                 <figure class="fm-result fm-result--loss">
-                  <img src="media/rmschedulerloss.png" alt="Training loss without an exponential learning-rate scheduler" loading="lazy">
-                  <figcaption>Class-conditioned training loss with a fixed learning rate of \(2\times10^{-3}\).</figcaption>
+                  <img src="media/rmschedulerloss.png"
+                       alt="Training loss with a fixed learning rate and no scheduler"
+                       loading="lazy">
+                  <figcaption>Training loss without ExponentialLR (fixed \(2\times10^{-3}\)).</figcaption>
                 </figure>
-
-                <div class="fm-epoch-grid fm-epoch-grid--two" aria-label="Sampling results without a learning-rate scheduler">
+                <div class="fm-epoch-grid fm-epoch-grid--two" aria-label="Sampling without a learning-rate scheduler">
                   <figure class="fm-result">
-                    <img src="media/rmsch1.png" alt="No-scheduler class-conditioned samples after epoch 1" loading="lazy">
+                    <img src="media/rmsch1.png" alt="No-scheduler samples at Epoch 1" loading="lazy">
                     <figcaption>Epoch 1</figcaption>
                   </figure>
                   <figure class="fm-result">
-                    <img src="media/rmsch5.png" alt="No-scheduler class-conditioned samples after epoch 5" loading="lazy">
+                    <img src="media/rmsch5.png" alt="No-scheduler samples at Epoch 5" loading="lazy">
                     <figcaption>Epoch 5</figcaption>
                   </figure>
                   <figure class="fm-result">
-                    <img src="media/rmsch10.png" alt="No-scheduler class-conditioned samples after epoch 10" loading="lazy">
+                    <img src="media/rmsch10.png" alt="No-scheduler samples at Epoch 10" loading="lazy">
                     <figcaption>Epoch 10</figcaption>
                   </figure>
                   <figure class="fm-result">
-                    <img src="media/rmsch20.png" alt="No-scheduler class-conditioned samples after epoch 20" loading="lazy">
+                    <img src="media/rmsch20.png" alt="No-scheduler samples at Epoch 20" loading="lazy">
                     <figcaption>Epoch 20</figcaption>
                   </figure>
                 </div>
-
                 <p class="fm-analysis">
-                  <strong>Observation.</strong> The fixed-rate run improves steadily rather than
-                  relying on an explicit decay schedule. By Epoch 20, all ten requested classes are
-                  recognizable and remain consistent across repeated samples. This shows that the
-                  scheduler is helpful but not essential when the learning rate and training length
-                  are adjusted together.
+                  <strong>Observation.</strong> The adjusted fixed-rate recipe also learns
+                  to generate recognizable, class-conditioned MNIST digits by Epoch 20.
+                  This shows that a usable model can be obtained without ExponentialLR
+                  under these revised settings. Because both the learning rate and the
+                  training duration changed, however, this experiment does not isolate
+                  the effect of removing the scheduler alone.
                 </p>
               </li>
             </ol>
