@@ -1432,69 +1432,646 @@
     <section class="panel" aria-labelledby="sec-nerf">
       <div class="panel-hd">
         <h2 id="sec-nerf">Part 2: Fit a Neural Radiance Field from Multi-view Images</h2>
-        <span class="muted">1 section in total</span>
+        <span class="muted">2 sections in total</span>
       </div>
       <div class="panel-bd">
         <!-- Small step box -->
+
         <div class="mini-box" id="2.1～2.3">
+
           <div class="mini-hd">
-            <span>Part 2.1～2.3</span>
-            <span class="hint">2.1～2.3</span>
-            <button class="mini-toggle" type="button" data-target="#2.1～2.3-bo">Hide</button>
+            <span class="hint">2.1–2.3</span>
+            <span>Camera Rays and Spatial Sampling</span>
+
+            <button class="mini-toggle" type="button"
+                    data-target="#part-2-1-to-2-3-body">Hide</button>
           </div>
-          <div class="mini-bd" id="2.1～2.3-body">
-            <ol>
-              <li><p>In this section, I managed to load data from Lego scene provided in the course website, and 
-                  plot the cameras, rays, and samples in 3D using Viser.</p>
-                  <p>To achieve this , firstly I wrote a function transform(c2w, x_c) to transform camera coordinate to 
-                      world coordinate. Then I wrote a function pixel_to_camera(K, uv, s) to transform pixel coordinates
-                      to camera coordinates, given arbitary depth s. Finally I wrote a function pixel_to_ray(K, c2w, uv, depth)
-                      to get the unit ray that shoot from a certain pixel of the camera. The detailed implementation is shown below.</p>
-                  <div class="result-box">
-                    <div class="thumb">
-                      <img src="media/transform.png" alt="Box filter result 1">
-                      <div class="caption">transform(c2w, x_c)</div>
-                    </div>
-                    <div class="thumb ">
-                      <img src="media/pixel2camera.png" alt="Box filter result 1">
-                      <div class="caption">pixel_to_camera(K, uv, s) </div>
-                    </div>
-                    <div class="thumb">
-                      <img src="media/pixel2ray.png" alt="Box filter result 1">
-                      <div class="caption">pixel_to_ray(K, c2w, uv, depth)</div>
-                    </div>
-                  </div>
-              </li>
-              <li><p>I used the second method mentioned in the official website, which randomly pick N rays and sample along them
-                      finally return the world coordinates of those points. The detailed procedure is shown in the picture below</p> 
-                <div class="result-box">
-                    <div class="thumb">
-                      <img src="media/samplealongrays.png" alt="Box filter result 1">
-                      <div class="caption">Sample along rays function</div>
-                    </div>
-                  </div>
-              </li>
+
+          <div class="mini-bd" id="part-2-1-to-2-3-body">
+
+            <ol class="neural-field-sections">
+
+
+              <!-- ============================================ -->
+              <!-- 01 Camera Rays                              -->
+              <!-- ============================================ -->
+
               <li>
-                <p>After doing the above procedure, I integrate the above tools to a RaysDataset class.
-                  This RaysDataset class precomputes all rays for every training image so we can sample them efficiently
-                  during NeRF training. It builds a pixel grid, converts each pixel into a ray using the camera intrinsics 
-                  and extrinsics, and stores the ray origins, directions, and corresponding RGB values in flattened form. 
-                  During training, we can randomly draw a batch of rays from the entire dataset or from a specific camera for debugging.
-                  This makes the dataloader simple, fast, and convenient for both global sampling and visualization in Part 2.3.</p>
-                <p>Then, I implemented a visualization function visualize_random_rays(dataset, K, num_rays, n_samples=) that helps visualize
-                   the dataset using Viser, following the code structure provided in the official website. These are two of the visualized results:</p>
+
+                <p>
+                  Having explored how a neural network can represent
+                  a continuous 2D image, we can now extend this idea
+                  to a 3D scene. Unlike Part 1, where each pixel
+                  directly corresponds to a 2D coordinate, NeRF
+                  must determine how different locations in 3D
+                  contribute to the observed color of a pixel.
+                </p>
+
+                <p>
+                  This requires constructing a ray for every image
+                  pixel using the calibrated camera parameters.
+                  Recall that in Part 0, we studied how a 3D world
+                  point is projected onto the image plane.
+                  Here, we perform the inverse operation known
+                  as <strong>back projection</strong>.
+                </p>
+
+                <p>
+                  A single pixel cannot uniquely determine a 3D
+                  point because its depth is unknown. However,
+                  given the camera intrinsics and extrinsics,
+                  we can determine the corresponding ray originating
+                  from the camera center.
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \boxed{
+                  \mathbf r(s)=\mathbf r_o+s\mathbf r_d
+                  }
+                  \]
+                </div>
+
+                <p>
+                  Here, \(\mathbf r_o\) represents the ray origin,
+                  \(\mathbf r_d\) is its normalized direction,
+                  and \(s\) describes the distance along the ray.
+                  Every possible 3D point observed through a
+                  particular pixel lies somewhere along this ray.
+                </p>
+
+                <p>
+                  I implemented the ray construction pipeline
+                  using three functions.
+                </p>
+
+
+                <p>
+                  <strong>Camera to World Transformation</strong>
+                </p>
+
+                <p>
+                  First, I implemented
+                  <code>transform(c2w, x_c)</code> to convert
+                  a point from camera coordinates to world
+                  coordinates.
+                </p>
+
+                <p>
+                  Given the camera to world transformation
+                  obtained from the calibrated camera pose,
+                  the conversion is expressed as
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \boxed{
+                  \mathbf x_w
+                  =
+                  R_{\mathrm{c2w}}\mathbf x_c
+                  +
+                  \mathbf t_{\mathrm{c2w}}
+                  }
+                  \]
+                </div>
+
+                <p>
+                  Here, \(R_{\mathrm{c2w}}\) and
+                  \(\mathbf t_{\mathrm{c2w}}\) are the rotation
+                  and translation components of the camera
+                  to world transformation.
+                  This allows us to express points observed
+                  by different cameras within the same global
+                  coordinate system.
+                </p>
+
+
+                <p>
+                  <strong>Pixel Back Projection</strong>
+                </p>
+
+                <p>
+                  Next, I implemented
+                  <code>pixel_to_camera(K, uv, s)</code>
+                  to recover a 3D point in camera coordinates
+                  from a pixel location at a specified depth.
+                </p>
+
+                <p>
+                  Recall the perspective projection equation
+                  from Part 0.
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  s
+                  \begin{bmatrix}
+                  u\\v\\1
+                  \end{bmatrix}
+                  =
+                  K
+                  \begin{bmatrix}
+                  x_c\\y_c\\z_c
+                  \end{bmatrix}
+                  \]
+                </div>
+
+                <p>
+                  By multiplying both sides by the inverse
+                  intrinsic matrix, we obtain
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \boxed{
+                  \mathbf x_c
+                  =
+                  sK^{-1}
+                  \begin{bmatrix}
+                  u\\v\\1
+                  \end{bmatrix}
+                  }
+                  \]
+                </div>
+
+                <p>
+                  Here, \(s=z_c\) is the depth along the camera
+                  optical axis. Choosing different positive
+                  values of \(s\) produces different 3D points
+                  that project onto the same pixel.
+                </p>
+
+
+                <p>
+                  <strong>Pixel to Ray Conversion</strong>
+                </p>
+
+                <p>
+                  Finally, I combined the previous two functions
+                  into <code>pixel_to_ray(K, c2w, uv, depth)</code>
+                  to obtain the world space ray corresponding
+                  to each pixel.
+                </p>
+
+                <p>
+                  The ray origin is simply the camera center
+                  in world coordinates, which corresponds to
+                  the translation component of the camera
+                  to world matrix.
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \mathbf r_o
+                  =
+                  \mathbf t_{\mathrm{c2w}}
+                  \]
+                </div>
+
+                <p>
+                  To obtain the ray direction, we can choose
+                  any positive camera depth, such as \(s=1\),
+                  back project the pixel into camera coordinates,
+                  and then transform the resulting point into
+                  world coordinates.
+                </p>
+
+                <p>
+                  Since we are representing each pixel by its
+                  center rather than its upper left corner,
+                  I add an offset of 0.5 to the integer pixel
+                  coordinates before back projection.
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \tilde{\mathbf p}
+                  =
+                  \begin{bmatrix}
+                  u+0.5\\
+                  v+0.5\\
+                  1
+                  \end{bmatrix}
+                  \]
+                </div>
+
+                <div class="equation-block">
+                  \[
+                  \mathbf x_w
+                  =
+                  R_{\mathrm{c2w}}
+                  K^{-1}\tilde{\mathbf p}
+                  +
+                  \mathbf t_{\mathrm{c2w}}
+                  \]
+                </div>
+
+                <p>
+                  The normalized ray direction can then be
+                  obtained by subtracting the camera origin
+                  from this world space point.
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \boxed{
+                  \mathbf r_d
+                  =
+                  \frac{
+                  \mathbf x_w-\mathbf r_o
+                  }{
+                  \|\mathbf x_w-\mathbf r_o\|_2
+                  }
+                  }
+                  \]
+                </div>
+
+                <p>
+                  Together, these operations convert any pixel
+                  from a calibrated image into a 3D ray with
+                  a known origin and direction.
+                  This establishes the geometric connection
+                  between our multi-view observations and
+                  the underlying scene representation.
+                </p>
+
+                <p>
+                  The corresponding implementations are
+                  shown below.
+                </p>
+
                 <div class="result-box">
-                    <div class="thumb large-box">
-                      <img src="media/Viser3.png" alt="Box filter result 1">
-                      <div class="caption">Visualization with random rays</div>
+
+                  <div class="thumb">
+
+                    <img
+                      src="media/transform.png"
+                      alt="Camera to world coordinate transformation"
+                    >
+
+                    <div class="caption">
+                      transform(c2w, x_c)
                     </div>
-                    <div class="thumb large-box">
-                      <img src="media/from_single.png" alt="Box filter result 1">
-                      <div class="caption">Visualization with rays from a single camera</div>
-                    </div>
+
                   </div>
+
+                  <div class="thumb">
+
+                    <img
+                      src="media/pixel2camera.png"
+                      alt="Pixel back projection into camera coordinates"
+                    >
+
+                    <div class="caption">
+                      pixel_to_camera(K, uv, s)
+                    </div>
+
+                  </div>
+
+                  <div class="thumb">
+
+                    <img
+                      src="media/pixel2ray.png"
+                      alt="Constructing a normalized world space ray"
+                    >
+
+                    <div class="caption">
+                      pixel_to_ray(K, c2w, uv, depth)
+                    </div>
+
+                  </div>
+
+                </div>
+
               </li>
+
+
+              <!-- ============================================ -->
+              <!-- 02 Sampling Rays and 3D Points              -->
+              <!-- ============================================ -->
+
+              <li>
+
+                <p>
+                  After constructing the rays, we need to
+                  determine where the NeRF network should
+                  evaluate the scene along each ray.
+                  Since a ray contains infinitely many
+                  possible 3D locations, directly querying
+                  the entire continuous ray is impossible.
+                  We therefore approximate it using a finite
+                  collection of sampled points.
+                </p>
+
+                <p>
+                  There are two sampling operations involved
+                  in NeRF training. First, we select a batch
+                  of rays from the training images.
+                  Then, we sample a number of 3D points
+                  along each selected ray.
+                </p>
+
+                <p>
+                  <strong>Random Ray Sampling</strong>
+                </p>
+
+                <p>
+                  Following the second sampling strategy
+                  suggested by the official assignment,
+                  I flatten the pixels across all training
+                  images into a global ray dataset.
+                  At each training iteration, I randomly
+                  select \(B\) rays together with their
+                  corresponding ground truth RGB values.
+                </p>
+
+                <p>
+                  This allows each minibatch to contain
+                  observations from different camera
+                  viewpoints, rather than being restricted
+                  to a single image.
+                </p>
+
+
+                <p>
+                  <strong>Sampling Points Along Each Ray</strong>
+                </p>
+
+                <p>
+                  For every selected ray, we define a near
+                  and far boundary that restricts the spatial
+                  region in which samples are taken.
+                  For the provided Lego scene, I follow
+                  the recommended sampling range.
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  s_{\mathrm{near}}=2.0,
+                  \qquad
+                  s_{\mathrm{far}}=6.0
+                  \]
+                </div>
+
+                <p>
+                  We divide this interval into \(N\)
+                  equally sized bins and sample one point
+                  within each bin.
+                  The interval width is defined as
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \Delta s
+                  =
+                  \frac{
+                  s_{\mathrm{far}}-s_{\mathrm{near}}
+                  }{N}
+                  \]
+                </div>
+
+                <p>
+                  During training, I introduce a small
+                  random perturbation within every interval.
+                  This strategy is known as
+                  <strong>Stratified Sampling</strong>
+                  and can be expressed as
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \boxed{
+                  s_i
+                  =
+                  s_{\mathrm{near}}
+                  +
+                  (i+\xi_i)\Delta s,
+                  \qquad
+                  \xi_i\sim\mathcal U(0,1)
+                  }
+                  \]
+                </div>
+
+                <p>
+                  Here, \(i\) ranges from \(0\) to \(N-1\).
+                  Rather than always evaluating the same
+                  fixed locations along a ray, the random
+                  perturbation allows different positions
+                  within each interval to be explored
+                  throughout training.
+                </p>
+
+                <p>
+                  This reduces dependence on a particular
+                  fixed sampling grid and provides more
+                  complete spatial coverage over repeated
+                  training iterations.
+                  During evaluation, the perturbation can
+                  be disabled to obtain deterministic samples.
+                </p>
+
+                <p>
+                  Finally, each sampled depth is converted
+                  into a world space 3D point using the ray
+                  equation introduced earlier.
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \boxed{
+                  \mathbf x_i
+                  =
+                  \mathbf r_o+s_i\mathbf r_d
+                  }
+                  \]
+                </div>
+
+                <p>
+                  For a batch containing \(B\) rays and
+                  \(N\) samples per ray, the resulting
+                  tensor of 3D sample positions has shape
+                  \(B\times N\times3\).
+                  These positions will later be passed
+                  into the NeRF MLP to query the scene's
+                  density and color at each sampled location.
+                </p>
+
+                <p>
+                  The implementation of
+                  <code>sample_along_rays</code> is shown below.
+                </p>
+
+                <div class="result-box">
+
+                  <div class="thumb large-box">
+
+                    <img
+                      src="media/samplealongrays.png"
+                      alt="Stratified sampling of 3D points along camera rays"
+                    >
+
+                    <div class="caption">
+                      Sampling 3D points along camera rays
+                    </div>
+
+                  </div>
+
+                </div>
+
+              </li>
+
+
+              <!-- ============================================ -->
+              <!-- 03 RaysDataset and Visualization            -->
+              <!-- ============================================ -->
+
+              <li>
+
+                <p>
+                  Finally, I integrated the previous geometric
+                  operations into a <code>RaysDataset</code>
+                  class, which provides an efficient data
+                  pipeline for the subsequent NeRF training.
+                </p>
+
+                <p>
+                  The dataset first constructs the complete
+                  pixel grid for every training image.
+                  Using the camera intrinsics and the
+                  corresponding camera to world transformation,
+                  each pixel is converted into a ray.
+                </p>
+
+                <p>
+                  The ray origins, normalized directions,
+                  and ground truth RGB values are then
+                  stored in flattened form.
+                  This avoids repeatedly performing
+                  pixel to ray conversion during training.
+                </p>
+
+                <p>
+                  At each iteration, the dataloader randomly
+                  returns a batch of ray origins, directions,
+                  and their corresponding target colors.
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \boxed{
+                  \mathcal B
+                  =
+                  \left\{
+                  (\mathbf r_o^{(i)},
+                  \mathbf r_d^{(i)},
+                  \mathbf c_{\mathrm{gt}}^{(i)})
+                  \right\}_{i=1}^{B}
+                  }
+                  \]
+                </div>
+
+                <p>
+                  Here, each ray is paired with the RGB value
+                  of the pixel from which it was constructed.
+                  During NeRF training, the model will render
+                  a predicted color for this ray and compare
+                  it against the corresponding ground truth
+                  pixel color.
+                </p>
+
+                <p>
+                  Although the ray origins and directions
+                  can be precomputed, the 3D sample points
+                  along those rays are generated during
+                  training so that stratified sampling can
+                  introduce new perturbations at each iteration.
+                </p>
+
+                <p>
+                  <strong>Geometric Verification with Viser</strong>
+                </p>
+
+                <p>
+                  Before proceeding to the NeRF network,
+                  I used Viser to verify the ray construction
+                  and spatial sampling pipeline.
+                  I implemented a visualization function
+                  called <code>visualize_random_rays</code>,
+                  following the reference structure provided
+                  by the course.
+                </p>
+
+                <p>
+                  The visualization displays the camera
+                  frustums, randomly selected rays, and
+                  their corresponding 3D sample points
+                  within the same world coordinate system.
+                </p>
+
+                <p>
+                  I first sampled rays globally from the
+                  multi-view dataset to inspect their
+                  overall spatial distribution.
+                  I then repeated the visualization using
+                  rays from a single camera, which makes
+                  it easier to verify that the constructed
+                  rays remain inside the corresponding
+                  camera frustum.
+                </p>
+
+                <div class="result-box">
+
+                  <div class="thumb large-box">
+
+                    <img
+                      src="media/Viser3.png"
+                      alt="Visualization of randomly sampled rays from multiple cameras"
+                    >
+
+                    <div class="caption">
+                      Random rays sampled across multiple cameras
+                    </div>
+
+                  </div>
+
+                  <div class="thumb large-box">
+
+                    <img
+                      src="media/from_single.png"
+                      alt="Visualization of rays sampled from a single camera"
+                    >
+
+                    <div class="caption">
+                      Rays sampled from a single camera
+                    </div>
+
+                  </div>
+
+                </div>
+
+                <p>
+                  These visualizations provide a useful
+                  geometric sanity check for the coordinate
+                  transformations, pixel back projection,
+                  and ray sampling procedures.
+                </p>
+
+                <p>
+                  With this data pipeline completed, every
+                  observed pixel can now be associated with
+                  a set of 3D sample positions along its
+                  corresponding camera ray.
+                  In the next section, we will use a neural
+                  radiance field to predict the density and
+                  color at these locations, before combining
+                  them through differentiable volume rendering
+                  to recover the final pixel color.
+                </p>
+
+              </li>
+
             </ol>
+
           </div>
         </div>
         <!-- Small step box -->
