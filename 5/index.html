@@ -1432,7 +1432,7 @@
     <section class="panel" aria-labelledby="sec-nerf">
       <div class="panel-hd">
         <h2 id="sec-nerf">Part 2: Fit a Neural Radiance Field from Multi-view Images</h2>
-        <span class="muted">2 sections in total</span>
+        <span class="muted">3 sections in total</span>
       </div>
       <div class="panel-bd">
         <!-- Small step box -->
@@ -2074,132 +2074,857 @@
 
           </div>
         </div>
-        <!-- Small step box -->
+        <!-- Part 2.4 and 2.5 -->
+
         <div class="mini-box" id="2.4～2.5">
+
           <div class="mini-hd">
-            <span>Part 2.4～2.5</span>
             <span class="hint">2.4～2.5</span>
-            <button class="mini-toggle" type="button" data-target="#2.4～2.5-bo">Hide</button>
+            <span>NeRF Architecture and Volume Rendering</span>
+
+            <button class="mini-toggle" type="button"
+                    data-target="#2.4～2.5-body">Hide</button>
           </div>
+
           <div class="mini-bd" id="2.4～2.5-body">
-            <ol>
-              <li><p>In this section, I managed to train a Nerf using the lego dataset.</p>
-                  <p>To achieve this , firstly I implemented the nerf model.the NeRF model follows the standard 
-                    design proposed in the original paper. I apply sinusoidal positional encoding to both 3D positions
-                    and view directions, using higher-frequency bands for positions and lower-frequency ones for 
-                    directions. The network is built as an eight-layer MLP with a skip connection at the middle layer,
-                    which helps preserve high-frequency details during training. The density (sigma) and color branches 
-                    are separated: sigma is predicted directly from the spatial features, while RGB is produced by 
-                    combining learned features with the encoded viewing direction. 
-                    A final sigmoid ensures valid color outputs.</p>
-              </li>
-              <li><p>To train the NeRF model, I implemented the volume rendering function as indeicated in the instruction. Then,
-                I randomly sample a large batch of rays at each iteration and generate points 
-                along them with stratified sampling. The network is optimized using Adam with a learning rate of 5 \times 10^{-4}, 
-                batch size 8192, and 64 samples per ray. I trained for 5000 iterations on Google Colab T4 GPU.
-                During training, I rendered a validation image every 250 iterations to track progress. PSNR is used as the main evaluation metric, and I log both training loss and validation PSNR to
-                monitor convergence. This setup provides stable optimization and reproduces the expected NeRF performance on the 
-                Lego dataset. Here are the rendering results during training:</p> 
-                <div class="result-box">
-                    <div class="thumb">
-                      <img src="media/val_iter_000001.png" alt="Box filter result 1">
-                      <div class="caption">the first iteration</div>
-                    </div>
-                    <div class="thumb">
-                      <img src="media/val_iter_000250.png" alt="Box filter result 1">
-                      <div class="caption">the 250th iteration</div>
-                    </div>
-                    <div class="thumb">
-                      <img src="media/val_iter_000750.png" alt="Box filter result 1">
-                      <div class="caption">the 750th iteration</div>
-                    </div>
-                    <div class="thumb">
-                      <img src="media/val_iter_001500.png" alt="Box filter result 1">
-                      <div class="caption">the 1500th iteration</div>
-                    </div>
-                    <div class="thumb">
-                      <img src="media/val_iter_005000.png" alt="Box filter result 1">
-                      <div class="caption">the 5000th iteration</div>
-                    </div>
-                  </div>
-                <p>And here is the PSNR curve:</p>
-                <div class="result-box">
-                  <div class="thumb large-box">
-                      <img src="media/psnr_curve.png" alt="Box filter result 1">
-                      <div class="caption">the PSNR curve during trainig</div>
-                    </div>
-                </div>
-                <p>Finally, here is the GIF of camera circling the lego car</p>
-                <div class="result-box">
-                  <div class="thumb large-box">
-                      <img src="media/output.gif" alt="Box filter result 1">
-                      <div class="caption">Spherical rendering video of the Lego</div>
-                    </div>
-                </div>
-              </li>
+
+            <ol class="neural-field-sections">
+
+              <!-- Neural Radiance Field -->
+
               <li>
-                <p>Then I tested using my own dataset. I found that near=0.3 far=0.7 is suitable for my dataset. 
-                  I set n_samples=64, batch_size=4096, max_iters=5000, lr=5e-4, and the rest of the hyperparameters are the same 
-                  as above.During implementation, I found that the model failed to converge when trained on my first 
-                  set of images. The PSNR stayed extremely low and the rendered results were almost blank. 
-                  After debugging, I realized the issue was not in the code, but in the dataset: most views 
-                  contained large backgrounds, very small objects, and almost no parallax. NeRF simply couldn’t 
-                  recover meaningful geometry. To fix this, I reshot the entire dataset, keeping the object centered,
-                  increasing the number of viewpoints, and making sure the camera moved around it in a full circle. 
-                  After these adjustments, training became much better, though the outcome isn't satisfying enough.</p>
-                <div class="result-box">
-                  <div class="thumb large-box">
-                      <img src="media/image.png" alt="Box filter result 1">
-                      <div class="caption">my new dataset after realizing the problem</div>
-                    </div>
+
+                <p>
+                  Having constructed camera rays and sampled 3D points
+                  along them, we can now build the Neural Radiance Field
+                  itself.
+                  The central idea of NeRF is to represent an entire
+                  3D scene as a continuous function learned by a neural
+                  network, rather than explicitly storing its geometry
+                  using meshes, point clouds, or voxels.
+                </p>
+
+                <p>
+                  Recall that in Part 1, we trained a neural field to
+                  map 2D coordinates directly to RGB values.
+                  NeRF extends this idea into 3D, but with an important
+                  difference.
+                  A single point in space may exhibit different colors
+                  when viewed from different directions, especially
+                  in the presence of reflective or view dependent
+                  surfaces.
+                  Therefore, the network takes both a 3D position
+                  \(\mathbf x\) and a viewing direction \(\mathbf d\)
+                  as inputs.
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \boxed{
+                  F_\theta(\mathbf x,\mathbf d)
+                  =
+                  (\sigma,\mathbf c)
+                  }
+                  \]
                 </div>
-                <p>Here are the progress during training:</p>
+
+                <p>
+                  Here, \(\sigma\) is the volume density at the queried
+                  location, while \(\mathbf c=(r,g,b)\) represents
+                  its view dependent color.
+                  Density describes how strongly a location contributes
+                  to the attenuation of a ray and is independent of
+                  the viewing direction.
+                  In contrast, RGB additionally depends on
+                  \(\mathbf d\) to capture changes in appearance
+                  across viewpoints.
+                </p>
+
+                <p>
+                  Similar to the 2D neural field, I apply sinusoidal
+                  positional encoding before feeding the inputs into
+                  the MLP.
+                  Following the recommended NeRF architecture,
+                  I use more frequency bands for spatial coordinates
+                  than for viewing directions.
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \gamma_{10}(\mathbf x),
+                  \qquad
+                  \gamma_4(\mathbf d)
+                  \]
+                </div>
+
+                <p>
+                  The architecture consists of an eight layer MLP
+                  for processing the encoded spatial coordinates.
+                  I also concatenate the original encoded position
+                  with the intermediate features at the middle of
+                  the network.
+                  This skip connection gives the deeper layers
+                  direct access to the spatial input and helps
+                  information propagate through the network.
+                </p>
+
+                <p>
+                  The network subsequently separates into two
+                  prediction branches.
+                  The density branch predicts \(\sigma\) using
+                  spatial features alone, with a ReLU activation
+                  ensuring nonnegative outputs.
+                  The color branch combines the learned spatial
+                  features with the encoded viewing direction
+                  to predict RGB, followed by a Sigmoid activation
+                  to constrain the output to the range between
+                  0 and 1.
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \begin{aligned}
+                  \mathbf h
+                  &amp;=
+                  F_{\theta,\mathrm{spatial}}
+                  (\gamma_{10}(\mathbf x))
+                  \\[6pt]
+                  \sigma
+                  &amp;=
+                  \operatorname{ReLU}
+                  (F_{\theta,\sigma}(\mathbf h))
+                  \\[6pt]
+                  \mathbf c
+                  &amp;=
+                  \operatorname{Sigmoid}
+                  \left(
+                  F_{\theta,\mathrm{color}}
+                  (\mathbf h,\gamma_4(\mathbf d))
+                  \right)
+                  \end{aligned}
+                  \]
+                </div>
+
+                <p>
+                  With this architecture, we can query the density
+                  and color of arbitrary 3D locations within the
+                  scene.
+                  However, these predictions are still defined
+                  at individual points, while our supervision
+                  consists only of observed 2D pixels.
+                  We therefore need a way to combine the predictions
+                  along each camera ray into a single rendered color.
+                </p>
+
+              </li>
+
+
+              <!-- Volume Rendering -->
+
+              <li>
+
+                <p>
+                  This is where
+                  <strong>Differentiable Volume Rendering</strong>
+                  comes into play.
+                  Instead of assuming that a ray intersects exactly
+                  one opaque surface, NeRF treats the scene as a
+                  continuous volumetric field.
+                  Each sampled location contributes a certain amount
+                  of color depending on its density and how much
+                  light can reach it without being attenuated
+                  by preceding samples.
+                </p>
+
+                <p>
+                  A useful way to understand this is through
+                  traditional Alpha Compositing.
+                  Consider two partially transparent layers
+                  arranged along a ray.
+                  The first layer contributes its own color,
+                  while the second contributes only the portion
+                  that remains visible through the first.
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  C=
+                  \alpha_1\mathbf c_1
+                  +
+                  (1-\alpha_1)\alpha_2\mathbf c_2
+                  \]
+                </div>
+
+                <p>
+                  Here, \(\alpha_i\) denotes the opacity of
+                  the corresponding layer.
+                  The second layer's contribution is multiplied
+                  by \(1-\alpha_1\) because only the light that
+                  passes through the first layer can reach it.
+                  The expression omits any remaining background
+                  contribution.
+                </p>
+
+                <p>
+                  NeRF generalizes this intuition to many small
+                  segments sampled along a continuous camera ray.
+                  Suppose the network predicts a density
+                  \(\sigma_i\) and a color \(\mathbf c_i\)
+                  at the \(i\)th sampled location.
+                  Let \(\delta_i\) denote the length of its
+                  corresponding segment along the ray.
+                </p>
+
+                <p>
+                  Assuming constant density within a small segment,
+                  the probability of passing through that segment
+                  without termination follows exponential attenuation.
+                  Its opacity is therefore given by
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \boxed{
+                  \alpha_i
+                  =
+                  1-\exp(-\sigma_i\delta_i)
+                  }
+                  \]
+                </div>
+
+                <p>
+                  Intuitively, larger density or a longer segment
+                  produces higher opacity.
+                  When \(\sigma_i\) approaches zero, the segment
+                  becomes almost transparent.
+                  When the density becomes sufficiently large,
+                  its opacity approaches one.
+                </p>
+
+                <p>
+                  However, opacity alone is not enough to determine
+                  how much a sample contributes to the final pixel.
+                  A location may have high density but remain
+                  invisible if the ray has already been terminated
+                  by earlier samples.
+                </p>
+
+                <p>
+                  We therefore introduce
+                  <strong>Transmittance</strong>, denoted by \(T_i\).
+                  It represents the probability that the ray
+                  survives all preceding segments before
+                  reaching sample \(i\).
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \boxed{
+                  T_i
+                  =
+                  \prod_{j=1}^{i-1}(1-\alpha_j)
+                  =
+                  \exp\left(
+                  -\sum_{j=1}^{i-1}
+                  \sigma_j\delta_j
+                  \right)
+                  }
+                  \]
+                </div>
+
+                <p>
+                  Combining opacity and transmittance,
+                  the contribution weight of each sample becomes
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \boxed{
+                  w_i
+                  =
+                  T_i\alpha_i
+                  =
+                  T_i
+                  \left(
+                  1-\exp(-\sigma_i\delta_i)
+                  \right)
+                  }
+                  \]
+                </div>
+
+                <p>
+                  This weight can be interpreted as the probability
+                  of the ray reaching the current segment and
+                  terminating within it.
+                  We can therefore obtain the expected pixel color
+                  by summing the colors of all sampled points,
+                  weighted by their corresponding contributions.
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \boxed{
+                  \hat C(\mathbf r)
+                  =
+                  \sum_{i=1}^{N}
+                  T_i
+                  \left(
+                  1-\exp(-\sigma_i\delta_i)
+                  \right)
+                  \mathbf c_i
+                  }
+                  \]
+                </div>
+
+                <p>
+                  This is the discrete Volume Rendering equation
+                  used in my implementation.
+                  It approximates the continuous rendering integral
+                  presented in the original NeRF paper.
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  C(\mathbf r)
+                  =
+                  \int_{s_n}^{s_f}
+                  T(s)\,
+                  \sigma(\mathbf r(s))\,
+                  \mathbf c(\mathbf r(s),\mathbf d)
+                  \,ds
+                  \]
+                </div>
+
+                <p>
+                  In practice, I implemented the discrete formulation
+                  in PyTorch.
+                  Given the predicted densities and colors along
+                  a batch of rays, the rendering function computes
+                  the opacity of each segment, accumulates
+                  transmittance from front to back, and finally
+                  calculates the weighted RGB sum for every ray.
+                </p>
+
+                <p>
+                  An important property of this formulation is that
+                  the entire rendering process is differentiable.
+                  Although we only have ground truth RGB images,
+                  the reconstruction error can be propagated
+                  backward through the rendering equation
+                  to update the NeRF network.
+                </p>
+
+                <p>
+                  For a batch of \(B\) rays, I minimize the
+                  reconstruction error between the rendered
+                  colors and their corresponding observed pixels.
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \boxed{
+                  \mathcal L(\theta)
+                  =
+                  \frac{1}{B}
+                  \sum_{i=1}^{B}
+                  \left\|
+                  \hat C_\theta(\mathbf r_i)
+                  -
+                  C_{\mathrm{gt}}(\mathbf r_i)
+                  \right\|_2^2
+                  }
+                  \]
+                </div>
+
+                <p>
+                  The essential idea is that a 3D scene representation
+                  can be learned indirectly through 2D image supervision.
+                  The network does not need explicit ground truth
+                  density or geometry at every spatial location.
+                  Instead, it learns a volumetric field whose
+                  rendered projections explain the observed
+                  multi view images.
+                  This optimization process is commonly known
+                  as Analysis by Synthesis.
+                </p>
+
+              </li>
+
+
+              <!-- Lego Training -->
+
+              <li>
+
+                <p>
+                  After implementing the NeRF architecture and
+                  differentiable volume rendering, I trained
+                  the complete pipeline using the Lego dataset
+                  provided by the course.
+                </p>
+
+                <p>
+                  At every training iteration, I randomly draw
+                  a batch of rays from the multi view images
+                  using the RaysDataset developed in the previous
+                  section.
+                  I then sample 64 points along each ray using
+                  stratified sampling and query the NeRF network
+                  to obtain their density and RGB predictions.
+                </p>
+
+                <p>
+                  The volume rendering function combines these
+                  predictions into a final color for each ray,
+                  which is compared against the corresponding
+                  ground truth pixel.
+                  The reconstruction loss is then backpropagated
+                  through both the rendering operation and the MLP.
+                </p>
+
+                <p>
+                  I used Adam with a learning rate of
+                  \(5\times10^{-4}\), a batch size of 8192 rays,
+                  and 64 samples per ray.
+                  The model was trained for 5000 iterations
+                  on a Google Colab T4 GPU.
+                </p>
+
+                <p>
+                  To monitor the reconstruction process,
+                  I rendered a fixed validation view every
+                  250 iterations and recorded the validation
+                  PSNR throughout training.
+                  The following images show how the predicted
+                  Lego scene gradually improves as optimization
+                  progresses.
+                </p>
+
                 <div class="result-box">
-                    <div class="thumb">
-                      <img src="media/val_iter_1.png" alt="Box filter result 1">
-                      <div class="caption">the first iteration</div>
-                    </div>
-                    <div class="thumb">
-                      <img src="media/val_iter_250.png" alt="Box filter result 1">
-                      <div class="caption">the 250th iteration</div>
-                    </div>
-                    <div class="thumb">
-                      <img src="media/val_iter_500.png" alt="Box filter result 1">
-                      <div class="caption">the 500th iteration</div>
-                    </div>
-                    <div class="thumb">
-                      <img src="media/val_iter_1000.png" alt="Box filter result 1">
-                      <div class="caption">the 1000th iteration</div>
-                    </div>
-                    <div class="thumb">
-                      <img src="media/val_iter_2750.png" alt="Box filter result 1">
-                      <div class="caption">the 2750th iteration</div>
-                    </div>
-                    <div class="thumb">
-                      <img src="media/val_iter_5000.png" alt="Box filter result 1">
-                      <div class="caption">the 5000th iteration</div>
+
+                  <div class="thumb">
+                    <img
+                      src="media/val_iter_000001.png"
+                      alt="Lego NeRF rendering at iteration 1"
+                    >
+                    <div class="caption">Iteration 1</div>
+                  </div>
+
+                  <div class="thumb">
+                    <img
+                      src="media/val_iter_000250.png"
+                      alt="Lego NeRF rendering at iteration 250"
+                    >
+                    <div class="caption">Iteration 250</div>
+                  </div>
+
+                  <div class="thumb">
+                    <img
+                      src="media/val_iter_000750.png"
+                      alt="Lego NeRF rendering at iteration 750"
+                    >
+                    <div class="caption">Iteration 750</div>
+                  </div>
+
+                  <div class="thumb">
+                    <img
+                      src="media/val_iter_001500.png"
+                      alt="Lego NeRF rendering at iteration 1500"
+                    >
+                    <div class="caption">Iteration 1500</div>
+                  </div>
+
+                  <div class="thumb">
+                    <img
+                      src="media/val_iter_005000.png"
+                      alt="Lego NeRF rendering at iteration 5000"
+                    >
+                    <div class="caption">Iteration 5000</div>
+                  </div>
+
+                </div>
+
+                <p>
+                  The early renders contain little recognizable
+                  structure, as the network has not yet learned
+                  a meaningful density distribution.
+                  As training progresses, the overall geometry
+                  of the Lego vehicle begins to emerge,
+                  followed by increasingly coherent colors,
+                  surfaces, and finer visual details.
+                </p>
+
+                <p>
+                  To evaluate reconstruction quality quantitatively,
+                  I use Peak Signal to Noise Ratio.
+                  For images with normalized RGB values,
+                  PSNR is calculated from the pixelwise
+                  Mean Squared Error as
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \boxed{
+                  \operatorname{PSNR}
+                  =
+                  10\log_{10}
+                  \left(
+                  \frac{1}{\operatorname{MSE}}
+                  \right)
+                  }
+                  \]
+                </div>
+
+                <p>
+                  A higher PSNR indicates better agreement between
+                  the rendered image and its ground truth.
+                  The validation curve provides a quantitative
+                  view of how the learned scene representation
+                  improves throughout optimization.
+                </p>
+
+                <div class="result-box">
+
+                  <div class="thumb large-box">
+                    <img
+                      src="media/psnr_curve.png"
+                      alt="Validation PSNR curve during Lego NeRF training"
+                    >
+                    <div class="caption">
+                      Lego validation PSNR over 5000 iterations
                     </div>
                   </div>
-                <p>And here is the PSNR curve and Loss function:</p>
-                <div class="result-box">
-                  <div class="thumb large-box">
-                      <img src="media/Traing_PSNRR.png" alt="Box filter result 1">
-                      <div class="caption">the PSNR curve during trainig</div>
-                    </div>
-                  <div class="thumb large-box">
-                      <img src="media/Training_loss.png" alt="Box filter result 1">
-                      <div class="caption">the LOSS curve during trainig</div>
-                    </div>
+
                 </div>
-                <p>Finally, here is the GIF of camera circling my own object</p>
+
+                <p>
+                  Finally, once the network has learned the scene,
+                  we are no longer restricted to the original
+                  training viewpoints.
+                  Given a new camera pose, we can construct
+                  a new set of rays, query the learned radiance
+                  field, and render the scene from that viewpoint
+                  using the same volume rendering procedure.
+                </p>
+
+                <p>
+                  I used the provided test camera poses to
+                  generate a sequence of novel views around
+                  the Lego vehicle.
+                  The resulting spherical rendering demonstrates
+                  how a continuous 3D representation learned
+                  from multiple 2D observations can support
+                  novel view synthesis.
+                </p>
+
                 <div class="result-box">
+
                   <div class="thumb large-box">
-                      <img src="media/output4.gif" alt="Box filter result 1">
-                      <div class="caption">Spherical rendering video of my own dataset</div>
+                    <img
+                      src="media/output.gif"
+                      alt="Novel view synthesis of the Lego vehicle"
+                    >
+                    <div class="caption">
+                      Spherical rendering of the learned Lego scene
                     </div>
+                  </div>
+
                 </div>
+
               </li>
+
             </ol>
+
+          </div>
+        </div>
+
+
+
+        <!-- Part 2.6 -->
+
+        <div class="mini-box" id="2.6">
+
+          <div class="mini-hd">
+            <span class="hint">2.6</span>
+            <span>NeRF on My Own Dataset</span>
+
+            <button class="mini-toggle" type="button"
+                    data-target="#2.6-body">Hide</button>
+          </div>
+
+          <div class="mini-bd" id="2.6-body">
+
+            <ol class="neural-field-sections">
+
+              <!-- Training on Real Data -->
+
+              <li>
+
+                <p>
+                  Having successfully trained the NeRF on the
+                  provided Lego dataset, I next applied the
+                  same pipeline to my own multi view images
+                  collected in Part 0.
+                  This experiment introduces additional
+                  challenges because real world images do
+                  not necessarily have the ideal camera poses,
+                  consistent lighting, and clean scene geometry
+                  found in synthetic datasets.
+                </p>
+
+                <p>
+                  One important adjustment is the ray sampling range.
+                  The near and far boundaries used for Lego are
+                  not directly transferable to my own dataset,
+                  since the camera distances and world coordinate
+                  scale are different.
+                  After experimentation, I selected
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \boxed{
+                  s_{\mathrm{near}}=0.3,
+                  \qquad
+                  s_{\mathrm{far}}=0.7
+                  }
+                  \]
+                </div>
+
+                <p>
+                  I used 64 samples per ray, a batch size of
+                  4096 rays, and a learning rate of
+                  \(5\times10^{-4}\), while keeping the
+                  remaining model configuration consistent
+                  with the previous experiment.
+                  The model was again trained for 5000 iterations.
+                </p>
+
+                <p>
+                  However, my first attempt failed to produce
+                  a meaningful reconstruction.
+                  The validation PSNR remained very low,
+                  and the rendered images were almost blank.
+                  This led me to revisit the quality of
+                  the captured dataset rather than simply
+                  increasing the training duration.
+                </p>
+
+                <p>
+                  After inspecting the source images, I noticed
+                  several potential problems.
+                  The pine cones occupied only a small portion
+                  of many frames, while large background regions
+                  dominated the images.
+                  In addition, the camera viewpoints did not
+                  provide sufficient variation around the object,
+                  limiting the available multi view constraints.
+                </p>
+
+                <p>
+                  These issues are particularly important for NeRF.
+                  Since the model is optimized through image
+                  reconstruction, it relies on overlapping
+                  observations from different camera poses
+                  to infer a consistent volumetric scene.
+                  Insufficient viewpoint coverage makes the
+                  reconstruction problem more ambiguous,
+                  while large background regions can dominate
+                  the pixelwise training objective.
+                </p>
+
+                <p>
+                  I therefore reshot the dataset, keeping the
+                  objects more prominent within each frame,
+                  improving the viewpoint coverage, and
+                  moving the camera around the scene in
+                  a more complete circular trajectory.
+                  The revised dataset is shown below.
+                </p>
+
+                <div class="result-box">
+
+                  <div class="thumb large-box">
+                    <img
+                      src="media/image.png"
+                      alt="Revised multi view dataset of my pine cones"
+                    >
+                    <div class="caption">
+                      Revised multi view dataset after debugging
+                    </div>
+                  </div>
+
+                </div>
+
+                <p>
+                  With the revised data, training produced
+                  more recognizable results, although the
+                  final reconstruction quality remained
+                  noticeably below that of the synthetic
+                  Lego experiment.
+                </p>
+
+              </li>
+
+
+              <!-- Training Progression -->
+
+              <li>
+
+                <p>
+                  The following images show the reconstruction
+                  progress throughout training on the revised
+                  dataset.
+                </p>
+
+                <div class="result-box">
+
+                  <div class="thumb">
+                    <img
+                      src="media/val_iter_1.png"
+                      alt="Own dataset rendering at iteration 1"
+                    >
+                    <div class="caption">Iteration 1</div>
+                  </div>
+
+                  <div class="thumb">
+                    <img
+                      src="media/val_iter_250.png"
+                      alt="Own dataset rendering at iteration 250"
+                    >
+                    <div class="caption">Iteration 250</div>
+                  </div>
+
+                  <div class="thumb">
+                    <img
+                      src="media/val_iter_500.png"
+                      alt="Own dataset rendering at iteration 500"
+                    >
+                    <div class="caption">Iteration 500</div>
+                  </div>
+
+                  <div class="thumb">
+                    <img
+                      src="media/val_iter_1000.png"
+                      alt="Own dataset rendering at iteration 1000"
+                    >
+                    <div class="caption">Iteration 1000</div>
+                  </div>
+
+                  <div class="thumb">
+                    <img
+                      src="media/val_iter_2750.png"
+                      alt="Own dataset rendering at iteration 2750"
+                    >
+                    <div class="caption">Iteration 2750</div>
+                  </div>
+
+                  <div class="thumb">
+                    <img
+                      src="media/val_iter_5000.png"
+                      alt="Own dataset rendering at iteration 5000"
+                    >
+                    <div class="caption">Iteration 5000</div>
+                  </div>
+
+                </div>
+
+                <p>
+                  Compared with the initial failed attempt,
+                  the model now gradually learns recognizable
+                  scene structure.
+                  However, the rendered results still contain
+                  noticeable artifacts and do not fully reproduce
+                  the appearance of the original objects.
+                </p>
+
+                <p>
+                  I also recorded both the validation PSNR
+                  and the training reconstruction loss
+                  throughout optimization.
+                </p>
+
+                <div class="result-box">
+
+                  <div class="thumb large-box">
+                    <img
+                      src="media/Traing_PSNRR.png"
+                      alt="Validation PSNR curve for my own NeRF dataset"
+                    >
+                    <div class="caption">
+                      Validation PSNR during training
+                    </div>
+                  </div>
+
+                  <div class="thumb large-box">
+                    <img
+                      src="media/Training_loss.png"
+                      alt="Training loss curve for my own NeRF dataset"
+                    >
+                    <div class="caption">
+                      Training reconstruction loss
+                    </div>
+                  </div>
+
+                </div>
+
+                <p>
+                  An interesting observation is that the
+                  training loss continues to decrease,
+                  while the validation PSNR reaches a peak
+                  and subsequently declines.
+                  This suggests that improving reconstruction
+                  on the observed training rays does not
+                  necessarily translate into better performance
+                  on unseen viewpoints.
+                </p>
+
+                <p>
+                  Several factors may contribute to this
+                  behavior, including limited viewpoint
+                  coverage, imperfect camera pose estimation,
+                  background interference, and differences
+                  in lighting or exposure between images.
+                  The current experiment does not isolate
+                  a single cause, but it highlights the
+                  importance of dataset quality in real
+                  world NeRF reconstruction.
+                </p>
+
+                <p>
+                  Finally, I rendered a sequence of novel
+                  viewpoints around the reconstructed scene
+                  using the trained model.
+                </p>
+
+                <div class="result-box">
+
+                  <div class="thumb large-box">
+                    <img
+                      src="media/output4.gif"
+                      alt="Novel view synthesis of my own reconstructed scene"
+                    >
+                    <div class="caption">
+                      Spherical rendering of my own dataset
+                    </div>
+                  </div>
+
+                </div>
+
+                <p>
+                  Although the reconstruction is still imperfect,
+                  this experiment provides a useful contrast
+                  with the synthetic Lego scene.
+                  It demonstrates that successful NeRF training
+                  depends not only on the architecture and
+                  optimization procedure, but also on accurate
+                  camera calibration, sufficient viewpoint
+                  coverage, and consistent image observations.
+                </p>
+
+              </li>
+
+            </ol>
+
           </div>
         </div>
       </div>
