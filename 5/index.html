@@ -7,7 +7,7 @@
   <meta name="description" content="CS180/280A Project 4: Neural Radiance Field!" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
   <style>
     /* ------------------------------
        Theme & Reset
@@ -202,9 +202,52 @@
       color: var(--muted);
       margin-top: 6px;
     }
+
+    .project-main .equation-block {
+      position: relative;
+      width: min(100%, 780px);
+      margin: 20px auto;
+      padding: 17px 22px;
+      overflow-x: auto;
+      border: 1px solid color-mix(in srgb, var(--project-accent) 24%, var(--project-border));
+      border-radius: 13px;
+      background: linear-gradient(
+        135deg,
+        color-mix(in srgb, var(--project-accent-soft) 70%, var(--project-paper)),
+        var(--project-paper)
+      );
+      color: var(--project-text);
+      text-align: center;
+      scrollbar-width: thin;
+    }
+
+    .project-main .equation-block mjx-container {
+      margin: 0 !important;
+      color: var(--project-text);
+      font-size: clamp(.92rem, 1.4vw, 1.08rem) !important;
+    }
+
+    @media (max-width: 760px) {
+      .project-main .equation-block {
+        margin: 15px 0;
+        padding: 14px 12px;
+      }
+    }
   </style>
   <link rel="stylesheet" href="../portfolio-polish.css">
   <link rel="stylesheet" href="../project-detail.css?v=20261004b">
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['\\(', '\\)']],
+        displayMath: [['\\[', '\\]']]
+      },
+      options: {
+        skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      }
+    };
+  </script>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
 </head>
     
 <body>
@@ -223,124 +266,501 @@
 
   <main class="wrap">
     <h1 class="page-title">Neural Radiance Field!</h1>
-    <p class="lead">This project aims to build a simple neural radiance field</span>.</p>
+    <p class="lead">This project aims to build a simple neural radiance field.</p>
     
     <!-- P1 -->
-    <section class="panel" aria-labelledby="sec-simple">
+    <section class="panel" aria-labelledby="sec-calibration">
       <div class="panel-hd">
-        <h2 id="sec-simple">Part 0: Calibrating Your Camera and Capturing a 3D Scan</h2>
+        <h2 id="sec-calibration">Part 0: Calibrating Your Camera and Capturing a 3D Scan</h2>
         <span class="muted">4 sections in total</span>
       </div>
       <div class="panel-bd">
-        <!-- Small step box -->
+
+        <!-- ====================================================== -->
+        <!-- Part 0.1 Camera Geometry and Intrinsic Calibration     -->
+        <!-- ====================================================== -->
+
         <div class="mini-box" id="0.1">
           <div class="mini-hd">
             <span>Part 0</span>
             <span class="hint">0.1</span>
-            <button class="mini-toggle" type="button" data-target="#0.1-bo">Hide</button>
+            <button class="mini-toggle" type="button"
+                    data-target="#0.1-body">Hide</button>
           </div>
+
           <div class="mini-bd" id="0.1-body">
             <ol>
-              <li><p>To calibrate my camera and get its parameters, I printed out the calibration tags fetched from the course project website, used my iphone to took 49 pictures of it from 
-                    muitiple angles and perspectives, and fed the source images to a python script to calculate the camera intrinsics and distortion coefficients</p>
-                  <div class="result-box">
-                    <div class="thumb large-box">
-                      <img src="media/calibration_dataset.png" alt="Box filter result 1">
-                      <div class="caption">my calibration dataset</div>
-                    </div>
-                    <div class="thumb large-box">
-                      <img src="media/calibration_result.png" alt="Box filter result 1">
-                      <div class="caption">my calibration result</div>
+
+              <li>
+
+                <p>
+                  Before training a NeRF, we need to know how every training image is related
+                  to the 3D scene. This requires understanding the geometry of the camera.
+                  A 3D point is first transformed from the world coordinate system into the
+                  camera coordinate system, and is then projected onto the image plane.
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \boxed{
+                  s
+                  \begin{bmatrix}
+                  u\\
+                  v\\
+                  1
+                  \end{bmatrix}
+                  =
+                  K
+                  \begin{bmatrix}
+                  R &amp; t
+                  \end{bmatrix}
+                  \begin{bmatrix}
+                  X\\
+                  Y\\
+                  Z\\
+                  1
+                  \end{bmatrix}
+                  }
+                  \]
+                </div>
+
+                <p>
+                  Here, \(K\) contains the intrinsic parameters of the camera, while
+                  \(R\) and \(t\) describe its orientation and position relative to the
+                  world coordinate system.
+                </p>
+
+                <p>
+                  The intrinsic matrix is commonly written as
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  K=
+                  \begin{bmatrix}
+                  f_x &amp; 0 &amp; c_x\\
+                  0 &amp; f_y &amp; c_y\\
+                  0 &amp; 0 &amp; 1
+                  \end{bmatrix}
+                  \]
+                </div>
+
+                <p>
+                  where \(f_x\) and \(f_y\) describe the focal length in pixel units,
+                  and \((c_x,c_y)\) gives the principal point.
+                  In practice, real lenses also introduce geometric distortion, so the
+                  distortion coefficients must be estimated together with the intrinsic
+                  matrix.
+                </p>
+
+                <p>
+                  To estimate these parameters, I printed the ArUco calibration target
+                  provided by the course and captured 49 images using my iPhone from
+                  different viewpoints, distances, and orientations.
+                  Since the physical geometry of the calibration board is known, its
+                  detected image locations provide 3D to 2D correspondences that can be
+                  used to estimate the camera intrinsics and lens distortion.
+                </p>
+
+                <div class="result-box">
+
+                  <div class="thumb large-box">
+                    <img
+                      src="media/calibration_dataset.png"
+                      alt="Camera calibration images captured from different viewpoints"
+                    >
+                    <div class="caption">
+                      Camera calibration dataset
                     </div>
                   </div>
-                <p>It is proven that the calibration result is precise as the reprojction error is just 0.6337 pixel. 
-                    the camera configuration is then saved to camera_params.npz for further usage.</p>
+
+                  <div class="thumb large-box">
+                    <img
+                      src="media/calibration_result.png"
+                      alt="Estimated camera intrinsic parameters and distortion coefficients"
+                    >
+                    <div class="caption">
+                      Estimated camera parameters
+                    </div>
+                  </div>
+
+                </div>
+
+                <p>
+                  The resulting calibration produced a reprojection error of
+                  \(0.6337\) pixels. Reprojection error measures the average discrepancy
+                  between the observed calibration points and the locations predicted by
+                  the estimated camera model.
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  e_{\mathrm{reproj}}
+                  =
+                  \frac{1}{N}
+                  \sum_{i=1}^{N}
+                  \left\|
+                  \mathbf p_i
+                  -
+                  \hat{\mathbf p}_i
+                  \right\|_2
+                  \]
+                </div>
+
+                <p>
+                  A relatively small reprojection error indicates that the estimated
+                  camera model explains the observed calibration points well.
+                  The intrinsic matrix and distortion coefficients were then saved in
+                  <code>camera_params.npz</code> and reused for the following stages.
+                </p>
+
+                <p>
+                  In more general multi-view reconstruction pipelines, camera motion can
+                  also be recovered from image correspondences through epipolar geometry,
+                  Essential Matrices, and Structure from Motion.
+                  In this project, however, the known geometry of the ArUco target allows
+                  us to recover the required camera parameters more directly through
+                  calibration and PnP.
+                </p>
+
               </li>
+
             </ol>
           </div>
         </div>
-        
-        <!-- Small step box -->
+
+
+        <!-- ====================================================== -->
+        <!-- Part 0.2 Multi-view Data Collection                    -->
+        <!-- ====================================================== -->
+
         <div class="mini-box" id="0.2">
           <div class="mini-hd">
             <span>Part 0</span>
             <span class="hint">0.2</span>
-            <button class="mini-toggle" type="button" data-target="#0.2-bo">Hide</button>
+            <button class="mini-toggle" type="button"
+                    data-target="#0.2-body">Hide</button>
           </div>
+
           <div class="mini-bd" id="0.2-body">
             <ol>
+
               <li>
-                <p>For Nerf dataset preparation, I took 52 pictures of two pine cones together with my ArUco tag from multiple 
-                    angles and perspectives to serve as the dataset for Nerf construction</p>
-                  <div class="result-box">    
-                    <div class="thumb large-box">
-                      <img src="media/Nerf_dataset1.png" alt="Box filter result 1">
-                      <div class="caption">my Nerf source dataset</div>
-                    </div>
-                    <div class="thumb large-box">
-                      <img src="media/Nerf_dataset2.png" alt="Box filter result 1">
-                      <div class="caption">my Nerf source dataset</div>
+
+                <p>
+                  With the camera intrinsics calibrated, the next step is to collect the
+                  multi-view images that will later supervise the NeRF.
+                  I chose two pine cones as the scene and captured 52 images from different
+                  viewpoints while keeping an ArUco marker visible in the scene.
+                </p>
+
+                <p>
+                  Multiple viewpoints are essential because a single image does not
+                  uniquely determine the 3D structure of a scene.
+                  Under perspective projection, different 3D points along the same camera
+                  ray can project to the same image location.
+                  Observations from different camera centers provide the parallax needed
+                  to constrain the underlying geometry.
+                </p>
+
+                <p>
+                  Classical stereo methods explicitly recover depth by matching
+                  corresponding image points across multiple views.
+                  NeRF takes a different approach.
+                  It does not explicitly triangulate every scene point before training.
+                  Instead, it optimizes a continuous volumetric scene representation so
+                  that rendered views agree with all observed training images.
+                </p>
+
+                <p>
+                  Nevertheless, NeRF still requires the camera corresponding to each
+                  image to be known.
+                  Therefore, the ArUco marker is included in the captured images so that
+                  its known 3D geometry can later be used to estimate the camera pose of
+                  each frame.
+                </p>
+
+                <div class="result-box">
+
+                  <div class="thumb large-box">
+                    <img
+                      src="media/Nerf_dataset1.png"
+                      alt="First subset of the multi-view NeRF dataset"
+                    >
+                    <div class="caption">
+                      Multi-view NeRF source images
                     </div>
                   </div>
+
+                  <div class="thumb large-box">
+                    <img
+                      src="media/Nerf_dataset2.png"
+                      alt="Second subset of the multi-view NeRF dataset"
+                    >
+                    <div class="caption">
+                      Additional camera viewpoints
+                    </div>
+                  </div>
+
+                </div>
+
+                <p>
+                  The goal during data collection is to obtain sufficient viewpoint
+                  coverage around the object while maintaining a consistent and mostly
+                  static scene.
+                  Better coverage gives the model stronger constraints when learning the
+                  geometry and appearance of the object from different viewing directions.
+                </p>
+
               </li>
+
             </ol>
           </div>
+        </div>
 
 
-        <!-- Small step box -->
+        <!-- ====================================================== -->
+        <!-- Part 0.3 Extrinsic Estimation with PnP                 -->
+        <!-- ====================================================== -->
+
         <div class="mini-box" id="0.3">
           <div class="mini-hd">
             <span>Part 0</span>
             <span class="hint">0.3</span>
-            <button class="mini-toggle" type="button" data-target="#0.3-bo">Hide</button>
+            <button class="mini-toggle" type="button"
+                    data-target="#0.3-body">Hide</button>
           </div>
+
           <div class="mini-bd" id="0.3-body">
             <ol>
-              <li><p>After figuring out the camera intrinsics and collecting the Nerf source dataset, I wrote a 
-                      script to figure out the extrinsic parameter w.r.t each Nerf source picture, and visualized them 
-                      using the python package Viser.</p>
-                  <div class="result-box">
-                    <div class="thumb large-box">
-                      <img src="media/Viser1.png" alt="Box filter result 1">
-                      <div class="caption">Angle 1</div>
-                    </div>
-                    <div class="thumb large-box">
-                      <img src="media/Viser2.png" alt="Box filter result 1">
-                      <div class="caption">Angle 2</div>
+
+              <li>
+
+                <p>
+                  The intrinsic matrix \(K\) describes the internal geometry of the camera,
+                  but NeRF also needs to know where the camera was located when each image
+                  was captured.
+                  These per-image parameters are the camera extrinsics.
+                </p>
+
+                <p>
+                  Because the 3D coordinates of the ArUco corners are known, and their
+                  corresponding 2D image coordinates can be detected, each image gives a
+                  set of 3D to 2D correspondences.
+                  This allows us to solve a Perspective-n-Point problem and recover
+                  the camera rotation \(R\) and translation \(t\).
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \boxed{
+                  \min_{R,t}
+                  \sum_i
+                  \left\|
+                  \mathbf p_i
+                  -
+                  \pi
+                  \left(
+                  K
+                  \left(
+                  R\mathbf X_i+t
+                  \right)
+                  \right)
+                  \right\|_2^2
+                  }
+                  \]
+                </div>
+
+                <p>
+                  Here, \(\mathbf X_i\) is a known 3D point on the ArUco marker,
+                  \(\mathbf p_i\) is its detected pixel location, and
+                  \(\pi\) denotes perspective projection.
+                  The objective is to find the camera pose whose projected 3D marker
+                  points best agree with the observed image locations.
+                </p>
+
+                <p>
+                  The pose returned by PnP naturally describes the transformation from
+                  world coordinates to camera coordinates.
+                  Later, when constructing NeRF rays, it is convenient to use the inverse
+                  transformation so that points and directions can be mapped from the
+                  camera coordinate frame back into the world coordinate frame.
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  T_{\mathrm{w2c}}
+                  =
+                  \begin{bmatrix}
+                  R &amp; t\\
+                  0 &amp; 1
+                  \end{bmatrix}
+                  \]
+                </div>
+
+                <div class="equation-block">
+                  \[
+                  \boxed{
+                  T_{\mathrm{c2w}}
+                  =
+                  T_{\mathrm{w2c}}^{-1}
+                  }
+                  \]
+                </div>
+
+                <p>
+                  I estimated the extrinsic parameters for all NeRF source images and
+                  visualized the resulting cameras in Viser.
+                  Each camera frustum should be positioned around the scene and oriented
+                  toward the region containing the ArUco marker and the pine cones.
+                </p>
+
+                <div class="result-box">
+
+                  <div class="thumb large-box">
+                    <img
+                      src="media/Viser1.png"
+                      alt="Visualization of recovered camera poses in Viser from one viewpoint"
+                    >
+                    <div class="caption">
+                      Recovered camera poses viewed from angle 1
                     </div>
                   </div>
-                <p>It is shown that the extrinsic parameters are correct, as the rays are pointed towards the world coordinate center.</p>
+
+                  <div class="thumb large-box">
+                    <img
+                      src="media/Viser2.png"
+                      alt="Visualization of recovered camera poses in Viser from another viewpoint"
+                    >
+                    <div class="caption">
+                      Recovered camera poses viewed from angle 2
+                    </div>
+                  </div>
+
+                </div>
+
+                <p>
+                  The visualization provides an important sanity check for the recovered
+                  coordinate system and camera poses.
+                  The camera frustums surround the scene and their viewing directions
+                  converge toward the target region, which is consistent with how the
+                  images were captured.
+                </p>
+
               </li>
+
             </ol>
           </div>
         </div>
-          
-        <!-- Small step box -->
+
+
+        <!-- ====================================================== -->
+        <!-- Part 0.4 Undistortion and Dataset Packaging            -->
+        <!-- ====================================================== -->
+
         <div class="mini-box" id="0.4">
           <div class="mini-hd">
             <span>Part 0</span>
             <span class="hint">0.4</span>
-            <button class="mini-toggle" type="button" data-target="#0.4-bo">Hide</button>
+            <button class="mini-toggle" type="button"
+                    data-target="#0.4-body">Hide</button>
           </div>
+
           <div class="mini-bd" id="0.4-body">
             <ol>
-              <li><p>Finally I undistorted my images and package everything into a dataset format that I can use 
-                for training NeRF in the later parts of this project.</p>
-                <div class="result-box">    
-                    <div class="thumb large-box">
-                      <img src="media/final_dataset.png" alt="Box filter result 1">
-                      <div class="caption">Final dataset preparation for Nerf</div>
+
+              <li>
+
+                <p>
+                  Before using the captured images for NeRF training, I undistorted them
+                  using the distortion coefficients obtained during camera calibration.
+                </p>
+
+                <p>
+                  This step is important because the ideal pinhole camera model assumes
+                  that image coordinates follow perspective projection.
+                  Real lenses introduce radial and tangential distortion, which causes
+                  observed pixels to deviate from this model.
+                  If the images are not corrected, the rays constructed from the
+                  intrinsic matrix will not perfectly correspond to the observed pixels.
+                </p>
+
+                <p>
+                  After undistortion, each training image is paired with the calibrated
+                  intrinsic matrix and its corresponding camera-to-world transformation.
+                  These quantities provide everything required to associate each image
+                  pixel with a ray in the 3D scene.
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \boxed{
+                  \text{Training Sample}
+                  =
+                  \left(
+                  I_i,\,
+                  K,\,
+                  T_{\mathrm{c2w}}^{(i)}
+                  \right)
+                  }
+                  \]
+                </div>
+
+                <p>
+                  Conceptually, this completes the geometric preparation stage.
+                  We now have a collection of calibrated multi-view images whose camera
+                  positions and viewing directions are known.
+                  In the later parts of the project, these parameters will be used to
+                  convert image pixels into 3D rays and to train the neural radiance field
+                  through differentiable rendering.
+                </p>
+
+                <div class="result-box">
+
+                  <div class="thumb large-box">
+                    <img
+                      src="media/final_dataset.png"
+                      alt="Final calibrated and undistorted dataset prepared for NeRF training"
+                    >
+                    <div class="caption">
+                      Final calibrated dataset for NeRF training
                     </div>
                   </div>
+
+                </div>
+
+                <p>
+                  This pipeline can be summarized as
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \boxed{
+                  \text{Camera Calibration}
+                  \rightarrow
+                  \text{Multi-view Capture}
+                  \rightarrow
+                  \text{PnP Pose Estimation}
+                  \rightarrow
+                  \text{Undistortion}
+                  \rightarrow
+                  \text{Calibrated NeRF Dataset}
+                  }
+                  \]
+                </div>
+
               </li>
+
             </ol>
           </div>
-        </div>  
+        </div>
+
+      </div>
     </section>
-    <!---------------- P2 ----------->
-    <section class="panel" aria-labelledby="sec-simple">
+    <!-- Part 1 -->
+    <section class="panel" aria-labelledby="sec-neural-field">
       <div class="panel-hd">
-        <h2 id="sec-simple">Part 1: Fit a Neural Field to a 2D Image</h2>
+        <h2 id="sec-neural-field">Part 1: Fit a Neural Field to a 2D Image</h2>
         <span class="muted">1 section in total</span>
       </div>
       <div class="panel-bd">
@@ -473,12 +893,13 @@ Overall, L controls how much fine detail the model can represent, and W controls
             </ol>
           </div>
         </div>
+      </div>
     </section>   
           
-    <!---------------- P3 ----------->
-    <section class="panel" aria-labelledby="sec-simple">
+    <!-- Part 2 -->
+    <section class="panel" aria-labelledby="sec-nerf">
       <div class="panel-hd">
-        <h2 id="sec-simple">Part 2: Fit a Neural Radiance Field from Multi-view Images</h2>
+        <h2 id="sec-nerf">Part 2: Fit a Neural Radiance Field from Multi-view Images</h2>
         <span class="muted">1 section in total</span>
       </div>
       <div class="panel-bd">
@@ -672,6 +1093,7 @@ Overall, L controls how much fine detail the model can represent, and W controls
             </ol>
           </div>
         </div>
+      </div>
     </section> 
   </main>
         
