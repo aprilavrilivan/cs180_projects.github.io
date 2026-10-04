@@ -227,10 +227,42 @@
       font-size: clamp(.92rem, 1.4vw, 1.08rem) !important;
     }
 
+    .project-main .neural-field-sections {
+      margin: 0;
+    }
+
+    .project-main .neural-field-sections > li {
+      padding-left: 4px;
+    }
+
+    .project-main .neural-field-sections > li + li {
+      margin-top: 54px;
+      padding-top: 48px;
+      border-top: 1px solid var(--project-border);
+    }
+
+    .project-main .neural-field-sections > li > p:first-child {
+      margin-top: 0;
+    }
+
+    .project-main .neural-field-sections > li > p > strong:only-child {
+      display: inline-block;
+      color: var(--project-accent-dark);
+      font-size: .78rem;
+      font-weight: 800;
+      letter-spacing: .07em;
+      text-transform: uppercase;
+    }
+
     @media (max-width: 760px) {
       .project-main .equation-block {
         margin: 15px 0;
         padding: 14px 12px;
+      }
+
+      .project-main .neural-field-sections > li + li {
+        margin-top: 42px;
+        padding-top: 36px;
       }
     }
   </style>
@@ -757,144 +789,661 @@
 
       </div>
     </section>
+
     <!-- Part 1 -->
+
     <section class="panel" aria-labelledby="sec-neural-field">
+
       <div class="panel-hd">
-        <h2 id="sec-neural-field">Part 1: Fit a Neural Field to a 2D Image</h2>
+        <h2 id="sec-neural-field">
+          Part 1. Fitting a Neural Field to a 2D Image
+        </h2>
         <span class="muted">1 section in total</span>
       </div>
+
       <div class="panel-bd">
-        <!-- Small step box -->
+
         <div class="mini-box" id="1.1">
+
           <div class="mini-hd">
-            <span>Part 1</span>
             <span class="hint">1.1</span>
-            <button class="mini-toggle" type="button" data-target="#1.1-bo">Hide</button>
+            <span>2D Neural Field</span>
+
+            <button class="mini-toggle" type="button"
+                    data-target="#1.1-body">Hide</button>
           </div>
+
           <div class="mini-bd" id="1.1-body">
-            <ol>
-              <li><p>In this section I trained a basic neural network to realize image recovering from pixel coordinates.
-                  The network has 4 layers, each with width of 256, trained using a learning rate of 1e-2. To help the 
-                  network learning more details of the picture, I defined the highest positional encoding frequency order to be 
-                  10.</p>
-                  <div class="result-box">
-                    <div class="thumb large-box">
-                      <img src="media/modelArchietecture.png" alt="Box filter result 1">
-                      <div class="caption">My model archietecture and hyperparameters</div>
-                    </div>
-                  </div>
-              </li>
-              <li><p>I used this configuration to train the fox image and my own image,here are the results of my training progression:</p> 
-                <p>FOX IMAGE</p>
-                <div class="result-box">
-                    <div class="thumb large-box">
-                      <img src="media/fox.jpg" alt="Box filter result 1">
-                      <div class="caption">original fox picture</div>
-                    </div>
-                    <div class="thumb large-box">
-                      <img src="media/fox_final.png" alt="Box filter result 1">
-                      <div class="caption">fox picture predicted by my model</div>
-                    </div>
-                  </div>
-                  <div class="result-box">
-                    <div class="thumb">
-                      <img src="media/fox_iter_0001.png" alt="Box filter result 1">
-                      <div class="caption">iteration 1</div>
-                    </div>
-                    <div class="thumb">
-                      <img src="media/fox_iter_0050.png" alt="Box filter result 1">
-                      <div class="caption">iteration 50</div>
-                    </div>
-                    <div class="thumb">
-                      <img src="media/fox_iter_0100.png" alt="Box filter result 1">
-                      <div class="caption">iteration 100</div>
-                    </div>
-                    <div class="thumb">
-                      <img src="media/fox_iter_0200.png" alt="Box filter result 1">
-                      <div class="caption">iteration 200</div>
-                    </div>
-                  </div>
-                <p>BREAKFAST IMAGE</p>
-                <div class="result-box">
-                    <div class="thumb large-box">
-                      <img src="media/breakfast.png" alt="Box filter result 1">
-                      <div class="caption">original fox picture</div>
-                    </div>
-                    <div class="thumb large-box">
-                      <img src="media/breakfast_final.png" alt="Box filter result 1">
-                      <div class="caption">fox picture predicted by my model</div>
-                    </div>
-                  </div>
-                  <div class="result-box">
-                    <div class="thumb">
-                      <img src="media/breakfast_iter_0001.png" alt="Box filter result 1">
-                      <div class="caption">iteration 1</div>
-                    </div>
-                    <div class="thumb">
-                      <img src="media/breakfast_iter_0050.png" alt="Box filter result 1">
-                      <div class="caption">iteration 50</div>
-                    </div>
-                    <div class="thumb">
-                      <img src="media/breakfast_iter_0100.png" alt="Box filter result 1">
-                      <div class="caption">iteration 100</div>
-                    </div>
-                    <div class="thumb">
-                      <img src="media/breakfast_iter_0300.png" alt="Box filter result 1">
-                      <div class="caption">iteration 200</div>
-                    </div>
-                  </div>
-              </li>
+
+            <ol class="neural-field-sections">
+
+              <!-- ============================================ -->
+              <!-- 01 Neural Field and Positional Encoding      -->
+              <!-- ============================================ -->
+
               <li>
+
                 <p>
-                  Here are the corresponding PSNR curves:
+                  Before moving on to 3D NeRF, we first explore a simpler
+                  problem. Can a neural network represent an entire 2D image
+                  as a continuous function?
                 </p>
+
+                <p>
+                  Conventionally, an image is stored as a discrete array of
+                  RGB values. A Neural Field takes a different approach.
+                  Instead of directly storing the color of every pixel,
+                  we train a coordinate based MLP that maps a spatial
+                  location to its corresponding color.
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \boxed{
+                  F_\theta:(u,v)\longrightarrow(r,g,b)
+                  }
+                  \]
+                </div>
+
+                <p>
+                  Here, \((u,v)\) denotes a normalized pixel coordinate,
+                  and \((r,g,b)\) is its corresponding RGB color.
+                  By learning this mapping, the image is implicitly
+                  represented by the parameters of the network.
+                  We can then reconstruct the image by querying the
+                  trained MLP at all pixel coordinates.
+                </p>
+
+                <p>
+                  However, directly feeding raw coordinates into a standard
+                  MLP introduces a challenge. Neural networks tend to
+                  learn smooth, low frequency functions more easily than
+                  rapidly changing, high frequency patterns.
+                  This phenomenon is commonly referred to as
+                  <strong>spectral bias</strong>.
+                </p>
+
+                <p>
+                  For image reconstruction, this means that a standard MLP
+                  may recover large color regions and coarse structures
+                  relatively easily, while struggling to reproduce sharp
+                  edges and fine textures.
+                </p>
+
+                <p>
+                  To address this limitation, NeRF introduces
+                  <strong>Sinusoidal Positional Encoding</strong>.
+                  Rather than using the original coordinates alone,
+                  we first project them into a higher dimensional space
+                  using sinusoidal functions at multiple frequencies.
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \begin{aligned}
+                  \gamma_L(p)=
+                  \big[
+                  &amp;p,\\
+                  &amp;\sin(2^0\pi p),\cos(2^0\pi p),\\
+                  &amp;\sin(2^1\pi p),\cos(2^1\pi p),\\
+                  &amp;\ldots,\\
+                  &amp;\sin(2^{L-1}\pi p),
+                  \cos(2^{L-1}\pi p)
+                  \big]
+                  \end{aligned}
+                  \]
+                </div>
+
+                <p>
+                  Here, \(p=(u,v)\), and \(L\) controls the number of
+                  frequency bands. The encoding provides the MLP with
+                  explicit features at different spatial frequencies,
+                  making it easier to learn both smooth regions and
+                  rapidly varying details.
+                </p>
+
+                <p>
+                  In my implementation, I use \(L=10\).
+                  Since each frequency contributes both sine and cosine
+                  features for the two input coordinates, while also
+                  retaining the original coordinates, the input dimension
+                  becomes
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  D_{\mathrm{input}}
+                  =
+                  2+2\times2L
+                  =
+                  42
+                  \]
+                </div>
+
+                <p>
+                  I implemented a four layer MLP with a hidden width
+                  of 256 and a learning rate of \(10^{-2}\).
+                  The network takes the positionally encoded coordinates
+                  as input and predicts normalized RGB values.
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \boxed{
+                  \hat{\mathbf c}
+                  =
+                  F_\theta(\gamma_L(u,v))
+                  }
+                  \]
+                </div>
+
+                <p>
+                  A final Sigmoid activation constrains the output
+                  to the valid normalized RGB range between 0 and 1.
+                  The model architecture and training configuration
+                  are shown below.
+                </p>
+
                 <div class="result-box">
-                    <div class="thumb large-box">
-                      <img src="media/fox_psnr_curve.png" alt="Box filter result 1">
-                      <div class="caption">PSNR for fox picture</div>
+                  <div class="thumb large-box">
+
+                    <img
+                      src="media/modelArchietecture.png"
+                      alt="Neural field model architecture and hyperparameters"
+                    >
+
+                    <div class="caption">
+                      MLP architecture and training configuration
                     </div>
-                    <div class="thumb large-box">
-                      <img src="media/breakfast_psnr_curve.png" alt="Box filter result 1">
-                      <div class="caption">PSNR for breakfast picture</div>
-                    </div>
+
                   </div>
+                </div>
+
               </li>
+
+
+              <!-- ============================================ -->
+              <!-- 02 Training and Reconstruction               -->
+              <!-- ============================================ -->
+
               <li>
+
                 <p>
-                  Finally I compared two choices of max positional encoding frequency (L=4; L=10) and 2 choices of width (W=64; W=256)
+                  To train the neural field, I randomly sample a batch
+                  of pixel coordinates from the target image at each
+                  iteration, together with their corresponding
+                  ground truth RGB values.
                 </p>
+
+                <p>
+                  Both the coordinates and RGB values are normalized
+                  to the range between 0 and 1.
+                  The MLP is then optimized to minimize the Mean
+                  Squared Error between its predicted colors and
+                  the original pixel colors.
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \boxed{
+                  \mathcal L(\theta)
+                  =
+                  \frac{1}{N}
+                  \sum_{i=1}^{N}
+                  \left\|
+                  F_\theta(\gamma_L(\mathbf p_i))
+                  -
+                  \mathbf c_i
+                  \right\|_2^2
+                  }
+                  \]
+                </div>
+
+                <p>
+                  Here, \(\mathbf p_i\) is a sampled pixel coordinate,
+                  \(\mathbf c_i\) is its ground truth RGB value, and
+                  \(N\) is the number of sampled pixels.
+                  The expression represents the squared RGB error
+                  averaged over sampled pixels.
+                </p>
+
+                <p>
+                  During training, the network gradually learns
+                  the spatial color distribution of the image.
+                  To visualize this process, I periodically queried
+                  the model over the full image coordinate grid
+                  and reconstructed the corresponding image.
+                </p>
+
+                <p>
+                  I tested this configuration on two images,
+                  the provided Fox image and a Breakfast image
+                  of my own choice.
+                </p>
+
+
+                <p>
+                  <strong>Experiment 1. Fox Image Reconstruction</strong>
+                </p>
+
                 <div class="result-box">
-                    <div class="thumb">
-                      <img src="media/final_L4_W64.png" alt="Box filter result 1">
-                      <div class="caption">final result for L=4 and W=64</div>
-                    </div>
-                    <div class="thumb">
-                      <img src="media/final_L4_W256.png" alt="Box filter result 1">
-                      <div class="caption">final result for L=4 and W=256</div>
+
+                  <div class="thumb large-box">
+                    <img
+                      src="media/fox.jpg"
+                      alt="Original fox image"
+                    >
+                    <div class="caption">
+                      Original Fox Image
                     </div>
                   </div>
-                <div class="result-box">
-                    <div class="thumb">
-                      <img src="media/final_L10_W64.png" alt="Box filter result 1">
-                      <div class="caption">final result for L=10 and W=64</div>
-                    </div>
-                    <div class="thumb">
-                      <img src="media/fox_final.png" alt="Box filter result 1">
-                      <div class="caption">final result for L=10 and W=256</div>
+
+                  <div class="thumb large-box">
+                    <img
+                      src="media/fox_final.png"
+                      alt="Fox image reconstructed by the trained neural field"
+                    >
+                    <div class="caption">
+                      Final Neural Field Reconstruction
                     </div>
                   </div>
+
+                </div>
+
                 <p>
-                  With these four settings, we can clearly see how the positional encoding frequency L and the network width W affect the reconstruction.
-When L is small (L=4), the model can only reproduce coarse, low-frequency structures, so the results look blurry even with a wider network. Increasing the width helps a bit, but the details are still missing.
-With a higher frequency (L=10), the model recovers much sharper textures. A small width (W=64) still leaves some artifacts, but using a wider network (W=256) produces the cleanest and most detailed result.
-Overall, L controls how much fine detail the model can represent, and W controls how well it can fit those details.
+                  The following images show how the reconstruction
+                  evolves throughout training.
                 </p>
+
+                <div class="result-box">
+
+                  <div class="thumb">
+                    <img
+                      src="media/fox_iter_0001.png"
+                      alt="Fox reconstruction at iteration 1"
+                    >
+                    <div class="caption">
+                      Iteration 1
+                    </div>
+                  </div>
+
+                  <div class="thumb">
+                    <img
+                      src="media/fox_iter_0050.png"
+                      alt="Fox reconstruction at iteration 50"
+                    >
+                    <div class="caption">
+                      Iteration 50
+                    </div>
+                  </div>
+
+                  <div class="thumb">
+                    <img
+                      src="media/fox_iter_0100.png"
+                      alt="Fox reconstruction at iteration 100"
+                    >
+                    <div class="caption">
+                      Iteration 100
+                    </div>
+                  </div>
+
+                  <div class="thumb">
+                    <img
+                      src="media/fox_iter_0200.png"
+                      alt="Fox reconstruction at iteration 200"
+                    >
+                    <div class="caption">
+                      Iteration 200
+                    </div>
+                  </div>
+
+                </div>
+
+                <p>
+                  At the beginning of training, the network has not yet
+                  learned the relationship between spatial coordinates
+                  and image colors, so its predictions contain little
+                  recognizable structure.
+                  As training progresses, the broad color regions
+                  and the overall shape of the fox gradually emerge.
+                  Finer details become more apparent as the model
+                  continues fitting the target image.
+                </p>
+
+
+                <p>
+                  <strong>Experiment 2. Breakfast Image Reconstruction</strong>
+                </p>
+
+                <p>
+                  I repeated the same experiment on the Breakfast image
+                  to verify that the neural field can fit a different
+                  visual composition using the same architecture.
+                </p>
+
+                <div class="result-box">
+
+                  <div class="thumb large-box">
+                    <img
+                      src="media/breakfast.png"
+                      alt="Original breakfast image"
+                    >
+                    <div class="caption">
+                      Original Breakfast Image
+                    </div>
+                  </div>
+
+                  <div class="thumb large-box">
+                    <img
+                      src="media/breakfast_final.png"
+                      alt="Breakfast image reconstructed by the trained neural field"
+                    >
+                    <div class="caption">
+                      Final Neural Field Reconstruction
+                    </div>
+                  </div>
+
+                </div>
+
+                <div class="result-box">
+
+                  <div class="thumb">
+                    <img
+                      src="media/breakfast_iter_0001.png"
+                      alt="Breakfast reconstruction at iteration 1"
+                    >
+                    <div class="caption">
+                      Iteration 1
+                    </div>
+                  </div>
+
+                  <div class="thumb">
+                    <img
+                      src="media/breakfast_iter_0050.png"
+                      alt="Breakfast reconstruction at iteration 50"
+                    >
+                    <div class="caption">
+                      Iteration 50
+                    </div>
+                  </div>
+
+                  <div class="thumb">
+                    <img
+                      src="media/breakfast_iter_0100.png"
+                      alt="Breakfast reconstruction at iteration 100"
+                    >
+                    <div class="caption">
+                      Iteration 100
+                    </div>
+                  </div>
+
+                  <div class="thumb">
+                    <img
+                      src="media/breakfast_iter_0300.png"
+                      alt="Breakfast reconstruction at iteration 300"
+                    >
+                    <div class="caption">
+                      Iteration 300
+                    </div>
+                  </div>
+
+                </div>
+
+                <p>
+                  Similar to the Fox experiment, the model progressively
+                  recovers the global color distribution and spatial
+                  structures before refining smaller visual details.
+                  These experiments demonstrate that a coordinate based
+                  MLP can represent different 2D images through their
+                  learned network parameters.
+                </p>
+
               </li>
+
+
+              <!-- ============================================ -->
+              <!-- 03 Quantitative Evaluation                   -->
+              <!-- ============================================ -->
+
+              <li>
+
+                <p>
+                  Besides visually comparing the reconstructed images,
+                  I also evaluated the reconstruction quality using
+                  Peak Signal to Noise Ratio, commonly known as PSNR.
+                </p>
+
+                <p>
+                  PSNR is derived from the pixelwise reconstruction
+                  error. For images normalized to the range between
+                  0 and 1, it can be calculated as
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \boxed{
+                  \operatorname{PSNR}
+                  =
+                  10\log_{10}
+                  \left(
+                  \frac{1}{\operatorname{MSE}}
+                  \right)
+                  }
+                  \]
+                </div>
+
+                <p>
+                  A higher PSNR indicates a smaller reconstruction
+                  error and therefore better agreement with the
+                  original image.
+                  Unlike the visual snapshots, the PSNR curves
+                  provide a quantitative view of how reconstruction
+                  quality changes throughout optimization.
+                </p>
+
+                <div class="result-box">
+
+                  <div class="thumb large-box">
+                    <img
+                      src="media/fox_psnr_curve.png"
+                      alt="Fox reconstruction PSNR curve"
+                    >
+                    <div class="caption">
+                      Fox Reconstruction PSNR
+                    </div>
+                  </div>
+
+                  <div class="thumb large-box">
+                    <img
+                      src="media/breakfast_psnr_curve.png"
+                      alt="Breakfast reconstruction PSNR curve"
+                    >
+                    <div class="caption">
+                      Breakfast Reconstruction PSNR
+                    </div>
+                  </div>
+
+                </div>
+
+                <p>
+                  The curves show the improvement in reconstruction
+                  quality as the network is optimized.
+                  Together with the intermediate images shown above,
+                  they illustrate how the MLP progressively fits
+                  the target color function through supervised
+                  coordinate based learning.
+                </p>
+
+              </li>
+
+
+              <!-- ============================================ -->
+              <!-- 04 Positional Encoding and Width Ablation     -->
+              <!-- ============================================ -->
+
+              <li>
+
+                <p>
+                  Finally, I investigated how the positional encoding
+                  frequency and network width influence reconstruction
+                  quality.
+                </p>
+
+                <p>
+                  As discussed earlier, positional encoding provides
+                  the MLP with input features at different spatial
+                  frequencies, while the network width determines
+                  its hidden feature capacity.
+                  I compared two frequency settings and two
+                  network widths, resulting in four configurations.
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  L\in\{4,10\},
+                  \qquad
+                  W\in\{64,256\}
+                  \]
+                </div>
+
+                <p>
+                  The final reconstructions under these four
+                  configurations are shown below.
+                </p>
+
+
+                <div class="result-box">
+
+                  <div class="thumb">
+                    <img
+                      src="media/final_L4_W64.png"
+                      alt="Fox reconstruction with L 4 and W 64"
+                    >
+                    <div class="caption">
+                      L = 4, W = 64
+                    </div>
+                  </div>
+
+                  <div class="thumb">
+                    <img
+                      src="media/final_L4_W256.png"
+                      alt="Fox reconstruction with L 4 and W 256"
+                    >
+                    <div class="caption">
+                      L = 4, W = 256
+                    </div>
+                  </div>
+
+                </div>
+
+
+                <div class="result-box">
+
+                  <div class="thumb">
+                    <img
+                      src="media/final_L10_W64.png"
+                      alt="Fox reconstruction with L 10 and W 64"
+                    >
+                    <div class="caption">
+                      L = 10, W = 64
+                    </div>
+                  </div>
+
+                  <div class="thumb">
+                    <img
+                      src="media/fox_final.png"
+                      alt="Fox reconstruction with L 10 and W 256"
+                    >
+                    <div class="caption">
+                      L = 10, W = 256
+                    </div>
+                  </div>
+
+                </div>
+
+
+                <p>
+                  <strong>Effect of Positional Encoding Frequency</strong>
+                </p>
+
+                <p>
+                  When \(L=4\), the positional encoding contains
+                  fewer high frequency components.
+                  The reconstructed images capture the main color
+                  distribution and broad image structures, but
+                  many fine details appear relatively smooth.
+                  Increasing the network width alone provides
+                  some improvement, but does not fully compensate
+                  for the limited frequency representation.
+                </p>
+
+                <p>
+                  Increasing the encoding level to \(L=10\)
+                  introduces additional high frequency features,
+                  allowing the MLP to fit sharper transitions,
+                  boundaries, and finer textures more effectively.
+                  This is consistent with the motivation behind
+                  using Fourier features to alleviate the
+                  spectral bias of standard MLPs.
+                </p>
+
+
+                <p>
+                  <strong>Effect of Network Width</strong>
+                </p>
+
+                <p>
+                  The width \(W\) controls the dimensionality of
+                  the hidden representations.
+                  A narrower network with \(W=64\) has fewer
+                  learnable parameters and may struggle to fit
+                  the full complexity of the target image
+                  within the same training budget.
+                </p>
+
+                <p>
+                  Increasing the width to \(W=256\) provides
+                  greater representational capacity and improves
+                  the reconstruction, particularly when combined
+                  with sufficiently rich positional encoding.
+                </p>
+
+                <p>
+                  Among the four tested configurations,
+                  \(L=10\) and \(W=256\) produced the cleanest
+                  and most detailed reconstruction.
+                </p>
+
+                <p>
+                  Overall, these experiments highlight two
+                  complementary aspects of coordinate based
+                  neural representations.
+                  Positional encoding determines which spatial
+                  frequencies are explicitly exposed to the
+                  network, while the MLP architecture determines
+                  its capacity to learn a mapping from those
+                  features to the target colors.
+                </p>
+
+                <p>
+                  This also provides a useful foundation for
+                  the following NeRF implementation.
+                  Instead of mapping 2D coordinates directly
+                  to RGB, we will extend the same idea into
+                  3D space, where a neural network predicts
+                  volumetric density and view dependent color
+                  for differentiable rendering.
+                </p>
+
+              </li>
+
             </ol>
+
           </div>
         </div>
+
       </div>
-    </section>   
+    </section>
           
     <!-- Part 2 -->
     <section class="panel" aria-labelledby="sec-nerf">
