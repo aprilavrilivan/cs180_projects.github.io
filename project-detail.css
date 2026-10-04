@@ -844,3 +844,182 @@ body.project-detail::before {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* Flat long-form layout shared by every CS180 project page */
+.project-detail .project-main.wrap {
+  width: min(100%, 1280px);
+  max-width: 1280px;
+  padding: 52px clamp(34px, 5vw, 76px) 104px;
+}
+
+.project-detail .project-main h1.page-title {
+  max-width: 960px;
+  margin-bottom: 12px;
+  font-size: clamp(2.2rem, 4.4vw, 3.65rem);
+}
+
+.project-detail .project-main p.lead {
+  max-width: 820px;
+  margin-bottom: 25px;
+}
+
+.project-detail .project-main > .actions {
+  margin-bottom: 52px !important;
+}
+
+.project-detail .project-main > section.panel {
+  position: relative;
+  width: 100%;
+  margin: 0;
+  overflow: visible;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.project-detail .project-main > section.panel + section.panel {
+  margin-top: 82px;
+  padding-top: 72px;
+  border-top: 1px solid var(--project-border);
+}
+
+.project-detail .project-main > section.panel::before {
+  display: none;
+}
+
+.project-detail .project-main .panel > .panel-hd {
+  display: block;
+  margin: 0 0 34px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+.project-detail .project-main .panel > .panel-hd h2 {
+  margin: 0;
+  font-size: clamp(1.75rem, 3vw, 2.45rem);
+  font-weight: 760;
+  line-height: 1.15;
+  letter-spacing: -.04em;
+}
+
+.project-detail .project-main .panel > .panel-hd h2::after {
+  display: block;
+  width: 42px;
+  height: 3px;
+  margin-top: 15px;
+  border-radius: 999px;
+  background: var(--project-accent);
+  content: "";
+}
+
+.project-detail .project-main .panel > .panel-hd .muted {
+  display: none;
+}
+
+.project-detail .project-main .panel > .panel-bd {
+  padding: 0;
+  background: transparent;
+}
+
+.project-detail .project-main .textbox {
+  margin: 0 0 24px;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: var(--project-muted);
+}
+
+.project-detail .project-main .mini-box {
+  margin: 0;
+  padding: 0;
+  overflow: visible;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.project-detail .project-main .mini-box + .mini-box {
+  margin-top: 58px;
+  padding-top: 50px;
+  border-top: 1px solid var(--project-border);
+}
+
+.project-detail .project-main .mini-box > .mini-hd {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 4px;
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+.project-detail .project-main .mini-box > .mini-hd .hint {
+  color: var(--project-accent-dark);
+  font-size: .7rem;
+  font-weight: 800;
+  letter-spacing: .12em;
+  line-height: 1.2;
+  text-transform: uppercase;
+}
+
+.project-detail .project-main .mini-box > .mini-hd > span:not(.hint) {
+  color: var(--project-text);
+  font-size: clamp(1.35rem, 2.4vw, 1.82rem);
+  font-weight: 750;
+  line-height: 1.24;
+  letter-spacing: -.03em;
+}
+
+.project-detail .project-main .mini-toggle {
+  display: none;
+}
+
+.project-detail .project-main .mini-box > .mini-bd {
+  display: block !important;
+  margin: 0;
+  padding: 20px 0 0 !important;
+  background: transparent;
+}
+
+.project-detail .project-main .equation-block {
+  box-shadow: none;
+}
+
+@media (max-width: 780px) {
+  .project-detail .project-main.wrap {
+    padding: 30px 18px 72px;
+  }
+
+  .project-detail .project-main > .actions {
+    margin-bottom: 42px !important;
+  }
+
+  .project-detail .project-main > section.panel + section.panel {
+    margin-top: 58px;
+    padding-top: 50px;
+  }
+
+  .project-detail .project-main .panel > .panel-hd {
+    margin-bottom: 27px;
+  }
+
+  .project-detail .project-main .mini-box + .mini-box {
+    margin-top: 44px;
+    padding-top: 38px;
+  }
+
+  .project-detail .project-main .mini-box > .mini-bd {
+    padding-top: 16px !important;
+  }
+
+  .project-detail .project-main .mini-box > .mini-hd .hint,
+  .project-detail .project-main .mini-box > .mini-hd > span:not(.hint) {
+    grid-row: auto;
+    grid-column: auto;
+  }
+}
