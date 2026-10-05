@@ -371,17 +371,22 @@
                     data-target="#0.1-body">Hide</button>
           </div>
 
+
           <div class="mini-bd calibration-study" id="0.1-body">
 
             <ol class="calibration-walkthrough">
 
               <li>
 
+                <!-- ====================================================== -->
+                <!-- Camera Geometry                                       -->
+                <!-- ====================================================== -->
+
                 <p>
                   Before training a NeRF, we need to know how every training image is
                   geometrically related to the 3D scene.
-                  A point is first transformed from the world coordinate system into the
-                  camera coordinate system, and is then projected onto the image plane.
+                  A 3D point is first transformed from the world coordinate system into
+                  the camera coordinate system, and is then projected onto the image plane.
                 </p>
 
                 <div class="equation-block">
@@ -410,14 +415,15 @@
 
                 <p>
                   Here, \(K\) contains the intrinsic parameters of the camera.
-                  The rotation \(R\) and translation \(t\) describe the camera pose
-                  relative to the world coordinate system.
-                  The scalar \(s\) accounts for the loss of depth information during
-                  perspective projection.
+                  The rotation \(R\) and translation \(t\) describe the transformation
+                  from world coordinates to camera coordinates.
+                  The scalar \(s\) appears because perspective projection removes
+                  absolute depth.
                 </p>
 
                 <p>
-                  The intrinsic matrix is commonly written as
+                  Ignoring lens distortion for the moment, the intrinsic matrix can be
+                  written as
                 </p>
 
                 <div class="equation-block">
@@ -432,32 +438,42 @@
                 </div>
 
                 <p>
-                  The parameters \(f_x\) and \(f_y\) describe the focal length in pixel
-                  units, while \((c_x,c_y)\) specifies the principal point.
-                  Real lenses also introduce radial and tangential distortion, so these
-                  distortion parameters must be estimated together with the intrinsic
-                  matrix.
+                  The parameters \(f_x\) and \(f_y\) represent the focal length in pixel
+                  units, while \((c_x,c_y)\) gives the principal point.
+                  The derivation below first assumes this ideal pinhole camera model.
+                  Lens distortion will be introduced after we obtain an initial estimate
+                  of the camera intrinsics and poses.
                 </p>
 
+
+                <!-- ====================================================== -->
+                <!-- ArUco Correspondences                                  -->
+                <!-- ====================================================== -->
 
                 <p class="calibration-subheading">
                   <strong>From ArUco corners to geometric correspondences</strong>
                 </p>
 
                 <p>
-                  To estimate these parameters, I printed the ArUco calibration target
-                  provided by the course and captured 49 images using my iPhone from
-                  different viewpoints, distances, and orientations.
+                  To calibrate my camera, I printed the ArUco calibration target provided
+                  by the course and captured 49 images using my iPhone from different
+                  viewpoints, distances, and orientations.
                 </p>
 
                 <p>
-                  The important property of the calibration board is that its physical
-                  geometry is known in advance.
-                  Every detected ArUco corner therefore has a known location in the board
-                  coordinate system.
-                  For example, a corner may have a known world coordinate
-                  \(\mathbf X_i=(X_i,Y_i,0)\), while the ArUco detector observes that same
-                  corner at image coordinate \(\mathbf p_i=(u_i,v_i)\).
+                  The key advantage of a calibration board is that its geometry is known.
+                  Every ArUco corner therefore has a known position in the board coordinate
+                  system.
+                  Since the board is planar, I define that plane using \(Z=0\).
+                  A corner can therefore have a known coordinate
+                  \(\mathbf X_i=(X_i,Y_i,0)\).
+                </p>
+
+                <p>
+                  Detecting the same corner in an image gives its pixel coordinate
+                  \(\mathbf p_i=(u_i,v_i)\).
+                  Each detected corner therefore produces a known correspondence between
+                  the physical board and the image.
                 </p>
 
                 <div class="equation-block">
@@ -471,23 +487,24 @@
                 </div>
 
                 <p>
-                  Each detected corner therefore provides a known correspondence between
-                  a point on the physical calibration board and a pixel in the image.
-                  Since every image contains many ArUco corners, each view provides many
-                  such constraints on the unknown camera parameters.
+                  Each calibration image contains many such correspondences.
+                  These known point pairs are the measurements from which the camera model
+                  will be recovered.
                 </p>
 
 
+                <!-- ====================================================== -->
+                <!-- One View to Homography                                 -->
+                <!-- ====================================================== -->
+
                 <p class="calibration-subheading">
-                  <strong>From one calibration image to a planar homography</strong>
+                  <strong>From one calibration image to one homography</strong>
                 </p>
 
                 <p>
-                  All points on the printed calibration target lie on the same plane.
-                  We can therefore choose the board coordinate system such that
-                  \(Z=0\).
-                  Substituting this into the projection equation removes the third column
-                  of the rotation matrix.
+                  Because every calibration point lies on the same plane, \(Z=0\).
+                  Writing the rotation matrix as
+                  \(R=[r_1\ r_2\ r_3]\), the general camera projection equation becomes
                 </p>
 
                 <div class="equation-block">
@@ -512,15 +529,17 @@
                 </div>
 
                 <p>
-                  This allows the projection of the planar board to be represented by a
-                  single \(3\times3\) homography matrix
+                  The third rotation column \(r_3\) disappears because it would multiply
+                  the zero \(Z\) coordinate.
+                  The mapping between the calibration plane and the image can therefore
+                  be represented by a \(3\times3\) homography.
                 </p>
 
                 <div class="equation-block">
                   \[
                   \boxed{
                   H
-                  =
+                  \sim
                   K
                   \begin{bmatrix}
                   r_1 &amp; r_2 &amp; t
@@ -548,9 +567,13 @@
                 </div>
 
                 <p>
-                  The homography \(H\) can be estimated directly from the detected ArUco
-                  correspondences.
-                  If
+                  The symbol \(\sim\) indicates equality up to an arbitrary nonzero scale.
+                  A homography describes a projective mapping and is therefore only defined
+                  up to scale.
+                </p>
+
+                <p>
+                  Write the homography as
                 </p>
 
                 <div class="equation-block">
@@ -565,7 +588,8 @@
                 </div>
 
                 <p>
-                  then a correspondence between \((X,Y)\) and \((u,v)\) satisfies
+                  For a correspondence between \((X,Y)\) and \((u,v)\), perspective
+                  division gives
                 </p>
 
                 <div class="equation-block">
@@ -593,11 +617,38 @@
                 </div>
 
                 <p>
-                  Multiplying out the denominators turns these expressions into equations
-                  that are linear in the entries of \(H\).
-                  Each ArUco corner contributes two equations.
-                  By stacking the equations from many detected corners, the homography can
-                  be recovered through a linear least squares problem.
+                  Multiplying out the denominators gives two equations that are linear
+                  in the entries of \(H\).
+                  Each detected ArUco corner therefore contributes two linear constraints.
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \begin{bmatrix}
+                  X &amp; Y &amp; 1 &amp; 0 &amp; 0 &amp; 0
+                  &amp; -uX &amp; -uY &amp; -u
+                  \end{bmatrix}
+                  \mathbf h
+                  =
+                  0
+                  \]
+                </div>
+
+                <div class="equation-block">
+                  \[
+                  \begin{bmatrix}
+                  0 &amp; 0 &amp; 0 &amp; X &amp; Y &amp; 1
+                  &amp; -vX &amp; -vY &amp; -v
+                  \end{bmatrix}
+                  \mathbf h
+                  =
+                  0
+                  \]
+                </div>
+
+                <p>
+                  Stacking the constraints from all detected corners in one image gives
+                  the first linear system in the calibration procedure.
                 </p>
 
                 <div class="equation-block">
@@ -609,26 +660,45 @@
                 </div>
 
                 <p>
-                  Four noncollinear points are theoretically enough to determine a planar
-                  homography up to scale.
-                  In practice, many more detected corners are used so that the estimate
-                  becomes much more robust to measurement noise.
+                  Four noncollinear point correspondences are theoretically sufficient
+                  to determine a planar homography up to scale.
+                  In practice, many more corners are used to make the estimate more robust
+                  to detection noise.
                 </p>
 
+                <p>
+                  Repeating this procedure independently for all 49 calibration images
+                  gives a collection of homographies
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \boxed{
+                  H_1,H_2,\ldots,H_{49}
+                  }
+                  \]
+                </div>
+
+
+                <!-- ====================================================== -->
+                <!-- Multiple Homographies to K                             -->
+                <!-- ====================================================== -->
 
                 <p class="calibration-subheading">
                   <strong>From multiple homographies to the intrinsic matrix</strong>
                 </p>
 
                 <p>
-                  Estimating a homography from one image is not yet sufficient to recover
-                  the camera intrinsics.
-                  The key observation is that every calibration image has its own
-                  homography, but all of them share the same intrinsic matrix \(K\).
+                  A single homography does not allow the intrinsic matrix and camera pose
+                  to be uniquely separated.
+                  The important observation in Zhang's method is that every calibration
+                  image has a different camera pose and therefore a different homography,
+                  while all images were captured by the same camera and therefore share
+                  the same intrinsic matrix \(K\).
                 </p>
 
                 <p>
-                  Write the homography for one image as
+                  For one calibration image, write
                 </p>
 
                 <div class="equation-block">
@@ -641,28 +711,29 @@
                 </div>
 
                 <p>
-                  From
-                  \(H=K[r_1\ r_2\ t]\),
-                  the first two columns satisfy
+                  Since the homography is only defined up to scale, there exists a scalar
+                  \(\lambda\) such that
                 </p>
 
                 <div class="equation-block">
                   \[
                   h_1=\lambda Kr_1,
                   \qquad
-                  h_2=\lambda Kr_2
+                  h_2=\lambda Kr_2,
+                  \qquad
+                  h_3=\lambda Kt
                   \]
                 </div>
 
                 <p>
-                  The vectors \(r_1\) and \(r_2\) are columns of a rotation matrix.
-                  They must therefore be orthogonal and have the same unit length.
+                  The first two columns \(r_1\) and \(r_2\) belong to a rotation matrix.
+                  They must therefore be orthogonal and have equal unit length.
                 </p>
 
                 <div class="equation-block">
                   \[
                   \boxed{
-                  r_1^{T}r_2=0
+                  r_1^Tr_2=0
                   }
                   \]
                 </div>
@@ -670,34 +741,34 @@
                 <div class="equation-block">
                   \[
                   \boxed{
-                  r_1^{T}r_1
-                  =
-                  r_2^{T}r_2
+                  r_1^Tr_1=r_2^Tr_2
                   }
                   \]
                 </div>
 
                 <p>
-                  Substituting
+                  From
                   \(r_1\propto K^{-1}h_1\)
                   and
-                  \(r_2\propto K^{-1}h_2\)
-                  turns these rotation constraints into equations involving only the
-                  homography and the shared intrinsic matrix.
+                  \(r_2\propto K^{-1}h_2\),
+                  these rotation properties can be converted into constraints on the
+                  unknown intrinsic matrix.
                 </p>
 
                 <p>
-                  It is convenient to define
+                  Define the symmetric matrix
                 </p>
 
                 <div class="equation-block">
                   \[
+                  \boxed{
                   B=K^{-T}K^{-1}
+                  }
                   \]
                 </div>
 
                 <p>
-                  The two rotation constraints then become
+                  The orthogonality and equal length constraints become
                 </p>
 
                 <div class="equation-block">
@@ -711,40 +782,73 @@
                 <div class="equation-block">
                   \[
                   \boxed{
-                  h_1^TBh_1
-                  -
-                  h_2^TBh_2
-                  =
-                  0
+                  h_1^TBh_1-h_2^TBh_2=0
                   }
                   \]
                 </div>
 
                 <p>
-                  Each calibration image therefore contributes constraints on the same
-                  matrix \(B\).
-                  By stacking constraints from many viewpoints, a linear system can be
-                  constructed and solved for \(B\), from which the intrinsic matrix
-                  \(K\) can be recovered.
+                  Since \(B\) is symmetric, it contains only six independent entries.
+                  These can be collected into a vector
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \mathbf b
+                  =
+                  \begin{bmatrix}
+                  B_{11} &amp;
+                  B_{12} &amp;
+                  B_{22} &amp;
+                  B_{13} &amp;
+                  B_{23} &amp;
+                  B_{33}
+                  \end{bmatrix}^{T}
+                  \]
+                </div>
+
+                <p>
+                  Each calibration image contributes two linear constraints on the same
+                  vector \(\mathbf b\).
+                  Stacking the constraints from all calibration images gives the second
+                  linear system in Zhang's method.
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \boxed{
+                  V\mathbf b=0
+                  }
+                  \]
+                </div>
+
+                <p>
+                  Solving this system gives \(B\), and the relationship
+                  \(B=K^{-T}K^{-1}\) can then be used to recover the shared intrinsic
+                  matrix \(K\).
                 </p>
 
                 <p>
-                  This explains why calibration images should be captured from many
-                  different orientations.
-                  Repeatedly photographing the board from nearly the same pose would provide
-                  highly redundant constraints, while diverse viewpoints provide much more
-                  information about the camera geometry.
+                  This also explains why calibration images should be captured from
+                  substantially different orientations.
+                  Different board poses provide independent geometric constraints,
+                  while repeatedly photographing almost the same pose would add mostly
+                  redundant information.
                 </p>
 
+
+                <!-- ====================================================== -->
+                <!-- Recover Initial Poses                                 -->
+                <!-- ====================================================== -->
 
                 <p class="calibration-subheading">
-                  <strong>Recovering pose and refining the camera model</strong>
+                  <strong>Recovering initial camera poses</strong>
                 </p>
 
                 <p>
-                  Once \(K\) is known, the homography of each calibration image can also be
-                  used to recover its corresponding rotation and translation.
-                  From
+                  Once \(K\) is known, each homography can be separated into the pose
+                  of the corresponding calibration image.
+                  For
                 </p>
 
                 <div class="equation-block">
@@ -757,52 +861,184 @@
                 </div>
 
                 <p>
-                  we obtain the pose up to a common normalization factor
+                  the first two rotation axes and the translation are obtained up to one
+                  common normalization factor.
                 </p>
 
                 <div class="equation-block">
                   \[
-                  r_1
-                  \propto
-                  K^{-1}h_1,
+                  \tilde r_1=K^{-1}h_1,
                   \qquad
-                  r_2
-                  \propto
-                  K^{-1}h_2,
+                  \tilde r_2=K^{-1}h_2,
                   \qquad
-                  t
-                  \propto
-                  K^{-1}h_3
+                  \tilde t=K^{-1}h_3
                   \]
                 </div>
 
                 <p>
-                  The third rotation axis can then be constructed from
+                  A scale factor can be chosen so that the recovered rotation axes have
+                  unit length.
                 </p>
 
                 <div class="equation-block">
                   \[
-                  r_3=r_1\times r_2
+                  \lambda
+                  \approx
+                  \frac{1}{\|\tilde r_1\|_2}
+                  \]
+                </div>
+
+                <div class="equation-block">
+                  \[
+                  r_1=\lambda\tilde r_1,
+                  \qquad
+                  r_2=\lambda\tilde r_2,
+                  \qquad
+                  t=\lambda\tilde t
                   \]
                 </div>
 
                 <p>
-                  These linear estimates provide an effective initialization, but real
-                  images also contain lens distortion and imperfect corner detections.
-                  OpenCV therefore performs a final nonlinear optimization that jointly
-                  refines the intrinsic parameters, distortion coefficients, and
-                  per image camera poses.
-                </p>
-
-                <p>
-                  The optimization minimizes the discrepancy between each detected ArUco
-                  corner and the location predicted by the current camera model.
+                  Because the calibration board is planar, the homography does not contain
+                  the third rotation axis directly.
+                  It can be reconstructed from the first two axes using
                 </p>
 
                 <div class="equation-block">
                   \[
                   \boxed{
-                  \min
+                  r_3=r_1\times r_2
+                  }
+                  \]
+                </div>
+
+                <p>
+                  This gives an initial estimate of the full camera pose
+                  \(R=[r_1\ r_2\ r_3]\) and \(t\) for every calibration image.
+                  In practice, the recovered rotation is also adjusted to satisfy the exact
+                  orthonormality constraints of a valid rotation matrix.
+                </p>
+
+
+                <!-- ====================================================== -->
+                <!-- Lens Distortion                                       -->
+                <!-- ====================================================== -->
+
+                <p class="calibration-subheading">
+                  <strong>Extending the pinhole model with lens distortion</strong>
+                </p>
+
+                <p>
+                  The derivation so far assumes an ideal pinhole camera.
+                  A real iPhone lens does not follow this model perfectly.
+                  Radial distortion bends image locations increasingly strongly away from
+                  the optical center, while tangential distortion accounts for small
+                  misalignments between the lens and the image sensor.
+                </p>
+
+                <p>
+                  Let \((x,y)\) denote normalized ideal pinhole coordinates and define
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  r^2=x^2+y^2
+                  \]
+                </div>
+
+                <p>
+                  A common OpenCV distortion model uses radial coefficients
+                  \(k_1,k_2,k_3\) and tangential coefficients \(p_1,p_2\).
+                  The distorted coordinates are modeled as
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \boxed{
+                  \begin{aligned}
+                  x_d
+                  &amp;=
+                  x
+                  \left(
+                  1+k_1r^2+k_2r^4+k_3r^6
+                  \right)
+                  +
+                  2p_1xy
+                  +
+                  p_2(r^2+2x^2)
+                  \\[6pt]
+                  y_d
+                  &amp;=
+                  y
+                  \left(
+                  1+k_1r^2+k_2r^4+k_3r^6
+                  \right)
+                  +
+                  p_1(r^2+2y^2)
+                  +
+                  2p_2xy
+                  \end{aligned}
+                  }
+                  \]
+                </div>
+
+                <p>
+                  These distortion terms are nonlinear, which is why they were not included
+                  in the simple homography derivation above.
+                  Zhang's method first provides strong geometric estimates of \(K\) and the
+                  per image poses.
+                  These estimates can then initialize a more complete optimization that
+                  includes real lens distortion.
+                </p>
+
+
+                <!-- ====================================================== -->
+                <!-- Nonlinear Refinement                                  -->
+                <!-- ====================================================== -->
+
+                <p class="calibration-subheading">
+                  <strong>Nonlinear reprojection refinement</strong>
+                </p>
+
+                <p>
+                  The linear stages provide good initial estimates, but the measurements
+                  still contain ArUco corner detection noise and the real camera includes
+                  nonlinear lens distortion.
+                  OpenCV therefore performs a final nonlinear least squares optimization.
+                </p>
+
+                <p>
+                  The variables include the shared intrinsic matrix \(K\), the distortion
+                  parameters \(D\), and the rotation and translation of every calibration
+                  image.
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \theta
+                  =
+                  \left\{
+                  K,
+                  D,
+                  R_1,t_1,
+                  \ldots,
+                  R_N,t_N
+                  \right\}
+                  \]
+                </div>
+
+                <p>
+                  For every known calibration point \(\mathbf X_i\) in image \(j\),
+                  the current camera model predicts a pixel location through the complete
+                  projection function \(\pi\).
+                  This prediction is compared with the ArUco corner actually detected in
+                  the image.
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \boxed{
+                  \min_{\theta}
                   \sum_j
                   \sum_i
                   \left\|
@@ -822,30 +1058,31 @@
                 </div>
 
                 <p>
-                  Here, \(D\) denotes the lens distortion parameters,
-                  \(\mathbf X_i\) is a known point on the calibration board,
-                  and \(\mathbf p_{ij}\) is the detected image location of that point
-                  in image \(j\).
-                  The function \(\pi\) represents projection through the complete camera
-                  model.
+                  The optimizer repeatedly adjusts these parameters so that the projected
+                  calibration points move closer to their observed pixel locations.
+                  Unlike the previous linear systems, this step directly minimizes the
+                  image space reprojection error under the complete camera model.
                 </p>
 
                 <p>
-                  The entire calibration procedure can therefore be summarized as
+                  The full calibration process can therefore be summarized as
                 </p>
 
                 <div class="equation-block">
                   \[
                   \boxed{
                   \begin{gathered}
-                  \text{ArUCo Corners}
+                  \text{ArUCo Corner Correspondences}
                   \rightarrow
-                  \text{3D to 2D Correspondences}
-                  \rightarrow
-                  \text{Homographies}
+                  \text{Homography for Each View}
                   \\
                   \rightarrow
-                  K
+                  \text{Shared Intrinsic Matrix }K
+                  \rightarrow
+                  \text{Initial Camera Poses}
+                  \\
+                  \rightarrow
+                  \text{Lens Distortion Model}
                   \rightarrow
                   \text{Nonlinear Reprojection Refinement}
                   \end{gathered}
@@ -853,26 +1090,38 @@
                   \]
                 </div>
 
+
+                <!-- ====================================================== -->
+                <!-- Results                                               -->
+                <!-- ====================================================== -->
+
                 <div class="result-box calibration-results">
 
                   <div class="thumb large-box">
+
                     <img
                       src="media/calibration_dataset.png"
                       alt="Camera calibration images captured from different viewpoints"
                     >
+
                     <div class="caption">
                       Camera calibration dataset
                     </div>
+
                   </div>
 
+
                   <div class="thumb large-box">
+
                     <img
                       src="media/calibration_result.png"
                       alt="Estimated camera intrinsic parameters and distortion coefficients"
                     >
+
                     <div class="caption">
                       Estimated camera parameters
                     </div>
+
                   </div>
 
                 </div>
@@ -880,31 +1129,39 @@
                 <p>
                   Using the 49 calibration images, the resulting camera model produced
                   a reported reprojection error of \(0.6337\) pixels.
-                  A relatively small reprojection error indicates that the estimated
-                  camera model can project the known calibration points close to their
-                  observed image locations.
+                  A relatively small reprojection error indicates that the final camera
+                  model projects the known calibration points close to the locations
+                  detected in the real images.
                 </p>
 
                 <p>
-                  The resulting intrinsic matrix and distortion coefficients were saved in
+                  The optimized intrinsic matrix and distortion coefficients were saved in
                   <code>camera_params.npz</code> and reused throughout the remainder of the
                   project.
                 </p>
 
                 <p>
-                  This calibration stage only needs to determine the intrinsic properties
-                  of the camera once.
-                  When collecting the actual NeRF dataset later, \(K\) is already known.
-                  The ArUco marker visible in each NeRF image is then used with PnP to
-                  estimate only that image's rotation \(R\) and translation \(t\).
+                  It is important to distinguish this intrinsic calibration stage from the
+                  later pose estimation stage.
+                  The 49 calibration images are used to determine the shared camera
+                  intrinsics and lens distortion.
+                  When collecting the actual NeRF images later, these parameters are already
+                  known.
+                </p>
+
+                <p>
+                  For each NeRF image, the visible ArUco marker then provides new 3D to 2D
+                  correspondences.
+                  With \(K\) and the distortion model already calibrated, PnP only needs
+                  to recover the rotation and translation of that particular image.
                 </p>
 
                 <div class="equation-block">
                   \[
                   \boxed{
-                  K
+                  K,D
                   +
-                  \text{ArUCo Correspondences}
+                  \text{ArUCo Correspondences in Image }j
                   \rightarrow
                   R_j,t_j
                   }
@@ -912,9 +1169,11 @@
                 </div>
 
                 <p>
-                  This separation between intrinsic calibration and per image pose
-                  estimation gives us all of the camera information required to construct
-                  world space rays for NeRF training in the later sections.
+                  This separation gives us the two types of camera information required
+                  by NeRF.
+                  The intrinsic parameters describe how the camera forms an image, while
+                  the per image extrinsics describe where the camera was located and how
+                  it was oriented when that image was captured.
                 </p>
 
               </li>
