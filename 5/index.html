@@ -237,7 +237,8 @@
       margin: 0;
     }
 
-    .project-main .calibration-subheading {
+    .project-main .calibration-subheading,
+    .project-main .section-subheading {
       display: flex;
       align-items: center;
       gap: 11px;
@@ -247,7 +248,8 @@
       line-height: 1.35;
     }
 
-    .project-main .calibration-subheading::before {
+    .project-main .calibration-subheading::before,
+    .project-main .section-subheading::before {
       width: 24px;
       height: 3px;
       flex: 0 0 24px;
@@ -256,7 +258,8 @@
       content: "";
     }
 
-    .project-main .calibration-subheading strong {
+    .project-main .calibration-subheading strong,
+    .project-main .section-subheading strong {
       color: inherit;
       font-weight: 740;
     }
@@ -267,26 +270,28 @@
     }
 
     @media (max-width: 760px) {
-      .project-main .calibration-subheading {
+      .project-main .calibration-subheading,
+      .project-main .section-subheading {
         margin-top: 34px;
       }
     }
 
     .project-main .neural-field-sections {
       margin: 0;
+      padding: 0;
+      list-style: none;
     }
 
     .project-main .neural-field-sections > li {
-      padding-left: 4px;
+      margin: 0;
+      padding: 0;
     }
 
     .project-main .neural-field-sections > li + li {
-      margin-top: 54px;
-      padding-top: 48px;
-      border-top: 1px solid var(--project-border);
+      margin-top: 50px;
     }
 
-    .project-main .neural-field-sections > li > p:first-child {
+    .project-main .neural-field-sections > li > .section-subheading:first-child {
       margin-top: 0;
     }
 
@@ -307,7 +312,6 @@
 
       .project-main .neural-field-sections > li + li {
         margin-top: 42px;
-        padding-top: 36px;
       }
     }
   </style>
@@ -935,16 +939,12 @@
           </div>
 
           <div class="mini-bd" id="0.2-body">
-            <ol>
-
-              <li>
-
-                <p>
+            <p>
                   With the camera intrinsics calibrated, the next step is to collect the
                   multi-view images that will later supervise the NeRF.
                   I chose two pine cones as the scene and captured 52 images from different
                   viewpoints while keeping an ArUco marker visible in the scene.
-                </p>
+            </p>
 
                 <p>
                   Multiple viewpoints are essential because a single image does not
@@ -996,17 +996,13 @@
 
                 </div>
 
-                <p>
+            <p>
                   The goal during data collection is to obtain sufficient viewpoint
                   coverage around the object while maintaining a consistent and mostly
                   static scene.
                   Better coverage gives the model stronger constraints when learning the
                   geometry and appearance of the object from different viewing directions.
-                </p>
-
-              </li>
-
-            </ol>
+            </p>
           </div>
         </div>
 
@@ -1024,16 +1020,12 @@
           </div>
 
           <div class="mini-bd" id="0.3-body">
-            <ol>
-
-              <li>
-
-                <p>
+            <p>
                   The intrinsic matrix \(K\) describes the internal geometry of the camera,
                   but NeRF also needs to know where the camera was located when each image
                   was captured.
                   These per-image parameters are the camera extrinsics.
-                </p>
+            </p>
 
                 <p>
                   Because the 3D coordinates of the ArUco corners are known, and their
@@ -1131,17 +1123,13 @@
 
                 </div>
 
-                <p>
+            <p>
                   The visualization provides an important sanity check for the recovered
                   coordinate system and camera poses.
                   The camera frustums surround the scene and their viewing directions
                   converge toward the target region, which is consistent with how the
                   images were captured.
-                </p>
-
-              </li>
-
-            </ol>
+            </p>
           </div>
         </div>
 
@@ -1159,14 +1147,10 @@
           </div>
 
           <div class="mini-bd" id="0.4-body">
-            <ol>
-
-              <li>
-
-                <p>
+            <p>
                   Before using the captured images for NeRF training, I undistorted them
                   using the distortion coefficients obtained during camera calibration.
-                </p>
+            </p>
 
                 <p>
                   This step is important because the ideal pinhole camera model assumes
@@ -1241,9 +1225,6 @@
                   \]
                 </div>
 
-              </li>
-
-            </ol>
           </div>
         </div>
 
@@ -1269,6 +1250,10 @@
               <!-- ============================================ -->
 
               <li>
+
+                <p class="section-subheading">
+                  <strong>Neural Field and Positional Encoding</strong>
+                </p>
 
                 <p>
                   Before moving on to 3D NeRF, we first explore a simpler
@@ -1414,6 +1399,10 @@
               <!-- ============================================ -->
 
               <li>
+
+                <p class="section-subheading">
+                  <strong>Training and Reconstruction</strong>
+                </p>
 
                 <p>
                   To train the neural field, I randomly sample a batch
@@ -1654,6 +1643,10 @@
 
               <li>
 
+                <p class="section-subheading">
+                  <strong>Quantitative Evaluation</strong>
+                </p>
+
                 <p>
                   Besides visually comparing the reconstructed images,
                   I also evaluated the reconstruction quality using
@@ -1729,6 +1722,10 @@
               <!-- ============================================ -->
 
               <li>
+
+                <p class="section-subheading">
+                  <strong>Positional Encoding and Width Ablation</strong>
+                </p>
 
                 <p>
                   Finally, I investigated how the positional encoding
@@ -1917,6 +1914,10 @@
               <!-- ============================================ -->
 
               <li>
+
+                <p class="section-subheading">
+                  <strong>Camera Rays</strong>
+                </p>
 
                 <p>
                   Having explored how a neural network can represent
@@ -2212,6 +2213,10 @@
 
               <li>
 
+                <p class="section-subheading">
+                  <strong>Sampling Rays and 3D Points</strong>
+                </p>
+
                 <p>
                   After constructing the rays, we need to
                   determine where the NeRF network should
@@ -2387,6 +2392,10 @@
 
               <li>
 
+                <p class="section-subheading">
+                  <strong>RaysDataset and Visualization</strong>
+                </p>
+
                 <p>
                   Finally, I integrated the previous geometric
                   operations into a <code>RaysDataset</code>
@@ -2554,6 +2563,10 @@
 
               <li>
 
+                <p class="section-subheading">
+                  <strong>Neural Radiance Field</strong>
+                </p>
+
                 <p>
                   Having constructed camera rays and sampled 3D points
                   along them, we can now build the Neural Radiance Field
@@ -2682,6 +2695,10 @@
               <!-- Volume Rendering -->
 
               <li>
+
+                <p class="section-subheading">
+                  <strong>Differentiable Volume Rendering</strong>
+                </p>
 
                 <p>
                   This is where
@@ -2915,6 +2932,10 @@
 
               <li>
 
+                <p class="section-subheading">
+                  <strong>Training on the Lego Dataset</strong>
+                </p>
+
                 <p>
                   After implementing the NeRF architecture and
                   differentiable volume rendering, I trained
@@ -3119,6 +3140,10 @@
 
               <li>
 
+                <p class="section-subheading">
+                  <strong>Training on Real Data</strong>
+                </p>
+
                 <p>
                   Having successfully trained the NeRF on the
                   provided Lego dataset, I next applied the
@@ -3229,6 +3254,10 @@
               <!-- Training Progression -->
 
               <li>
+
+                <p class="section-subheading">
+                  <strong>Training Progression</strong>
+                </p>
 
                 <p>
                   The following images show the reconstruction
