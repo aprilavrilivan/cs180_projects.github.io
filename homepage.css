@@ -228,13 +228,6 @@ h1 {
   letter-spacing: -0.048em;
 }
 
-.hero-summary {
-  max-width: 570px;
-  margin-bottom: 0;
-  color: var(--muted);
-  font-size: 0.98rem;
-}
-
 .hero-collage {
   min-height: 340px;
   display: grid;
@@ -376,24 +369,18 @@ h1 {
 }
 
 .project-copy {
-  min-height: 156px;
+  min-height: 92px;
   display: flex;
   flex-direction: column;
+  justify-content: center;
   padding: 1rem 1.05rem 1.1rem;
 }
 
 .project-copy h3 {
   max-width: 29ch;
-  margin-bottom: 0.55rem;
+  margin-bottom: 0;
   font-size: clamp(1.05rem, 1.6vw, 1.2rem);
   letter-spacing: -0.025em;
-}
-
-.project-copy p {
-  margin-bottom: 0;
-  color: var(--muted);
-  font-size: 0.84rem;
-  line-height: 1.55;
 }
 
 .notes-card {
