@@ -180,6 +180,20 @@
       max-width: 650px; /* 设置最大宽度 */
     }
 
+    .result-box.nerf-architecture-figure {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) !important;
+      justify-content: center;
+      width: 100%;
+      max-width: 100%;
+      margin: 24px 0;
+    }
+    .result-box.nerf-architecture-figure .thumb {
+      flex: 1 1 100%;
+      width: 100% !important;
+      max-width: none !important;
+    }
+
       .result-line {
       display: flex;
       justify-content: space-between; /* 或 center */
@@ -3209,14 +3223,14 @@
 
         </div>
         <!-- ====================================================== -->
-        <!-- Part 2.4 Neural Radiance Field                         -->
+        <!-- Part 2.4 NeRF Architecture                             -->
         <!-- ====================================================== -->
 
         <div class="mini-box" id="part-2-4">
 
           <div class="mini-hd">
             <span class="hint">2.4</span>
-            <span>Neural Radiance Field</span>
+            <span>NeRF Architecture</span>
 
             <button class="mini-toggle" type="button"
                     data-target="#part-2-4-body">Hide</button>
@@ -3303,6 +3317,18 @@
                   direct access to the spatial input and helps
                   information propagate through the network.
                 </p>
+
+                <div class="result-box nerf-architecture-figure">
+                  <div class="thumb large-box">
+                    <img
+                      src="media/nerf_architecture.png"
+                      alt="NeRF architecture with positional encoding, a middle skip connection, and separate density and color branches"
+                    >
+                    <div class="caption">
+                      NeRF architecture used for density and view-dependent color prediction
+                    </div>
+                  </div>
+                </div>
 
                 <p>
                   The network subsequently separates into two
