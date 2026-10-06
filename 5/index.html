@@ -1271,124 +1271,270 @@
         <!-- ====================================================== -->
 
         <div class="mini-box" id="0.3">
+
           <div class="mini-hd">
             <span class="hint">0.3</span>
             <span>Camera Pose Estimation with PnP</span>
+
             <button class="mini-toggle" type="button"
                     data-target="#0.3-body">Hide</button>
           </div>
 
           <div class="mini-bd" id="0.3-body">
-            <p>
-                  The intrinsic matrix \(K\) describes the internal geometry of the camera,
-                  but NeRF also needs to know where the camera was located when each image
-                  was captured.
-                  These per-image parameters are the camera extrinsics.
-            </p>
-
-                <p>
-                  Because the 3D coordinates of the ArUco corners are known, and their
-                  corresponding 2D image coordinates can be detected, each image gives a
-                  set of 3D to 2D correspondences.
-                  This allows us to solve a Perspective-n-Point problem and recover
-                  the camera rotation \(R\) and translation \(t\).
-                </p>
-
-                <div class="equation-block">
-                  \[
-                  \boxed{
-                  \min_{R,t}
-                  \sum_i
-                  \left\|
-                  \mathbf p_i
-                  -
-                  \pi
-                  \left(
-                  K
-                  \left(
-                  R\mathbf X_i+t
-                  \right)
-                  \right)
-                  \right\|_2^2
-                  }
-                  \]
-                </div>
-
-                <p>
-                  Here, \(\mathbf X_i\) is a known 3D point on the ArUco marker,
-                  \(\mathbf p_i\) is its detected pixel location, and
-                  \(\pi\) denotes perspective projection.
-                  The objective is to find the camera pose whose projected 3D marker
-                  points best agree with the observed image locations.
-                </p>
-
-                <p>
-                  The pose returned by PnP naturally describes the transformation from
-                  world coordinates to camera coordinates.
-                  Later, when constructing NeRF rays, it is convenient to use the inverse
-                  transformation so that points and directions can be mapped from the
-                  camera coordinate frame back into the world coordinate frame.
-                </p>
-
-                <div class="equation-block">
-                  \[
-                  T_{\mathrm{w2c}}
-                  =
-                  \begin{bmatrix}
-                  R &amp; t\\
-                  0 &amp; 1
-                  \end{bmatrix}
-                  \]
-                </div>
-
-                <div class="equation-block">
-                  \[
-                  \boxed{
-                  T_{\mathrm{c2w}}
-                  =
-                  T_{\mathrm{w2c}}^{-1}
-                  }
-                  \]
-                </div>
-
-                <p>
-                  I estimated the extrinsic parameters for all NeRF source images and
-                  visualized the resulting cameras in Viser.
-                  Each camera frustum should be positioned around the scene and oriented
-                  toward the region containing the ArUco marker and the pine cones.
-                </p>
-
-                <div class="result-box">
-
-                  <div class="thumb large-box">
-                    <img
-                      src="media/Viser1.png"
-                      alt="Visualization of recovered camera poses in Viser from one viewpoint"
-                    >
-                    <div class="caption">
-                      Recovered camera poses viewed from angle 1
-                    </div>
-                  </div>
-
-                  <div class="thumb large-box">
-                    <img
-                      src="media/Viser2.png"
-                      alt="Visualization of recovered camera poses in Viser from another viewpoint"
-                    >
-                    <div class="caption">
-                      Recovered camera poses viewed from angle 2
-                    </div>
-                  </div>
-
-                </div>
 
             <p>
-                  The visualization provides an important sanity check for the recovered
-                  coordinate system and camera poses.
-                  The camera frustums surround the scene and their viewing directions
-                  converge toward the target region, which is consistent with how the
-                  images were captured.
+              After Part 0.1, the intrinsic matrix \(K\) and lens distortion
+              parameters \(D\) of my camera are already known.
+              However, every NeRF source image was captured from a different
+              camera position and orientation.
+              We therefore still need to estimate the camera pose associated
+              with each individual image.
             </p>
+
+            <p>
+              I kept an ArUco marker visible while capturing the object.
+              Since the physical size and geometry of the marker are known,
+              the 3D coordinates of its corners can be defined in the world
+              coordinate system.
+              The same corners can also be detected as 2D pixel locations
+              in every captured image.
+            </p>
+
+            <div class="equation-block">
+              \[
+              \boxed{
+              \mathbf X_i
+              \longleftrightarrow
+              \mathbf p_i^{\mathrm{obs}}
+              }
+              \]
+            </div>
+
+            <p>
+              Here, \(\mathbf X_i\) is a known 3D ArUco corner and
+              \(\mathbf p_i^{\mathrm{obs}}\) is its detected pixel position
+              in the current image.
+              These 3D to 2D correspondences allow us to solve the
+              Perspective n Point problem.
+            </p>
+
+            <p>
+              An important detail is that the observed pixels come from the
+              original camera image and therefore still contain lens distortion.
+              For this reason, PnP uses both the calibrated intrinsic matrix
+              \(K\) and the distortion parameters \(D\).
+            </p>
+
+            <p>
+              For a candidate camera pose, a known world point is first
+              transformed into the camera coordinate system
+            </p>
+
+            <div class="equation-block">
+              \[
+              \mathbf X_c
+              =
+              R\mathbf X_i+t
+              \]
+            </div>
+
+            <p>
+              The complete camera model then performs perspective projection,
+              lens distortion, and intrinsic projection to predict where this
+              point should appear in the original image.
+              I use the symbol \(\pi\) to represent this complete projection
+              operation.
+            </p>
+
+            <div class="equation-block">
+              \[
+              \boxed{
+              \hat{\mathbf p}_i
+              =
+              \pi
+              \left(
+              K,
+              D,
+              R,
+              t,
+              \mathbf X_i
+              \right)
+              }
+              \]
+            </div>
+
+            <p>
+              PnP searches for the rotation and translation that make the
+              predicted ArUco corner locations agree as closely as possible
+              with the corners actually detected in the image.
+            </p>
+
+            <div class="equation-block">
+              \[
+              \boxed{
+              \min_{R,t}
+              \sum_i
+              \left\|
+              \mathbf p_i^{\mathrm{obs}}
+              -
+              \pi
+              \left(
+              K,
+              D,
+              R,
+              t,
+              \mathbf X_i
+              \right)
+              \right\|_2^2
+              }
+              \]
+            </div>
+
+            <p>
+              In my implementation, I use
+              <code>cv2.solvePnP()</code> with the known ArUco object points,
+              the detected image points, the calibrated camera matrix,
+              and the distortion coefficients.
+              OpenCV returns a rotation vector and a translation vector.
+              The rotation vector can be converted into a \(3\times3\)
+              rotation matrix using <code>cv2.Rodrigues()</code>.
+            </p>
+
+            <p>
+              The recovered rotation and translation describe the mapping
+              from the world coordinate system into the camera coordinate
+              system.
+            </p>
+
+            <div class="equation-block">
+              \[
+              \boxed{
+              \mathbf X_c
+              =
+              R\mathbf X_w+t
+              }
+              \]
+            </div>
+
+            <p>
+              In homogeneous coordinates, this transformation can be written as
+            </p>
+
+            <div class="equation-block">
+              \[
+              T_{\mathrm{w2c}}
+              =
+              \begin{bmatrix}
+              R &amp; t\\
+              0 &amp; 1
+              \end{bmatrix}
+              \]
+            </div>
+
+            <p>
+              NeRF ray construction later works in the opposite direction.
+              We will start with a ray defined in the camera coordinate system
+              and transform it into the shared world coordinate system.
+              I therefore store the inverse transformation
+            </p>
+
+            <div class="equation-block">
+              \[
+              \boxed{
+              T_{\mathrm{c2w}}
+              =
+              T_{\mathrm{w2c}}^{-1}
+              }
+              \]
+            </div>
+
+            <p>
+              Since \(R\) is a rotation matrix, its inverse is its transpose.
+              The camera to world transformation can therefore also be written as
+            </p>
+
+            <div class="equation-block">
+              \[
+              \boxed{
+              T_{\mathrm{c2w}}
+              =
+              \begin{bmatrix}
+              R^T &amp; -R^Tt\\
+              0 &amp; 1
+              \end{bmatrix}
+              }
+              \]
+            </div>
+
+            <p>
+              The translation component of this matrix gives the camera center
+              in world coordinates.
+            </p>
+
+            <div class="equation-block">
+              \[
+              \boxed{
+              \mathbf C
+              =
+              -R^Tt
+              }
+              \]
+            </div>
+
+            <p>
+              It is important to note that lens distortion is only used when
+              relating 3D scene points to their observed 2D image locations.
+              It does not modify the rigid world to camera transformation and
+              it does not participate in the matrix inversion above.
+            </p>
+
+            <p>
+              I estimated the pose of every valid NeRF source image and
+              visualized the resulting camera frustums in Viser.
+              Since the images were captured while moving around the pine cones,
+              the recovered camera centers should surround the scene and their
+              viewing directions should point toward the target region.
+            </p>
+
+            <div class="result-box">
+
+              <div class="thumb large-box">
+                <img
+                  src="media/Viser1.png"
+                  alt="Visualization of recovered camera poses in Viser from one viewpoint"
+                >
+                <div class="caption">
+                  Recovered camera poses viewed from angle 1
+                </div>
+              </div>
+
+              <div class="thumb large-box">
+                <img
+                  src="media/Viser2.png"
+                  alt="Visualization of recovered camera poses in Viser from another viewpoint"
+                >
+                <div class="caption">
+                  Recovered camera poses viewed from angle 2
+                </div>
+              </div>
+
+            </div>
+
+            <p>
+              The visualization acts as a geometric sanity check.
+              The recovered cameras form a roughly circular arrangement around
+              the scene and their frustums point toward the objects.
+              This behavior is consistent with the way the dataset was captured
+              and suggests that the estimated poses are geometrically reasonable.
+            </p>
+
+            <p>
+              At this point, each source image has an associated camera pose.
+              The next step is not to refine this pose further.
+              Instead, we will correct the geometry of the RGB images themselves
+              so that their pixels follow the ideal pinhole model assumed by NeRF.
+            </p>
+
           </div>
         </div>
 
@@ -1398,91 +1544,311 @@
         <!-- ====================================================== -->
 
         <div class="mini-box" id="0.4">
+
           <div class="mini-hd">
             <span class="hint">0.4</span>
             <span>Image Undistortion &amp; Dataset Preparation</span>
+
             <button class="mini-toggle" type="button"
                     data-target="#0.4-body">Hide</button>
           </div>
 
           <div class="mini-bd" id="0.4-body">
+
             <p>
-                  Before using the captured images for NeRF training, I undistorted them
-                  using the distortion coefficients obtained during camera calibration.
+              The camera poses recovered in Part 0.3 are now known, but the
+              original RGB images still contain radial and tangential lens
+              distortion.
+              This is inconvenient for NeRF because the ray construction used
+              later assumes an ideal pinhole camera.
             </p>
 
-                <p>
-                  This step is important because the ideal pinhole camera model assumes
-                  that image coordinates follow perspective projection.
-                  Real lenses introduce radial and tangential distortion, which causes
-                  observed pixels to deviate from this model.
-                  If the images are not corrected, the rays constructed from the
-                  intrinsic matrix will not perfectly correspond to the observed pixels.
-                </p>
+            <p>
+              In an ideal pinhole camera, an undistorted pixel
+              \((u,v)\) can be converted directly into a direction in the
+              camera coordinate system using the inverse intrinsic matrix.
+            </p>
 
-                <p>
-                  After undistortion, each training image is paired with the calibrated
-                  intrinsic matrix and its corresponding camera-to-world transformation.
-                  These quantities provide everything required to associate each image
-                  pixel with a ray in the 3D scene.
-                </p>
+            <div class="equation-block">
+              \[
+              \boxed{
+              \mathbf d_c
+              \propto
+              K^{-1}
+              \begin{bmatrix}
+              u\\
+              v\\
+              1
+              \end{bmatrix}
+              }
+              \]
+            </div>
 
-                <div class="equation-block">
-                  \[
-                  \boxed{
-                  \text{Training Sample}
-                  =
-                  \left(
-                  I_i,\,
-                  K,\,
-                  T_{\mathrm{c2w}}^{(i)}
-                  \right)
-                  }
-                  \]
+            <p>
+              This relationship does not hold directly for a distorted pixel
+              \((u_d,v_d)\).
+              Lens distortion has shifted that pixel away from the location
+              predicted by the ideal perspective projection model.
+              Using the distorted coordinates directly with \(K^{-1}\) would
+              therefore produce an incorrect ray direction.
+            </p>
+
+            <p>
+              I use the distortion parameters estimated in Part 0.1 to remap
+              each original RGB image into an undistorted image.
+            </p>
+
+            <div class="equation-block">
+              \[
+              \boxed{
+              I_{\mathrm{distorted}}
+              \xrightarrow{K,D}
+              I_{\mathrm{undistorted}}
+              }
+              \]
+            </div>
+
+            <p>
+              Conceptually, this operation moves the observed RGB values onto
+              the pixel grid of an ideal pinhole camera.
+              After this correction, every pixel coordinate in the new image
+              can again be interpreted using the standard perspective camera
+              model.
+            </p>
+
+            <div class="equation-block">
+              \[
+              \boxed{
+              (u,v)
+              \xrightarrow{K_{\mathrm{new}}^{-1}}
+              \mathbf d_c
+              }
+              \]
+            </div>
+
+            <p>
+              In my implementation, I also compute a new intrinsic matrix using
+              <code>cv2.getOptimalNewCameraMatrix()</code>.
+              Undistortion can introduce invalid regions near the image
+              boundaries, so the image can be cropped to a valid region of
+              interest.
+              When cropping changes the image coordinate origin, the principal
+              point must be shifted by the same crop offset.
+            </p>
+
+            <p>
+              The resulting \(K_{\mathrm{new}}\) is therefore the intrinsic
+              matrix corresponding to the final undistorted and cropped images.
+              This is the matrix that should later be used when constructing
+              NeRF rays.
+            </p>
+
+            <div class="equation-block">
+              \[
+              K_{\mathrm{new}}
+              =
+              \begin{bmatrix}
+              f_x' &amp; 0 &amp; c_x'\\
+              0 &amp; f_y' &amp; c_y'\\
+              0 &amp; 0 &amp; 1
+              \end{bmatrix}
+              \]
+            </div>
+
+            <p>
+              At this point, the two pieces of geometric preparation can be
+              combined.
+              Part 0.3 provides the camera to world transformation
+              \(T_{\mathrm{c2w}}^{(i)}\) for every image.
+              Part 0.4 provides an undistorted image and its corresponding
+              intrinsic matrix \(K_{\mathrm{new}}\).
+            </p>
+
+            <div class="equation-block">
+              \[
+              \boxed{
+              \text{Training Image }i
+              =
+              \left(
+              I_i^{\mathrm{undistorted}},
+              K_{\mathrm{new}},
+              T_{\mathrm{c2w}}^{(i)}
+              \right)
+              }
+              \]
+            </div>
+
+            <p>
+              These quantities contain everything required to construct the
+              rays used during NeRF training.
+              For a pixel \((u,v)\), the inverse intrinsic matrix first
+              back projects the pixel into a camera frame direction.
+            </p>
+
+            <div class="equation-block">
+              \[
+              \boxed{
+              \mathbf d_c
+              \propto
+              K_{\mathrm{new}}^{-1}
+              \begin{bmatrix}
+              u\\
+              v\\
+              1
+              \end{bmatrix}
+              }
+              \]
+            </div>
+
+            <p>
+              The rotation contained in \(T_{\mathrm{c2w}}\) then transforms
+              this direction into the world coordinate system.
+            </p>
+
+            <div class="equation-block">
+              \[
+              \boxed{
+              \mathbf d_w
+              =
+              R_{\mathrm{c2w}}\mathbf d_c
+              }
+              \]
+            </div>
+
+            <p>
+              The ray origin is simply the camera center stored in the
+              translation component of \(T_{\mathrm{c2w}}\).
+            </p>
+
+            <div class="equation-block">
+              \[
+              \boxed{
+              \mathbf r_o
+              =
+              \mathbf t_{\mathrm{c2w}}
+              }
+              \]
+            </div>
+
+            <p>
+              After normalizing the ray direction, the complete world space
+              ray is
+            </p>
+
+            <div class="equation-block">
+              \[
+              \boxed{
+              \mathbf r(s)
+              =
+              \mathbf r_o
+              +
+              s\mathbf r_d
+              }
+              \]
+            </div>
+
+            <p>
+              The RGB image itself does not determine the ray direction.
+              Instead, once a ray has been constructed from its pixel coordinate,
+              the corresponding pixel in the undistorted image provides the
+              ground truth color for that ray.
+            </p>
+
+            <div class="equation-block">
+              \[
+              \boxed{
+              \mathbf c_{\mathrm{gt}}
+              =
+              I_i^{\mathrm{undistorted}}(u,v)
+              }
+              \]
+            </div>
+
+            <p>
+              A NeRF training observation can therefore ultimately be represented
+              by a world space ray origin, a world space ray direction, and the
+              observed RGB color.
+            </p>
+
+            <div class="equation-block">
+              \[
+              \boxed{
+              \left(
+              \mathbf r_o,
+              \mathbf r_d,
+              \mathbf c_{\mathrm{gt}}
+              \right)
+              }
+              \]
+            </div>
+
+            <p>
+              I then split the processed images and camera poses into training,
+              validation, and test subsets and saved them in the dataset format
+              required by the later NeRF implementation.
+            </p>
+
+            <div class="result-box">
+
+              <div class="thumb large-box">
+                <img
+                  src="media/final_dataset.png"
+                  alt="Final calibrated and undistorted dataset prepared for NeRF training"
+                >
+
+                <div class="caption">
+                  Final calibrated dataset for NeRF training
                 </div>
+              </div>
 
-                <p>
-                  Conceptually, this completes the geometric preparation stage.
-                  We now have a collection of calibrated multi-view images whose camera
-                  positions and viewing directions are known.
-                  In the later parts of the project, these parameters will be used to
-                  convert image pixels into 3D rays and to train the neural radiance field
-                  through differentiable rendering.
-                </p>
+            </div>
 
-                <div class="result-box">
+            <p>
+              The complete geometric preparation process can be summarized as
+            </p>
 
-                  <div class="thumb large-box">
-                    <img
-                      src="media/final_dataset.png"
-                      alt="Final calibrated and undistorted dataset prepared for NeRF training"
-                    >
-                    <div class="caption">
-                      Final calibrated dataset for NeRF training
-                    </div>
-                  </div>
+            <div class="equation-block">
+              \[
+              \boxed{
+              \begin{gathered}
+              \text{Intrinsic Calibration}
+              \rightarrow
+              K,D
+              \\
+              \text{Multi View Images}
+              +
+              K,D
+              \rightarrow
+              \text{PnP}
+              \rightarrow
+              T_{\mathrm{c2w}}
+              \\
+              I_{\mathrm{distorted}}
+              +
+              K,D
+              \rightarrow
+              I_{\mathrm{undistorted}},
+              K_{\mathrm{new}}
+              \\
+              \left(
+              I_{\mathrm{undistorted}},
+              K_{\mathrm{new}},
+              T_{\mathrm{c2w}}
+              \right)
+              \rightarrow
+              \text{NeRF Dataset}
+              \end{gathered}
+              }
+              \]
+            </div>
 
-                </div>
-
-                <p>
-                  This pipeline can be summarized as
-                </p>
-
-                <div class="equation-block">
-                  \[
-                  \boxed{
-                  \text{Camera Calibration}
-                  \rightarrow
-                  \text{Multi-view Capture}
-                  \rightarrow
-                  \text{PnP Pose Estimation}
-                  \rightarrow
-                  \text{Undistortion}
-                  \rightarrow
-                  \text{Calibrated NeRF Dataset}
-                  }
-                  \]
-                </div>
+            <p>
+              Distortion is therefore handled before NeRF ray construction.
+              It is used during PnP so that the raw ArUco observations can produce
+              accurate camera poses, and it is used again to rectify the RGB images.
+              Once the images have been undistorted, the later NeRF pipeline no longer
+              needs an explicit distortion model.
+            </p>
 
           </div>
         </div>
