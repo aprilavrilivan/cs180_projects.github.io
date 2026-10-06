@@ -2514,29 +2514,26 @@
     <section class="panel" aria-labelledby="sec-nerf">
       <div class="panel-hd">
         <h2 id="sec-nerf">Part 2: Fit a Neural Radiance Field from Multi-view Images</h2>
-        <span class="muted">3 sections in total</span>
+        <span class="muted">5 sections in total</span>
       </div>
       <div class="panel-bd">
-        <!-- Small step box -->
+        <!-- ====================================================== -->
+        <!-- Part 2.1 Creating Rays from Cameras                    -->
+        <!-- ====================================================== -->
 
-        <div class="mini-box" id="2.1～2.3">
+        <div class="mini-box" id="part-2-1">
 
           <div class="mini-hd">
-            <span class="hint">2.1–2.3</span>
-            <span>Camera Rays and Spatial Sampling</span>
+            <span class="hint">2.1</span>
+            <span>Creating Rays from Cameras</span>
 
             <button class="mini-toggle" type="button"
-                    data-target="#part-2-1-to-2-3-body">Hide</button>
+                    data-target="#part-2-1-body">Hide</button>
           </div>
 
-          <div class="mini-bd" id="part-2-1-to-2-3-body">
+          <div class="mini-bd" id="part-2-1-body">
 
             <ol class="neural-field-sections">
-
-
-              <!-- ============================================ -->
-              <!-- 01 Camera Rays                              -->
-              <!-- ============================================ -->
 
               <li>
 
@@ -2591,7 +2588,6 @@
                   using three functions.
                 </p>
 
-
                 <p>
                   <strong>Camera to World Transformation</strong>
                 </p>
@@ -2631,7 +2627,6 @@
                   coordinate system.
                 </p>
 
-
                 <p>
                   <strong>Pixel Back Projection</strong>
                 </p>
@@ -2652,12 +2647,16 @@
                   \[
                   s
                   \begin{bmatrix}
-                  u\\v\\1
+                  u\\
+                  v\\
+                  1
                   \end{bmatrix}
                   =
                   K
                   \begin{bmatrix}
-                  x_c\\y_c\\z_c
+                  x_c\\
+                  y_c\\
+                  z_c
                   \end{bmatrix}
                   \]
                 </div>
@@ -2674,7 +2673,9 @@
                   =
                   sK^{-1}
                   \begin{bmatrix}
-                  u\\v\\1
+                  u\\
+                  v\\
+                  1
                   \end{bmatrix}
                   }
                   \]
@@ -2686,7 +2687,6 @@
                   values of \(s\) produces different 3D points
                   that project onto the same pixel.
                 </p>
-
 
                 <p>
                   <strong>Pixel to Ray Conversion</strong>
@@ -2831,10 +2831,30 @@
 
               </li>
 
+            </ol>
 
-              <!-- ============================================ -->
-              <!-- 02 Sampling Rays and 3D Points              -->
-              <!-- ============================================ -->
+          </div>
+
+        </div>
+
+
+        <!-- ====================================================== -->
+        <!-- Part 2.2 Sampling Rays and Points                      -->
+        <!-- ====================================================== -->
+
+        <div class="mini-box" id="part-2-2">
+
+          <div class="mini-hd">
+            <span class="hint">2.2</span>
+            <span>Sampling Rays and Points</span>
+
+            <button class="mini-toggle" type="button"
+                    data-target="#part-2-2-body">Hide</button>
+          </div>
+
+          <div class="mini-bd" id="part-2-2-body">
+
+            <ol class="neural-field-sections">
 
               <li>
 
@@ -2881,7 +2901,6 @@
                   viewpoints, rather than being restricted
                   to a single image.
                 </p>
-
 
                 <p>
                   <strong>Sampling Points Along Each Ray</strong>
@@ -3010,10 +3029,30 @@
 
               </li>
 
+            </ol>
 
-              <!-- ============================================ -->
-              <!-- 03 RaysDataset and Visualization            -->
-              <!-- ============================================ -->
+          </div>
+
+        </div>
+
+
+        <!-- ====================================================== -->
+        <!-- Part 2.3 Ray Dataset and 3D Visualization              -->
+        <!-- ====================================================== -->
+
+        <div class="mini-box" id="part-2-3">
+
+          <div class="mini-hd">
+            <span class="hint">2.3</span>
+            <span>Ray Dataset and 3D Visualization</span>
+
+            <button class="mini-toggle" type="button"
+                    data-target="#part-2-3-body">Hide</button>
+          </div>
+
+          <div class="mini-bd" id="part-2-3-body">
+
+            <ol class="neural-field-sections">
 
               <li>
 
@@ -3167,6 +3206,7 @@
             </ol>
 
           </div>
+
         </div>
         <!-- Part 2.4 and 2.5 -->
 
