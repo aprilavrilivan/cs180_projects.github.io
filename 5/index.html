@@ -180,18 +180,22 @@
       max-width: 650px; /* 设置最大宽度 */
     }
 
-    .result-box.nerf-architecture-figure {
+    .result-box.architecture-figure {
       display: grid;
       grid-template-columns: minmax(0, 1fr) !important;
       justify-content: center;
+      justify-items: center;
       width: 100%;
       max-width: 100%;
       margin: 24px 0;
     }
-    .result-box.nerf-architecture-figure .thumb {
+    .result-box.architecture-figure .thumb {
       flex: 1 1 100%;
-      width: 100% !important;
-      max-width: none !important;
+      width: min(100%, var(--architecture-figure-width, 720px)) !important;
+      max-width: var(--architecture-figure-width, 720px) !important;
+    }
+    .result-box.neural-field-architecture-figure {
+      --architecture-figure-width: 660px;
     }
 
       .result-line {
@@ -2009,6 +2013,22 @@
                 </div>
 
                 <p>
+                  The visualized architecture is as follows:
+                </p>
+
+                <div class="result-box architecture-figure neural-field-architecture-figure">
+                  <div class="thumb large-box">
+                    <img
+                      src="media/neural_field_architecture.jpg"
+                      alt="Part 1 neural field MLP with positional encoding, ReLU layers, and a final Sigmoid output"
+                    >
+                    <div class="caption">
+                      Neural field MLP architecture provided by the course
+                    </div>
+                  </div>
+                </div>
+
+                <p>
                   A final Sigmoid activation constrains the output
                   to the valid normalized RGB range between 0 and 1.
                   The model architecture and training configuration
@@ -3318,7 +3338,7 @@
                   information propagate through the network.
                 </p>
 
-                <div class="result-box nerf-architecture-figure">
+                <div class="result-box architecture-figure">
                   <div class="thumb large-box">
                     <img
                       src="media/nerf_architecture.png"
