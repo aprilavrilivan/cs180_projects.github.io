@@ -245,6 +245,15 @@
       font-size: clamp(.92rem, 1.4vw, 1.08rem) !important;
     }
 
+    .project-main .rendering-pipeline-equation {
+      width: min(100%, 660px);
+      padding-block: 22px;
+    }
+
+    .project-main .rendering-pipeline-equation mjx-container {
+      font-size: clamp(.82rem, 1.25vw, 1rem) !important;
+    }
+
     .project-main .calibration-walkthrough {
       margin: 0;
       padding: 0;
@@ -3656,6 +3665,123 @@
                   multi view images.
                   This optimization process is commonly known
                   as Analysis by Synthesis.
+                </p>
+
+                <p>
+                  The complete training process for one ray can now
+                  be summarized as follows.
+                  We first sample a set of 3D locations
+                  \(\mathbf x_1,\ldots,\mathbf x_N\) along the ray.
+                  The NeRF network is queried at every sampled location
+                  together with the viewing direction and predicts a
+                  density and color for each sample.
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \boxed{
+                  (\mathbf x_i,\mathbf d)
+                  \xrightarrow{F_\theta}
+                  (\sigma_i,\mathbf c_i)
+                  }
+                  \]
+                </div>
+
+                <p>
+                  These pointwise predictions are then converted into
+                  opacity and transmittance values.
+                  Volume rendering combines all samples along the ray
+                  into a single predicted pixel color.
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \boxed{
+                  \left\{
+                  (\sigma_i,\mathbf c_i)
+                  \right\}_{i=1}^{N}
+                  \xrightarrow{\text{Volume Rendering}}
+                  \hat C_\theta(\mathbf r)
+                  }
+                  \]
+                </div>
+
+                <p>
+                  The resulting color is compared with the ground truth
+                  RGB value of the pixel from which the ray was constructed.
+                  Importantly, there is only one ground truth color for
+                  the entire ray.
+                  The individual 3D samples do not have ground truth
+                  density or color labels.
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \boxed{
+                  \hat C_\theta(\mathbf r)
+                  \longleftrightarrow
+                  C_{\mathrm{gt}}(\mathbf r)
+                  }
+                  \]
+                </div>
+
+                <p>
+                  Because every operation from the NeRF predictions
+                  to the rendered pixel is differentiable, the pixel
+                  reconstruction loss can be propagated backward
+                  through the volume rendering computation and into
+                  the neural field.
+                  Gradient descent therefore updates the network so
+                  that its predicted densities and colors produce
+                  increasingly accurate rendered views.
+                </p>
+
+                <div class="equation-block rendering-pipeline-equation">
+                  \[
+                  \boxed{
+                  \begin{gathered}
+                  \text{Sample 3D Points Along Ray}
+                  \\
+                  \downarrow
+                  \\
+                  F_\theta(\mathbf x_i,\mathbf d)
+                  \rightarrow
+                  (\sigma_i,\mathbf c_i)
+                  \\
+                  \downarrow
+                  \\
+                  \text{Volume Rendering}
+                  \rightarrow
+                  \hat C_\theta(\mathbf r)
+                  \\
+                  \downarrow
+                  \\
+                  \hat C_\theta(\mathbf r)
+                  \text{ compared with }
+                  C_{\mathrm{gt}}(\mathbf r)
+                  \\
+                  \downarrow
+                  \\
+                  \text{Reconstruction Loss}
+                  \rightarrow
+                  \text{Backpropagation}
+                  \rightarrow
+                  \theta
+                  \end{gathered}
+                  }
+                  \]
+                </div>
+
+                <p>
+                  For a minibatch containing many rays, this same
+                  procedure is performed in parallel.
+                  If the batch contains \(B\) rays and each ray contains
+                  \(N\) sampled points, the NeRF network is queried at
+                  \(B\times N\) spatial locations.
+                  Volume rendering then reduces those predictions into
+                  \(B\) rendered pixel colors, which are compared with
+                  the \(B\) corresponding ground truth pixels to form
+                  the training loss.
                 </p>
 
               </li>
