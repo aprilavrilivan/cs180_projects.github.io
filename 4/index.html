@@ -2991,86 +2991,539 @@
 
         </div>
           
-        <!-- Small step box -->
+        <!-- ====================================================== -->
+        <!-- Part B.4 Robust Homography Estimation with RANSAC      -->
+        <!-- ====================================================== -->
+
         <div class="mini-box" id="2.4">
+
           <div class="mini-hd">
-            <span>Part B</span>
             <span class="hint">2.4</span>
-            <button class="mini-toggle" type="button" data-target="#2.4-bo">Hide</button>
+            <span>Robust Homography Estimation with RANSAC</span>
+
+            <button class="mini-toggle" type="button"
+                    data-target="#2.4-body">Hide</button>
           </div>
+
           <div class="mini-bd" id="2.4-body">
-            <ol>
-              <li><p>In this section, I compute the final homography matrix using RANSAC.
-First, I randomly select four pairs of matched feature points to estimate a candidate homography matrix. Then, I project all feature points from the left image to the right image using this matrix and measure their reprojection errors.
-Points with errors smaller than a certain threshold (e.g., 3 pixels) are considered inliers.
-I repeat this process for many random samples (around 2000 iterations) and keep the homography that yields the largest number of inliers.
-Finally, I recompute the homography using all inlier correspondences judged by the best homography matrix to obtain a more accurate and robust result.</p>
-                <div class="result-box">
-                    <div class="thumb large-box">
-                      <img src="media/canteen_result_bad.png" alt="Box filter result 1">
-                      <div class="caption">canteen_manual_selection.png</div>
-                    </div>
-                    <div class="thumb large-box">
-                      <img src="media/canteen_result.png" alt="Box filter result 1">
-                      <div class="caption">canteen_RANSAC.png</div>
+
+            <ol class="section-steps">
+
+              <li>
+
+                <p>
+                  The ratio test in the previous section removes many ambiguous feature
+                  matches, but it does not guarantee that every remaining
+                  correspondence is correct.
+                  Two unrelated image patches can occasionally have similar
+                  descriptors, so a small number of incorrect matches may still remain.
+                </p>
+
+                <p>
+                  This is a problem because homography estimation is sensitive to
+                  incorrect correspondences.
+                  If all candidate matches are directly used in a least squares fit,
+                  even a few strong outliers can pull the estimated transformation away
+                  from the correct geometric alignment.
+                </p>
+
+                <p>
+                  I therefore use Random Sample Consensus to estimate the homography
+                  robustly.
+                  The key idea is that correct correspondences should agree with one
+                  common projective transformation, while incorrect matches generally
+                  will not.
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \boxed{
+                  \begin{gathered}
+                  \text{Appearance Matching}
+                  \longrightarrow
+                  \text{Candidate Correspondences}
+                  \\
+                  \longrightarrow
+                  \text{Geometric Consistency}
+                  \longrightarrow
+                  \text{Robust Homography}
+                  \end{gathered}
+                  }
+                  \]
+                </div>
+
+                <p>
+                  A homography has eight independent degrees of freedom.
+                  Each point correspondence supplies two constraints, so four
+                  nondegenerate correspondence pairs form the minimum sample needed to
+                  estimate a candidate homography.
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \boxed{
+                  4
+                  \text{ Correspondences}
+                  \times
+                  2
+                  \text{ Constraints}
+                  =
+                  8
+                  \text{ Constraints}
+                  }
+                  \]
+                </div>
+
+                <p>
+                  During each RANSAC iteration, I randomly select four matched feature
+                  pairs and estimate a candidate homography using the same homography
+                  solver developed in Part A.
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \boxed{
+                  \left\{
+                  \mathbf p_k
+                  \leftrightarrow
+                  \mathbf p_k'
+                  \right\}_{k=1}^{4}
+                  \longrightarrow
+                  H
+                  }
+                  \]
+                </div>
+
+                <p>
+                  The candidate homography is then tested against every matched feature
+                  pair.
+                  For each source point \(\mathbf p_i\), I project it into the second
+                  image using \(H\).
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \hat{\mathbf p}_i'
+                  =
+                  \pi
+                  \left(
+                  H\mathbf p_i
+                  \right)
+                  \]
+                </div>
+
+                <p>
+                  Here, \(\pi\) converts a homogeneous coordinate back into ordinary
+                  image coordinates.
+                  If
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  H\mathbf p_i
+                  =
+                  \begin{bmatrix}
+                  \tilde x_i\\
+                  \tilde y_i\\
+                  \tilde w_i
+                  \end{bmatrix}
+                  \]
+                </div>
+
+                <p>
+                  then
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \boxed{
+                  \pi
+                  \left(
+                  H\mathbf p_i
+                  \right)
+                  =
+                  \begin{bmatrix}
+                  \tilde x_i / \tilde w_i\\
+                  \tilde y_i / \tilde w_i
+                  \end{bmatrix}
+                  }
+                  \]
+                </div>
+
+                <p>
+                  I compare this predicted location with the matched point observed in
+                  the second image.
+                  Their Euclidean distance is the reprojection error.
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \boxed{
+                  e_i
+                  =
+                  \left\|
+                  \mathbf p_i'
+                  -
+                  \hat{\mathbf p}_i'
+                  \right\|_2
+                  }
+                  \]
+                </div>
+
+                <p>
+                  If the reprojection error is smaller than the selected tolerance,
+                  I classify the correspondence as an inlier.
+                  In my implementation I use a threshold of approximately three
+                  pixels.
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \boxed{
+                  e_i
+                  <
+                  3
+                  \text{ pixels}
+                  \quad
+                  \Longrightarrow
+                  \quad
+                  \text{Inlier}
+                  }
+                  \]
+                </div>
+
+                <p>
+                  Correct matches should be explained by approximately the same
+                  homography and therefore tend to produce small reprojection errors.
+                  Incorrect matches usually disagree with the candidate geometry and
+                  produce much larger errors.
+                </p>
+
+                <p>
+                  A single random sample may contain an outlier, so I repeat this
+                  procedure for roughly 2000 iterations.
+                  For every candidate homography, I count the number of
+                  correspondences that agree with it.
+                  I retain the model with the largest consensus set.
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \boxed{
+                  H^*
+                  =
+                  \arg\max_H
+                  \left|
+                  \left\{
+                  i
+                  \mid
+                  e_i < \tau
+                  \right\}
+                  \right|
+                  }
+                  \]
+                </div>
+
+                <p>
+                  The best random sample gives a reliable estimate of which feature
+                  matches belong to the same projective transformation.
+                  Rather than keeping the homography estimated from only four points,
+                  I then recompute it using all correspondences classified as inliers.
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \boxed{
+                  \text{Best Inlier Set}
+                  \longrightarrow
+                  \text{Least Squares Homography Fit}
+                  \longrightarrow
+                  H_{\mathrm{final}}
+                  }
+                  \]
+                </div>
+
+                <p>
+                  Using all inliers in the final estimation reduces sensitivity to
+                  measurement noise and produces a more stable transformation than the
+                  four point hypothesis used during an individual RANSAC iteration.
+                </p>
+
+                <p>
+                  The complete RANSAC procedure can therefore be summarized as
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \boxed{
+                  \begin{gathered}
+                  \text{Randomly Select Four Matches}
+                  \\
+                  \downarrow
+                  \\
+                  \text{Estimate Candidate } H
+                  \\
+                  \downarrow
+                  \\
+                  \text{Measure Reprojection Errors}
+                  \\
+                  \downarrow
+                  \\
+                  \text{Identify Inliers}
+                  \\
+                  \downarrow
+                  \\
+                  \text{Repeat and Keep Largest Consensus Set}
+                  \\
+                  \downarrow
+                  \\
+                  \text{Refit } H \text{ Using All Inliers}
+                  \end{gathered}
+                  }
+                  \]
+                </div>
+
+                <p>
+                  I compare the automatically estimated RANSAC homography with the
+                  result obtained using manually selected correspondences.
+                  The first comparison uses the canteen image pair.
+                </p>
+
+                <p>
+                  <strong>Canteen Alignment</strong>
+                </p>
+
+                <div class="result-box pair-grid">
+
+                  <div class="thumb">
+                    <img
+                      src="media/canteen_result_bad.png"
+                      alt="Canteen alignment using manually selected correspondences"
+                    >
+                    <div class="caption">
+                      Manual correspondence result
                     </div>
                   </div>
-                <p>We can observed that the right picture has a much better alignment than the one with manual selected points 
-                   the following provided a detailed comparism.</p>
-                  <div class="result-box">
-                    <div class="thumb">
-                      <img src="media/canteen_detail_bad.png" alt="Box filter result 1">
-                      <div class="caption">canteen_detail_manual_selection.png</div>
-                    </div>
-                    <div class="thumb">
-                      <img src="media/canteen_detail.png" alt="Box filter result 1">
-                      <div class="caption">canteen_detail_RANSAC.png</div>
+
+                  <div class="thumb">
+                    <img
+                      src="media/canteen_result.png"
+                      alt="Canteen alignment using RANSAC"
+                    >
+                    <div class="caption">
+                      RANSAC result
                     </div>
                   </div>
-                <p>Here are the result of the rest two sets of images</p>
-                  <div class="result-box">
-                    <div class="thumb large-box">
-                      <img src="media/room_result_bad.png" alt="Box filter result 1">
-                      <div class="caption">room_manual_selection.png</div>
-                    </div>
-                    <div class="thumb large-box">
-                      <img src="media/room_result.png" alt="Box filter result 1">
-                      <div class="caption">room_RANSAC.png</div>
-                    </div>
-                  </div>
-                  <div class="result-box">
-                    <div class="thumb">
-                      <img src="media/room_detail_bad.png" alt="Box filter result 1">
-                      <div class="caption">room_detail_manual_selection.png</div>
-                    </div>
-                    <div class="thumb">
-                      <img src="media/room_detail.png" alt="Box filter result 1">
-                      <div class="caption">room_detail_RANSAC.png</div>
-                    </div>
-                  </div>
-                <div class="result-box">
-                    <div class="thumb large-box">
-                      <img src="media/lib_result_bad.png" alt="Box filter result 1">
-                      <div class="caption">lib_manual_selection.png</div>
-                    </div>
-                    <div class="thumb large-box">
-                      <img src="media/lib_result.png" alt="Box filter result 1">
-                      <div class="caption">lib_RANSAC.png</div>
+
+                </div>
+
+                <p>
+                  In this example, the RANSAC estimate produces noticeably better
+                  agreement in the overlapping region.
+                  The difference becomes easier to see when the alignment is examined
+                  more closely.
+                </p>
+
+                <div class="result-box pair-grid">
+
+                  <div class="thumb">
+                    <img
+                      src="media/canteen_detail_bad.png"
+                      alt="Detailed canteen alignment using manually selected correspondences"
+                    >
+                    <div class="caption">
+                      Manual correspondence detail
                     </div>
                   </div>
-                <div class="result-box">
-                    <div class="thumb">
-                      <img src="media/lib_detail_bad.png" alt="Box filter result 1">
-                      <div class="caption">lib_detail_manual_selection.png</div>
-                    </div>
-                    <div class="thumb">
-                      <img src="media/lib_detail.png" alt="Box filter result 1">
-                      <div class="caption">room_detail_RANSAC.png</div>
+
+                  <div class="thumb">
+                    <img
+                      src="media/canteen_detail.png"
+                      alt="Detailed canteen alignment using RANSAC"
+                    >
+                    <div class="caption">
+                      RANSAC detail
                     </div>
                   </div>
+
+                </div>
+
+                <p>
+                  I repeat the same comparison for the room image pair.
+                </p>
+
+                <p>
+                  <strong>Room Alignment</strong>
+                </p>
+
+                <div class="result-box pair-grid">
+
+                  <div class="thumb">
+                    <img
+                      src="media/room_result_bad.png"
+                      alt="Room alignment using manually selected correspondences"
+                    >
+                    <div class="caption">
+                      Manual correspondence result
+                    </div>
+                  </div>
+
+                  <div class="thumb">
+                    <img
+                      src="media/room_result.png"
+                      alt="Room alignment using RANSAC"
+                    >
+                    <div class="caption">
+                      RANSAC result
+                    </div>
+                  </div>
+
+                </div>
+
+                <div class="result-box pair-grid">
+
+                  <div class="thumb">
+                    <img
+                      src="media/room_detail_bad.png"
+                      alt="Detailed room alignment using manually selected correspondences"
+                    >
+                    <div class="caption">
+                      Manual correspondence detail
+                    </div>
+                  </div>
+
+                  <div class="thumb">
+                    <img
+                      src="media/room_detail.png"
+                      alt="Detailed room alignment using RANSAC"
+                    >
+                    <div class="caption">
+                      RANSAC detail
+                    </div>
+                  </div>
+
+                </div>
+
+                <p>
+                  Finally, I apply the same procedure to the library image pair.
+                </p>
+
+                <p>
+                  <strong>Library Alignment</strong>
+                </p>
+
+                <div class="result-box pair-grid">
+
+                  <div class="thumb">
+                    <img
+                      src="media/lib_result_bad.png"
+                      alt="Library alignment using manually selected correspondences"
+                    >
+                    <div class="caption">
+                      Manual correspondence result
+                    </div>
+                  </div>
+
+                  <div class="thumb">
+                    <img
+                      src="media/lib_result.png"
+                      alt="Library alignment using RANSAC"
+                    >
+                    <div class="caption">
+                      RANSAC result
+                    </div>
+                  </div>
+
+                </div>
+
+                <div class="result-box pair-grid">
+
+                  <div class="thumb">
+                    <img
+                      src="media/lib_detail_bad.png"
+                      alt="Detailed library alignment using manually selected correspondences"
+                    >
+                    <div class="caption">
+                      Manual correspondence detail
+                    </div>
+                  </div>
+
+                  <div class="thumb">
+                    <img
+                      src="media/lib_detail.png"
+                      alt="Detailed library alignment using RANSAC"
+                    >
+                    <div class="caption">
+                      RANSAC detail
+                    </div>
+                  </div>
+
+                </div>
+
+                <p>
+                  RANSAC completes the transition from appearance based feature
+                  matching to geometric image alignment.
+                  Descriptor similarity proposes likely correspondences, while RANSAC
+                  keeps the subset that agrees with one common projective
+                  transformation.
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \boxed{
+                  \begin{gathered}
+                  \text{Descriptor Matches}
+                  \longrightarrow
+                  \text{RANSAC Inlier Selection}
+                  \\
+                  \longrightarrow
+                  \text{Robust Homography}
+                  \longrightarrow
+                  \text{Image Alignment}
+                  \end{gathered}
+                  }
+                  \]
+                </div>
+
+                <p>
+                  Combining all stages of Part B gives a fully automatic correspondence
+                  and alignment pipeline.
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \boxed{
+                  \begin{gathered}
+                  \text{Harris Corners}
+                  \longrightarrow
+                  \text{ANMS}
+                  \longrightarrow
+                  \text{Feature Descriptors}
+                  \\
+                  \longrightarrow
+                  \text{Ratio Test Matching}
+                  \longrightarrow
+                  \text{RANSAC}
+                  \longrightarrow
+                  H_{\mathrm{final}}
+                  \end{gathered}
+                  }
+                  \]
+                </div>
+
+                <p>
+                  The final homography can then be passed directly into the same inverse
+                  warping and blending pipeline developed in Part A.
+                  The main difference is that the point correspondences no longer need
+                  to be selected manually.
+                </p>
+
               </li>
+
             </ol>
+
           </div>
+
         </div>
       </div>
     </section>      
