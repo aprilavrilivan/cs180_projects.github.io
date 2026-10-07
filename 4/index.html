@@ -239,6 +239,20 @@
       max-width: none;
     }
 
+    .project-main .result-box.pair-grid,
+    .project-main .result-box.four-up-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+      margin: 22px 0 28px;
+    }
+
+    .project-main .result-box.pair-grid .thumb,
+    .project-main .result-box.four-up-grid .thumb {
+      width: 100%;
+      max-width: none;
+    }
+
     .project-main .result-box.single-figure {
       display: grid;
       grid-template-columns: minmax(0, 1fr);
@@ -256,21 +270,24 @@
       --single-figure-width: 690px;
     }
 
-    .project-main .homography-steps {
+    .project-main .homography-steps,
+    .project-main .section-steps {
       margin: 0;
       padding: 0;
       list-style: none;
       counter-reset: homography-step;
     }
 
-    .project-main .homography-steps > li {
+    .project-main .homography-steps > li,
+    .project-main .section-steps > li {
       position: relative;
       margin: 0;
       padding-left: 34px;
       counter-increment: homography-step;
     }
 
-    .project-main .homography-steps > li::before {
+    .project-main .homography-steps > li::before,
+    .project-main .section-steps > li::before {
       position: absolute;
       top: .15em;
       left: 0;
@@ -281,7 +298,8 @@
       letter-spacing: .08em;
     }
 
-    .project-main .homography-steps > li + li {
+    .project-main .homography-steps > li + li,
+    .project-main .section-steps > li + li {
       margin-top: 48px;
       padding-top: 42px;
       border-top: 1px solid var(--project-border);
@@ -297,11 +315,18 @@
         grid-template-columns: 1fr;
       }
 
-      .project-main .homography-steps > li {
+      .project-main .result-box.pair-grid,
+      .project-main .result-box.four-up-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .project-main .homography-steps > li,
+      .project-main .section-steps > li {
         padding-left: 0;
       }
 
-      .project-main .homography-steps > li::before {
+      .project-main .homography-steps > li::before,
+      .project-main .section-steps > li::before {
         position: static;
         display: block;
         margin-bottom: 12px;
@@ -1108,221 +1133,731 @@
           </div>
         </div>
 
-        <!-- Small step box -->
+        <!-- Part A.3 Inverse Warping and Interpolation -->
         <div class="mini-box" id="1.3">
           <div class="mini-hd">
-            <span>Part A</span>
             <span class="hint">1.3</span>
-            <button class="mini-toggle" type="button" data-target="#1.3-bo">Hide</button>
+            <span>Inverse Warping and Interpolation</span>
+            <button class="mini-toggle" type="button" data-target="#1.3-body">Hide</button>
           </div>
+
           <div class="mini-bd" id="1.3-body">
-            <ol>
-              <li><p>In this section I compared two inverse warping methods: NearestNeighbour and Bilinear.
-                    Both methods seeks pixels to be extracted from the source image, according to the position of pixels from 
-                    the demanding image multiplied by the projective matrix. The difference is that NearestNeighbor Interpolation rounds
-                    coordinates to the nearest pixel value, while Bilinear Interpolation uses
-                    weighted average of four neighboring pixels. Here I listed two sets of example images.</p>
-                  <div class="result-box">
-                    <div class="thumb">
-                      <img src="media/1111.jpeg" alt="Box filter result 1">
-                      <div class="caption">source1</div>
-                    </div>
-                    <div class="thumb">
-                      <img src="media/reference.jpeg" alt="Box filter result 1">
-                      <div class="caption">reference1.png</div>
-                    </div>
+            <ol class="section-steps">
+              <li>
+                <p>
+                  After recovering the homography, we can use it to warp one image
+                  into the coordinate system of another.
+                  If \(H\) maps points from the source image to the destination image,
+                  then the forward geometric relationship is
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \boxed{
+                  \mathbf p'
+                  \sim
+                  H\mathbf p
+                  }
+                  \]
+                </div>
+
+                <p>
+                  One possible implementation would be to take every pixel in the
+                  source image and push it forward through \(H\).
+                  However, this forward warping strategy creates a sampling problem.
+                  The transformed coordinates usually do not land exactly on integer
+                  pixel locations in the destination image.
+                  Some destination pixels may receive several source pixels, while
+                  other pixels may receive none at all.
+                  The latter case produces visible holes in the warped image.
+                </p>
+
+                <p>
+                  I therefore use inverse warping.
+                  Instead of asking where each source pixel should move, inverse
+                  warping visits every destination pixel and asks where its color
+                  should be sampled from in the source image.
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \boxed{
+                  \mathbf p
+                  \sim
+                  H^{-1}\mathbf p'
+                  }
+                  \]
+                </div>
+
+                <p>
+                  For every destination pixel
+                  \(\mathbf p'=[x',y',1]^T\),
+                  I multiply it by \(H^{-1}\) to recover the corresponding homogeneous
+                  coordinate in the source image.
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \begin{bmatrix}
+                  \tilde x\\
+                  \tilde y\\
+                  \tilde w
+                  \end{bmatrix}
+                  =
+                  H^{-1}
+                  \begin{bmatrix}
+                  x'\\
+                  y'\\
+                  1
+                  \end{bmatrix}
+                  \]
+                </div>
+
+                <p>
+                  Homogeneous normalization then gives the source image coordinate
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \boxed{
+                  x
+                  =
+                  \frac{\tilde x}{\tilde w},
+                  \qquad
+                  y
+                  =
+                  \frac{\tilde y}{\tilde w}
+                  }
+                  \]
+                </div>
+
+                <p>
+                  This approach ensures that every valid destination pixel explicitly
+                  queries a location in the source image.
+                  It therefore avoids the holes that commonly appear when discrete
+                  source pixels are pushed forward.
+                  Pixels whose inverse mapped coordinates fall outside the source
+                  image remain outside the valid warped region.
+                </p>
+
+                <p>
+                  The remaining problem is that the recovered source coordinate
+                  \((x,y)\) is usually not located exactly at an integer pixel center.
+                  For example, inverse warping may request the image value at
+                  \((120.37,84.62)\).
+                  Since the original image only stores discrete samples, we need an
+                  interpolation rule to estimate the color at such a location.
+                </p>
+
+                <p>
+                  I compared two interpolation methods using two image pairs.
+                  The first pair is shown below.
+                </p>
+
+                <div class="result-box pair-grid">
+                  <div class="thumb">
+                    <img src="media/1111.jpeg" alt="First source image for inverse warping">
+                    <div class="caption">source1</div>
                   </div>
-                  <div class="result-box">
-                    <div class="thumb">
-                      <img src="media/NN.png" alt="Box filter result 2">
-                      <div class="caption">NearestNeighbour</div>
-                    </div>
-                    <div class="thumb">
-                      <img src="media/BL.png" alt="Box filter result 1">
-                      <div class="caption">Bilinear</div>
-                    </div>
+
+                  <div class="thumb">
+                    <img src="media/reference.jpeg" alt="Reference image for first inverse warping example">
+                    <div class="caption">reference1.png</div>
                   </div>
-                  <div class="result-box">
-                    <div class="thumb">
-                      <img src="media/zoom1.png" alt="Box filter result 1">
-                      <div class="caption">Detailed NearestNeighbour</div>
-                    </div>
-                    <div class="thumb">
-                      <img src="media/zoom2.png" alt="Box filter result 1">
-                      <div class="caption">Detailed Bilinear</div>
-                    </div>
+                </div>
+
+                <p>
+                  <strong>Nearest Neighbor Interpolation</strong>
+                </p>
+
+                <p>
+                  Nearest Neighbor Interpolation assigns the value of the closest
+                  discrete source pixel to the requested continuous coordinate.
+                  Conceptually, the coordinate is rounded to the nearest integer
+                  location.
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \boxed{
+                  I(x,y)
+                  \approx
+                  I
+                  \left(
+                  \operatorname{round}(x),
+                  \operatorname{round}(y)
+                  \right)
+                  }
+                  \]
+                </div>
+
+                <p>
+                  This method is simple and computationally inexpensive because only
+                  one source pixel is accessed.
+                  However, the sampled value changes abruptly whenever the nearest
+                  integer pixel changes.
+                  The resulting warped image can therefore contain blocky boundaries
+                  and jagged local structure.
+                </p>
+
+                <p>
+                  <strong>Bilinear Interpolation</strong>
+                </p>
+
+                <p>
+                  Bilinear Interpolation instead uses the four source pixels
+                  surrounding the continuous coordinate.
+                  Suppose
+                  \((x_0,y_0)\),
+                  \((x_1,y_0)\),
+                  \((x_0,y_1)\), and
+                  \((x_1,y_1)\)
+                  surround the requested point.
+                  Let the fractional offsets within this cell be
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  a=x-x_0,
+                  \qquad
+                  b=y-y_0
+                  \]
+                </div>
+
+                <p>
+                  The interpolated value is computed as a weighted combination of the
+                  four neighboring pixels.
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \boxed{
+                  \begin{aligned}
+                  I(x,y)
+                  ={}&
+                  (1-a)(1-b)I(x_0,y_0)
+                  +
+                  a(1-b)I(x_1,y_0)
+                  \\
+                  &+
+                  (1-a)bI(x_0,y_1)
+                  +
+                  abI(x_1,y_1)
+                  \end{aligned}
+                  }
+                  \]
+                </div>
+
+                <p>
+                  Pixels that are geometrically closer to the requested location
+                  receive larger weights.
+                  The interpolation therefore changes smoothly as the sampling
+                  coordinate moves through the image.
+                </p>
+
+                <div class="result-box pair-grid">
+                  <div class="thumb">
+                    <img src="media/NN.png" alt="Nearest Neighbor interpolation result for first example">
+                    <div class="caption">Nearest Neighbor</div>
                   </div>
-                <p>Generally, after evaluating, the NearestNeighbour method runs faster that Bilinear, since for every pixel, it doens't have to do the 
-                average calculation. But as a result, its outcome will be more coarse</p>
-                <p>The following is the second set of pictures</p>
-                <div class="result-box">
-                    <div class="thumb">
-                      <img src="media/2222.jpeg" alt="Box filter result 1">
-                      <div class="caption">source2</div>
-                    </div>
-                    <div class="thumb">
-                      <img src="media/reference.jpeg" alt="Box filter result 1">
-                      <div class="caption">reference2.png</div>
-                    </div>
+
+                  <div class="thumb">
+                    <img src="media/BL.png" alt="Bilinear interpolation result for first example">
+                    <div class="caption">Bilinear</div>
                   </div>
-                  <div class="result-box">
-                    <div class="thumb">
-                      <img src="media/NN2.png" alt="Box filter result 2">
-                      <div class="caption">NearestNeighbour</div>
-                    </div>
-                    <div class="thumb">
-                      <img src="media/BL2.png" alt="Box filter result 1">
-                      <div class="caption">Bilinear</div>
-                    </div>
+                </div>
+
+                <p>
+                  The difference is easier to observe at a larger scale.
+                  Nearest Neighbor preserves sharp discrete pixel values but introduces
+                  more visible jagged structure.
+                  Bilinear Interpolation produces smoother transitions by combining
+                  information from neighboring pixels.
+                </p>
+
+                <div class="result-box pair-grid">
+                  <div class="thumb">
+                    <img src="media/zoom1.png" alt="Detailed Nearest Neighbor interpolation result">
+                    <div class="caption">Detailed Nearest Neighbor</div>
                   </div>
-                  <div class="result-box">
-                    <div class="thumb">
-                      <img src="media/zoom3.png" alt="Box filter result 1">
-                      <div class="caption">Detailed NearestNeighbour</div>
-                    </div>
-                    <div class="thumb">
-                      <img src="media/zoom4.png" alt="Box filter result 1">
-                      <div class="caption">Detailed Bilinear</div>
-                    </div>
+
+                  <div class="thumb">
+                    <img src="media/zoom2.png" alt="Detailed Bilinear interpolation result">
+                    <div class="caption">Detailed Bilinear</div>
                   </div>
+                </div>
+
+                <p>
+                  Nearest Neighbor is generally faster because only one pixel value
+                  needs to be retrieved.
+                  Bilinear Interpolation requires several weighted operations for each
+                  destination pixel, but it usually produces a smoother warped image.
+                </p>
+
+                <p>
+                  I repeated the same comparison on a second source image while using
+                  the same reference geometry.
+                </p>
+
+                <div class="result-box pair-grid">
+                  <div class="thumb">
+                    <img src="media/2222.jpeg" alt="Second source image for inverse warping">
+                    <div class="caption">source2</div>
+                  </div>
+
+                  <div class="thumb">
+                    <img src="media/reference.jpeg" alt="Reference image for second inverse warping example">
+                    <div class="caption">reference2.png</div>
+                  </div>
+                </div>
+
+                <div class="result-box pair-grid">
+                  <div class="thumb">
+                    <img src="media/NN2.png" alt="Nearest Neighbor interpolation result for second example">
+                    <div class="caption">Nearest Neighbor</div>
+                  </div>
+
+                  <div class="thumb">
+                    <img src="media/BL2.png" alt="Bilinear interpolation result for second example">
+                    <div class="caption">Bilinear</div>
+                  </div>
+                </div>
+
+                <div class="result-box pair-grid">
+                  <div class="thumb">
+                    <img src="media/zoom3.png" alt="Detailed Nearest Neighbor result for second example">
+                    <div class="caption">Detailed Nearest Neighbor</div>
+                  </div>
+
+                  <div class="thumb">
+                    <img src="media/zoom4.png" alt="Detailed Bilinear result for second example">
+                    <div class="caption">Detailed Bilinear</div>
+                  </div>
+                </div>
+
+                <p>
+                  These experiments complete the geometric warping pipeline developed
+                  so far.
+                  Corresponding points first determine a homography, the inverse
+                  homography then maps destination pixels back into the source image,
+                  and interpolation supplies the color at continuous sampling
+                  locations.
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \boxed{
+                  \text{Destination Pixel}
+                  \longrightarrow
+                  H^{-1}
+                  \longrightarrow
+                  \text{Continuous Source Coordinate}
+                  \longrightarrow
+                  \text{Interpolation}
+                  \longrightarrow
+                  \text{Warped Pixel}
+                  }
+                  \]
+                </div>
+
+                <p>
+                  In the next section, I use this warping procedure to place several
+                  images into a shared coordinate system and combine them into a
+                  seamless mosaic.
+                </p>
               </li>
             </ol>
           </div>
         </div>
           
-        <!-- Small step box -->
+        <!-- Part A.4 Image Mosaicing and Blending -->
         <div class="mini-box" id="1.4">
           <div class="mini-hd">
-            <span>Part A</span>
             <span class="hint">1.4</span>
-            <button class="mini-toggle" type="button" data-target="#1.4-bo">Hide</button>
+            <span>Image Mosaicing and Blending</span>
+            <button class="mini-toggle" type="button" data-target="#1.4-body">Hide</button>
           </div>
+
           <div class="mini-bd" id="1.4-body">
-            <ol>
-              <li>In this section I created a mosaic of three pictures of my room, as shown below.Here is a detailed breakdown of my steps.
-                <div class="result-box">    
-                    <div class="thumb">
-                      <img src="media/2.jpeg" alt="Box filter result 1">
-                      <div class="caption">original_left.png</div>
-                    </div>
-                    <div class="thumb">
-                      <img src="media/3.jpeg" alt="Box filter result 2">
-                      <div class="caption">original_center.png</div>
-                    </div>
-                    <div class="thumb">
-                      <img src="media/4.jpeg" alt="Box filter result 2">
-                      <div class="caption">original_right.png</div>
-                    </div>
-                  </div>
-              Firstly I locate the center img to a larger background that could contain the 3 imgs. Then I warped the original left and right imgs towards it.
-                <div class="result-box">    
-                    <div class="thumb">
-                      <img src="media/left.png" alt="Box filter result 1">
-                      <div class="caption">warped_left.png</div>
-                    </div>
-                    <div class="thumb">
-                      <img src="media/center.png" alt="Box filter result 2">
-                      <div class="caption">adjusted_center.png</div>
-                    </div>
-                    <div class="thumb">
-                      <img src="media/right.png" alt="Box filter result 2">
-                      <div class="caption">warped_right.png</div>
-                    </div>
-                  </div>
-                When using weighted average blending method like I did to create the oraple in the previous project, there'll be seemigly edge artifactes as shown below. So using the binary center seam with distance transform togerther with laplacian stack appears to be a better solution.
-                <div class="result-box">    
-                    <div class="thumb">
-                      <img src="media/weighted average.png" alt="Box filter result 1">
-                      <div class="caption">weighted average.png</div>
-                    </div>
-                  </div>
-                  Then I first blended the right img with the center img using a binary center seam and a laplacian pyramid of 4 levels. This results the intermediate outcome. Finally I blended the intermediate outcome with the left img, resulting in a full-scaled panorama.
-                <div class="result-box">    
-                    <div class="thumb large-box">
-                      <img src="media/intermediate.png" alt="Box filter result 1">
-                      <div class="caption">intermediate.png</div>
-                    </div>
+            <ol class="section-steps">
+              <li>
+                <p>
+                  With homography estimation and inverse warping implemented, I can
+                  now combine several overlapping photographs into a single panorama.
+                  The central idea is to choose one image as the reference coordinate
+                  system and warp the remaining images into that same system.
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \boxed{
+                  \text{Multiple Views}
+                  \longrightarrow
+                  \text{Common Image Coordinate System}
+                  \longrightarrow
+                  \text{Blending}
+                  \longrightarrow
+                  \text{Panorama}
+                  }
+                  \]
                 </div>
-                <div class="result-box">
-                    <div class="thumb large-box">
-                      <img src="media/blend_final.png" alt="Box filter result 2">
-                      <div class="caption">blend_final.png</div>
-                    </div>
+
+                <p>
+                  My first panorama uses the three room images captured in Part 1.1.
+                  The center image is used as the reference view.
+                  The left and right images overlap with this reference and can
+                  therefore be aligned by estimating their corresponding homographies.
+                </p>
+
+                <div class="result-box panorama-sequence">
+                  <div class="thumb">
+                    <img src="media/2.jpeg" alt="Original left room image">
+                    <div class="caption">original_left.png</div>
                   </div>
-              </li>
-              <li>In this section I created a mosaic of three pictures of a library, as shown below. Additionally, I used a reference rectangular draw by myself. Here is a detailed breakdown of my steps.
-                <div class="result-box">    
-                    <div class="thumb">
-                      <img src="media/one.jpeg" alt="Box filter result 1">
-                      <div class="caption">original_left.png</div>
-                    </div>
-                    <div class="thumb">
-                      <img src="media/two.jpeg" alt="Box filter result 2">
-                      <div class="caption">original_center.png</div>
-                    </div>
-                    <div class="thumb">
-                      <img src="media/five.jpeg" alt="Box filter result 2">
-                      <div class="caption">original_right.png</div>
-                    </div>
-                    <div class="thumb">
-                      <img src="media/reference1.jpeg" alt="Box filter result 2">
-                      <div class="caption">reference.png</div>
-                    </div>
+
+                  <div class="thumb">
+                    <img src="media/3.jpeg" alt="Original center room image">
+                    <div class="caption">original_center.png</div>
                   </div>
-              Firstly I warped the window of the center img to the black rectangular drawn as the reference. Then I warped the original left and right imgs using the center img as reference. The results are shown below.
-                <div class="result-box">    
-                    <div class="thumb">
-                      <img src="media/11.png" alt="Box filter result 1">
-                      <div class="caption">warped_left.png</div>
-                    </div>
-                    <div class="thumb">
-                      <img src="media/22.png" alt="Box filter result 2">
-                      <div class="caption">adjusted_center.png</div>
-                    </div>
-                    <div class="thumb">
-                      <img src="media/44.png" alt="Box filter result 2">
-                      <div class="caption">warped_right.png</div>
-                    </div>
+
+                  <div class="thumb">
+                    <img src="media/4.jpeg" alt="Original right room image">
+                    <div class="caption">original_right.png</div>
                   </div>
-                  The blending procedure is just the same as above. And the following are the final outcome.
-                <div class="result-box">    
-                    <div class="thumb">
-                      <img src="media/scene.png" alt="Box filter result 1">
-                      <div class="caption">outcome.png</div>
-                    </div>
                 </div>
-                <div class="result-box">   
-                    <div class="thumb large-box">
-                      <img src="media/cropped.png" alt="Box filter result 2">
-                      <div class="caption">The main part of the scene</div>
-                    </div>
+
+                <p>
+                  I first place the center image onto a larger canvas capable of
+                  containing all three views.
+                  I then warp the left and right images into the coordinate system of
+                  the center image.
+                  After this step, corresponding scene structures occupy approximately
+                  the same locations on the common canvas.
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \mathbf p_{\mathrm{center}}
+                  \sim
+                  H_{\mathrm{left}\rightarrow\mathrm{center}}
+                  \mathbf p_{\mathrm{left}}
+                  \]
+                </div>
+
+                <div class="equation-block">
+                  \[
+                  \mathbf p_{\mathrm{center}}
+                  \sim
+                  H_{\mathrm{right}\rightarrow\mathrm{center}}
+                  \mathbf p_{\mathrm{right}}
+                  \]
+                </div>
+
+                <div class="result-box panorama-sequence">
+                  <div class="thumb">
+                    <img src="media/left.png" alt="Left room image warped into the common coordinate system">
+                    <div class="caption">warped_left.png</div>
                   </div>
+
+                  <div class="thumb">
+                    <img src="media/center.png" alt="Center room image placed on the panorama canvas">
+                    <div class="caption">adjusted_center.png</div>
+                  </div>
+
+                  <div class="thumb">
+                    <img src="media/right.png" alt="Right room image warped into the common coordinate system">
+                    <div class="caption">warped_right.png</div>
+                  </div>
+                </div>
+
+                <p>
+                  Geometric alignment alone is not sufficient to create a visually
+                  seamless panorama.
+                  Even when the homography is accurate, small alignment errors,
+                  exposure differences, illumination changes, and interpolation
+                  effects can make the boundaries between images visible.
+                </p>
+
+                <p>
+                  A simple weighted average can reduce abrupt intensity jumps, but it
+                  may still leave visible seams or ghosted structures in the overlap
+                  region.
+                  The result below illustrates this limitation.
+                </p>
+
+                <div class="result-box single-figure">
+                  <div class="thumb">
+                    <img src="media/weighted average.png" alt="Room panorama produced using simple weighted averaging">
+                    <div class="caption">weighted average.png</div>
+                  </div>
+                </div>
+
+                <p>
+                  To obtain a smoother transition, I use a binary center seam together
+                  with a distance transform to construct a spatially varying blending
+                  mask.
+                  Pixels near one side of the overlap receive more contribution from
+                  one image, while pixels near the other side receive more contribution
+                  from the other image.
+                  This avoids switching abruptly between the two aligned images.
+                </p>
+
+                <p>
+                  I further combine this mask with a four level Laplacian stack.
+                  The main idea is to blend different spatial frequencies at different
+                  scales.
+                  Low frequency appearance changes are allowed to transition gradually
+                  across a wide region, while high frequency details are blended more
+                  locally near the seam.
+                </p>
+
+                <p>
+                  Let \(L_A^l\) and \(L_B^l\) denote the Laplacian representations of
+                  two images at level \(l\), and let \(G_M^l\) denote the corresponding
+                  smoothed blending mask.
+                  The blended level can be written as
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \boxed{
+                  L_{\mathrm{blend}}^l
+                  =
+                  G_M^l L_A^l
+                  +
+                  \left(
+                  1-G_M^l
+                  \right)
+                  L_B^l
+                  }
+                  \]
+                </div>
+
+                <p>
+                  The blended Laplacian levels are then reconstructed to obtain the
+                  final image.
+                  This multiscale procedure makes the transition less noticeable than
+                  blending all image frequencies with the same simple mask.
+                </p>
+
+                <p>
+                  I first blend the warped right image with the center image.
+                  This produces an intermediate panorama.
+                </p>
+
+                <div class="result-box single-figure">
+                  <div class="thumb large-box">
+                    <img src="media/intermediate.png" alt="Intermediate panorama formed from the center and right room images">
+                    <div class="caption">intermediate.png</div>
+                  </div>
+                </div>
+
+                <p>
+                  I then blend the warped left image with this intermediate result to
+                  obtain the complete room panorama.
+                </p>
+
+                <div class="result-box single-figure">
+                  <div class="thumb large-box">
+                    <img src="media/blend_final.png" alt="Final room panorama">
+                    <div class="caption">blend_final.png</div>
+                  </div>
+                </div>
+
+                <p>
+                  The entire room mosaic can therefore be viewed as two coupled
+                  operations.
+                  Homography warping establishes geometric agreement between the
+                  images, while multiscale blending reduces the visible appearance
+                  differences that remain after alignment.
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \boxed{
+                  \text{Geometric Alignment}
+                  \longrightarrow
+                  \text{Photometric Blending}
+                  \longrightarrow
+                  \text{Final Mosaic}
+                  }
+                  \]
+                </div>
               </li>
-              <li>My Third work is to put Taylor's new album on top of a table. The source imgs are shown below: 
-                <div class="result-box">    
-                    <div class="thumb">
-                      <img src="media/album.jpeg" alt="Box filter result 1">
-                      <div class="caption">New_Album.png</div>
-                    </div>
-                    <div class="thumb">
-                      <img src="media/table.jpeg" alt="Box filter result 2">
-                      <div class="caption">A room with table.png</div>
-                    </div>
+
+              <li>
+                <p>
+                  I applied the same pipeline to the three library images.
+                  In this example I also introduced a rectangular reference image so
+                  that the center photograph could first be rectified into a desired
+                  projective view.
+                </p>
+
+                <div class="result-box four-up-grid">
+                  <div class="thumb">
+                    <img src="media/one.jpeg" alt="Original left library image">
+                    <div class="caption">original_left.png</div>
                   </div>
-                Firstly I warped the image with reference of four corners from the table.
-                <div class="result-box">    
-                    <div class="thumb">
-                      <img src="media/warped_album.png" alt="Box filter result 1">
-                      <div class="caption">warped_album.png</div>
-                    </div>
+
+                  <div class="thumb">
+                    <img src="media/two.jpeg" alt="Original center library image">
+                    <div class="caption">original_center.png</div>
                   </div>
-                  Then I used a rectangular mask to blend the two images together, which looks likes that the ablum is placed on the table.
-                <div class="result-box">    
-                    <div class="thumb large-box">
-                      <img src="media/album_on_table.png" alt="Box filter result 1">
-                      <div class="caption">Album on table.png</div>
-                    </div>
+
+                  <div class="thumb">
+                    <img src="media/five.jpeg" alt="Original right library image">
+                    <div class="caption">original_right.png</div>
                   </div>
+
+                  <div class="thumb">
+                    <img src="media/reference1.jpeg" alt="Rectangular reference used for library image rectification">
+                    <div class="caption">reference.png</div>
+                  </div>
+                </div>
+
+                <p>
+                  I first select corresponding corners between a window in the center
+                  library image and the rectangular reference.
+                  The resulting homography rectifies that planar region and defines
+                  the coordinate system used for the final mosaic.
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \boxed{
+                  \text{Oblique Planar Region}
+                  \longrightarrow
+                  \text{Homography}
+                  \longrightarrow
+                  \text{Rectified Reference View}
+                  }
+                  \]
+                </div>
+
+                <p>
+                  I then warp the left and right library images so that their
+                  overlapping content aligns with the transformed center image.
+                  All three images are therefore expressed in a common projective
+                  coordinate system.
+                </p>
+
+                <div class="result-box panorama-sequence">
+                  <div class="thumb">
+                    <img src="media/11.png" alt="Warped left library image">
+                    <div class="caption">warped_left.png</div>
+                  </div>
+
+                  <div class="thumb">
+                    <img src="media/22.png" alt="Rectified center library image">
+                    <div class="caption">adjusted_center.png</div>
+                  </div>
+
+                  <div class="thumb">
+                    <img src="media/44.png" alt="Warped right library image">
+                    <div class="caption">warped_right.png</div>
+                  </div>
+                </div>
+
+                <p>
+                  I use the same seam construction and Laplacian blending procedure as
+                  in the room example.
+                  The aligned images are gradually combined across their overlapping
+                  regions to reduce visible transitions.
+                </p>
+
+                <div class="result-box single-figure">
+                  <div class="thumb">
+                    <img src="media/scene.png" alt="Full library mosaic">
+                    <div class="caption">outcome.png</div>
+                  </div>
+                </div>
+
+                <p>
+                  The uncropped result contains the complete warped canvas.
+                  Cropping the valid region produces a cleaner view of the main scene.
+                </p>
+
+                <div class="result-box single-figure">
+                  <div class="thumb large-box">
+                    <img src="media/cropped.png" alt="Cropped library panorama">
+                    <div class="caption">The main part of the scene</div>
+                  </div>
+                </div>
+              </li>
+
+              <li>
+                <p>
+                  As an additional application of homography warping, I used a planar
+                  projective transformation to place an album image onto a table.
+                  Unlike the previous two examples, the goal here is not to extend the
+                  camera field of view.
+                  Instead, the homography is used to make a source image appear as if
+                  it lies on a planar surface viewed under perspective.
+                </p>
+
+                <div class="result-box pair-grid">
+                  <div class="thumb">
+                    <img src="media/album.jpeg" alt="Source album image">
+                    <div class="caption">New_Album.png</div>
+                  </div>
+
+                  <div class="thumb">
+                    <img src="media/table.jpeg" alt="Target image containing a table">
+                    <div class="caption">A room with table.png</div>
+                  </div>
+                </div>
+
+                <p>
+                  I select the four corners of the album image and four corresponding
+                  points on the target table region.
+                  These correspondences determine a homography that maps the
+                  rectangular album into the perspective shape of the table surface.
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \boxed{
+                  \text{Album Plane}
+                  \longrightarrow
+                  H
+                  \longrightarrow
+                  \text{Table Plane}
+                  }
+                  \]
+                </div>
+
+                <p>
+                  Using inverse warping and interpolation, I transform the album into
+                  the target quadrilateral.
+                </p>
+
+                <div class="result-box single-figure">
+                  <div class="thumb">
+                    <img src="media/warped_album.png" alt="Album image warped into the table perspective">
+                    <div class="caption">warped_album.png</div>
+                  </div>
+                </div>
+
+                <p>
+                  Finally, I use a rectangular mask to composite the warped album with
+                  the table image.
+                  The resulting projective geometry makes the inserted image appear
+                  consistent with the perspective of the table.
+                </p>
+
+                <div class="result-box single-figure">
+                  <div class="thumb large-box">
+                    <img src="media/album_on_table.png" alt="Album composited onto the table">
+                    <div class="caption">Album on table.png</div>
+                  </div>
+                </div>
+
+                <p>
+                  Together, these examples show two important uses of homographies.
+                  Multiple camera views can be aligned into a larger panorama, while
+                  planar content can also be rectified or transferred between
+                  different perspective views.
+                </p>
               </li>
             </ol>
           </div>
