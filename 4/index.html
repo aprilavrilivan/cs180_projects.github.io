@@ -1821,90 +1821,497 @@
         <span class="muted">4 sections in total</span>
       </div>
       <div class="panel-bd">
-        <!-- Small step box -->
+        <!-- ====================================================== -->
+        <!-- Part B.1 Harris Corner Detection and ANMS              -->
+        <!-- ====================================================== -->
+
         <div class="mini-box" id="2.1">
+
           <div class="mini-hd">
-            <span>Part B</span>
             <span class="hint">2.1</span>
-            <button class="mini-toggle" type="button" data-target="#2.1-bo">Hide</button>
+            <span>Harris Corner Detection and ANMS</span>
+
+            <button class="mini-toggle" type="button"
+                    data-target="#2.1-body">Hide</button>
           </div>
+
           <div class="mini-bd" id="2.1-body">
-            <ol>
-              <li>In this section I implemented the Harris Corner detector to the following three sets of images.
-                  <p>The first group</p>
-                  <div class="result-box">
-                    <div class="thumb">
-                      <img src="media/canteen_left.png" alt="Box filter result 1">
-                      <div class="caption">canteen_left.png</div>
-                    </div>
-                    <div class="thumb">
-                      <img src="media/canteen_right.png" alt="Box filter result 1">
-                      <div class="caption">canteen_right.png</div>
+
+            <ol class="section-steps">
+
+              <li>
+
+                <p>
+                  In Part A, the homography between two images was estimated from
+                  manually selected point correspondences.
+                  This works well when only a few image pairs are involved, but manual
+                  selection becomes impractical when the number of images increases.
+                  Part B therefore replaces this manual step with an automatic feature
+                  matching pipeline.
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \boxed{
+                  \text{Images}
+                  \longrightarrow
+                  \text{Feature Detection}
+                  \longrightarrow
+                  \text{Feature Description}
+                  \longrightarrow
+                  \text{Feature Matching}
+                  \longrightarrow
+                  \text{Homography}
+                  }
+                  \]
+                </div>
+
+                <p>
+                  The first task is to identify image locations that can be recognized
+                  reliably across different views.
+                  Flat regions are poor choices because nearby pixels have very similar
+                  appearance.
+                  Edges are also ambiguous because movement along the edge produces
+                  little visual change.
+                  Corners are much more distinctive because shifting a small window in
+                  almost any direction produces a noticeable change in intensity.
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \boxed{
+                  \begin{aligned}
+                  \text{Flat Region}
+                  &\quad
+                  \text{small change in all directions}
+                  \\
+                  \text{Edge}
+                  &\quad
+                  \text{small change along one direction}
+                  \\
+                  \text{Corner}
+                  &\quad
+                  \text{large change in multiple directions}
+                  \end{aligned}
+                  }
+                  \]
+                </div>
+
+                <p>
+                  I use the Harris Corner Detector to measure this behavior.
+                  For a small image window \(W\), Harris considers how much the window
+                  changes when shifted by a small displacement \((u,v)\).
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  E(u,v)
+                  =
+                  \sum_{(x,y)\in W}
+                  \left[
+                  I(x+u,y+v)
+                  -
+                  I(x,y)
+                  \right]^2
+                  \]
+                </div>
+
+                <p>
+                  A corner should produce a large value of \(E(u,v)\) for many small
+                  displacement directions.
+                  Using a first order approximation of the image intensity, this
+                  expression can be written approximately as a quadratic form.
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \boxed{
+                  E(u,v)
+                  \approx
+                  \begin{bmatrix}
+                  u &amp; v
+                  \end{bmatrix}
+                  M
+                  \begin{bmatrix}
+                  u\\
+                  v
+                  \end{bmatrix}
+                  }
+                  \]
+                </div>
+
+                <p>
+                  The matrix \(M\) is the second moment matrix computed from local
+                  image gradients.
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \boxed{
+                  M
+                  =
+                  \sum_{(x,y)\in W}
+                  \begin{bmatrix}
+                  I_x^2 &amp; I_xI_y\\
+                  I_xI_y &amp; I_y^2
+                  \end{bmatrix}
+                  }
+                  \]
+                </div>
+
+                <p>
+                  The two eigenvalues of \(M\) describe how strongly the image changes
+                  along two principal directions.
+                  If both eigenvalues are small, the region is approximately flat.
+                  If one is large and the other is small, the region behaves like an
+                  edge.
+                  If both are large, the location behaves like a corner.
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \boxed{
+                  \begin{aligned}
+                  \lambda_1 \approx 0,\,
+                  \lambda_2 \approx 0
+                  &\quad
+                  \Longrightarrow
+                  \quad
+                  \text{Flat}
+                  \\
+                  \lambda_1 \gg \lambda_2
+                  \text{ or }
+                  \lambda_2 \gg \lambda_1
+                  &\quad
+                  \Longrightarrow
+                  \quad
+                  \text{Edge}
+                  \\
+                  \lambda_1,\lambda_2
+                  \text{ both large}
+                  &\quad
+                  \Longrightarrow
+                  \quad
+                  \text{Corner}
+                  \end{aligned}
+                  }
+                  \]
+                </div>
+
+                <p>
+                  Rather than explicitly thresholding both eigenvalues, Harris combines
+                  them into a scalar corner response.
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \boxed{
+                  R
+                  =
+                  \det(M)
+                  -
+                  k
+                  \operatorname{trace}(M)^2
+                  }
+                  \]
+                </div>
+
+                <p>
+                  Locations with large positive \(R\) are strong corner candidates.
+                  After computing the response over the image, I retain strong local
+                  maxima as candidate feature points.
+                </p>
+
+                <p>
+                  I apply this procedure to three pairs of overlapping images.
+                  These image pairs will be used throughout the rest of the automatic
+                  stitching pipeline.
+                </p>
+
+                <p>
+                  <strong>Canteen Image Pair</strong>
+                </p>
+
+                <div class="result-box pair-grid">
+
+                  <div class="thumb">
+                    <img
+                      src="media/canteen_left.png"
+                      alt="Left canteen image"
+                    >
+                    <div class="caption">
+                      canteen_left.png
                     </div>
                   </div>
-                   <p>The second group</p>
-                  <div class="result-box">
-                    <div class="thumb">
-                      <img src="media/room_left.png" alt="Box filter result 1">
-                      <div class="caption">room_left.png</div>
-                    </div>
-                    <div class="thumb">
-                      <img src="media/room_right.png" alt="Box filter result 1">
-                      <div class="caption">room_right.png</div>
-                    </div>
-                  </div>
-                <p>The Third group</p>  
-                <div class="result-box">
-                    <div class="thumb">
-                      <img src="media/lib_left.png" alt="Box filter result 1">
-                      <div class="caption">library_left.png</div>
-                    </div>
-                    <div class="thumb">
-                      <img src="media/lib_right.png" alt="Box filter result 1">
-                      <div class="caption">library_right.png</div>
+
+                  <div class="thumb">
+                    <img
+                      src="media/canteen_right.png"
+                      alt="Right canteen image"
+                    >
+                    <div class="caption">
+                      canteen_right.png
                     </div>
                   </div>
+
+                </div>
+
+                <p>
+                  <strong>Room Image Pair</strong>
+                </p>
+
+                <div class="result-box pair-grid">
+
+                  <div class="thumb">
+                    <img
+                      src="media/room_left.png"
+                      alt="Left room image"
+                    >
+                    <div class="caption">
+                      room_left.png
+                    </div>
+                  </div>
+
+                  <div class="thumb">
+                    <img
+                      src="media/room_right.png"
+                      alt="Right room image"
+                    >
+                    <div class="caption">
+                      room_right.png
+                    </div>
+                  </div>
+
+                </div>
+
+                <p>
+                  <strong>Library Image Pair</strong>
+                </p>
+
+                <div class="result-box pair-grid">
+
+                  <div class="thumb">
+                    <img
+                      src="media/lib_left.png"
+                      alt="Left library image"
+                    >
+                    <div class="caption">
+                      library_left.png
+                    </div>
+                  </div>
+
+                  <div class="thumb">
+                    <img
+                      src="media/lib_right.png"
+                      alt="Right library image"
+                    >
+                    <div class="caption">
+                      library_right.png
+                    </div>
+                  </div>
+
+                </div>
+
               </li>
-              <li><p>First I run the plain Harris Corner detection algorithm, resulting a lot of point candidates. 
-                Then, I used ANMS to select 500 representative and effective points out of the whole point set. The following 
-                is the three sets of pictures before/after ANMS. The selected corners are marked with read dots. For pics after
-                ANMS, the dots may be hard to observe, so you can zoom up a little.</p> 
-                <p>The left image of the first group</p>
-                <div class="result-box">
-                    <div class="thumb">
-                      <img src="media/canteen_left_harris_overlay_full.png" alt="Box filter result 1">
-                      <div class="caption">without_ANMS</div>
-                    </div>
-                    <div class="thumb">
-                      <img src="media/canteen_left_harris_overlay.png" alt="Box filter result 1">
-                      <div class="caption">with_ANMS</div>
+
+
+              <li>
+
+                <p>
+                  Harris Corner Detection usually produces far more points than are
+                  needed for matching.
+                  It can also produce many strong responses in a small textured region,
+                  while leaving other parts of the image poorly represented.
+                  Using all of these points would increase computation without
+                  necessarily improving alignment.
+                </p>
+
+                <p>
+                  I therefore apply Adaptive Non Maximal Suppression to select a
+                  smaller and more spatially distributed set of features.
+                  The goal is not simply to keep the strongest Harris responses.
+                  Instead, ANMS favors points that remain locally dominant over a large
+                  spatial region.
+                </p>
+
+                <p>
+                  For each Harris candidate \(i\), we can associate a suppression
+                  radius \(r_i\).
+                  Conceptually, this radius measures how far we must move from feature
+                  \(i\) before encountering another feature with a sufficiently stronger
+                  Harris response.
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \boxed{
+                  r_i
+                  =
+                  \min_j
+                  \left\|
+                  \mathbf x_i
+                  -
+                  \mathbf x_j
+                  \right\|_2
+                  }
+                  \]
+                </div>
+
+                <p>
+                  The minimization is performed over points \(j\) whose Harris response
+                  is sufficiently stronger than the response at point \(i\).
+                  A large suppression radius therefore means that the feature is a
+                  strong representative of a relatively large surrounding region.
+                </p>
+
+                <p>
+                  I rank the Harris candidates according to their suppression radii and
+                  retain the 500 points with the largest values.
+                  This produces a fixed number of features while encouraging them to
+                  cover the image more evenly.
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \boxed{
+                  \text{Dense Harris Candidates}
+                  \longrightarrow
+                  \text{ANMS}
+                  \longrightarrow
+                  500
+                  \text{ Spatially Distributed Features}
+                  }
+                  \]
+                </div>
+
+                <p>
+                  The following comparisons show the detected corners before and after
+                  ANMS.
+                  Red points indicate the selected feature locations.
+                  The full Harris detector produces many densely clustered candidates,
+                  while ANMS retains a smaller set that better covers the scene.
+                </p>
+
+                <p>
+                  <strong>Canteen Image</strong>
+                </p>
+
+                <div class="result-box pair-grid">
+
+                  <div class="thumb">
+                    <img
+                      src="media/canteen_left_harris_overlay_full.png"
+                      alt="Full Harris corner detections on the canteen image"
+                    >
+                    <div class="caption">
+                      Harris candidates before ANMS
                     </div>
                   </div>
-                <p>The left image of the second group</p>
-                  <div class="result-box">
-                    <div class="thumb">
-                      <img src="media/room_left_harris_overlay_full.png" alt="Box filter result 1">
-                      <div class="caption">without_ANMS</div>
-                    </div>
-                    <div class="thumb">
-                      <img src="media/room_left_harris_overlay.png" alt="Box filter result 1">
-                      <div class="caption">with_ANMS</div>
-                    </div>
-                  </div>
-                <p>The left image of the third group</p>
-                <div class="result-box">
-                    <div class="thumb">
-                      <img src="media/lib_left_harris_overlay_full.png" alt="Box filter result 1">
-                      <div class="caption">without_ANMS</div>
-                    </div>
-                    <div class="thumb">
-                      <img src="media/lib_left_harris_overlay.png" alt="Box filter result 1">
-                      <div class="caption">with_ANMS</div>
+
+                  <div class="thumb">
+                    <img
+                      src="media/canteen_left_harris_overlay.png"
+                      alt="Selected canteen features after ANMS"
+                    >
+                    <div class="caption">
+                      Selected features after ANMS
                     </div>
                   </div>
+
+                </div>
+
+                <p>
+                  <strong>Room Image</strong>
+                </p>
+
+                <div class="result-box pair-grid">
+
+                  <div class="thumb">
+                    <img
+                      src="media/room_left_harris_overlay_full.png"
+                      alt="Full Harris corner detections on the room image"
+                    >
+                    <div class="caption">
+                      Harris candidates before ANMS
+                    </div>
+                  </div>
+
+                  <div class="thumb">
+                    <img
+                      src="media/room_left_harris_overlay.png"
+                      alt="Selected room features after ANMS"
+                    >
+                    <div class="caption">
+                      Selected features after ANMS
+                    </div>
+                  </div>
+
+                </div>
+
+                <p>
+                  <strong>Library Image</strong>
+                </p>
+
+                <div class="result-box pair-grid">
+
+                  <div class="thumb">
+                    <img
+                      src="media/lib_left_harris_overlay_full.png"
+                      alt="Full Harris corner detections on the library image"
+                    >
+                    <div class="caption">
+                      Harris candidates before ANMS
+                    </div>
+                  </div>
+
+                  <div class="thumb">
+                    <img
+                      src="media/lib_left_harris_overlay.png"
+                      alt="Selected library features after ANMS"
+                    >
+                    <div class="caption">
+                      Selected features after ANMS
+                    </div>
+                  </div>
+
+                </div>
+
+                <p>
+                  Harris and ANMS therefore solve two different parts of feature
+                  selection.
+                  Harris determines which image locations have distinctive local
+                  corner structure, while ANMS determines which of those candidate
+                  corners should be retained for the later matching pipeline.
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \boxed{
+                  \text{Harris}
+                  \longrightarrow
+                  \text{Where Are Distinctive Corners}
+                  \longrightarrow
+                  \text{ANMS}
+                  \longrightarrow
+                  \text{Which Corners Should Be Kept}
+                  }
+                  \]
+                </div>
+
+                <p>
+                  At this stage, each image has a compact set of well distributed
+                  feature locations.
+                  The next step is to describe the local appearance around every
+                  selected point so that corresponding features can be compared across
+                  different images.
+                </p>
+
               </li>
+
             </ol>
+
           </div>
+
         </div>
         
         <!-- Small step box -->
