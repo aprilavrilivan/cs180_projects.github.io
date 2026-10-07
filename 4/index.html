@@ -2314,105 +2314,681 @@
 
         </div>
         
-        <!-- Small step box -->
+        <!-- ====================================================== -->
+        <!-- Part B.2 Feature Descriptor Extraction                 -->
+        <!-- ====================================================== -->
+
         <div class="mini-box" id="2.2">
+
           <div class="mini-hd">
-            <span>Part B</span>
             <span class="hint">2.2</span>
-            <button class="mini-toggle" type="button" data-target="#2.2-bo">Hide</button>
+            <span>Feature Descriptor Extraction</span>
+
+            <button class="mini-toggle" type="button"
+                    data-target="#2.2-body">Hide</button>
           </div>
+
           <div class="mini-bd" id="2.2-body">
-            <ol>
-              <li><p>In this section I implemented the Feature Descriptor Extraction to the previous pictures after ANMS.
-                     First I selected 40*40 pixels around the points after ANMS, then I downsampled them to 8*8. Their values
-                    are usefull for picture matching. In the following, I randomly selected three feature descriptors from 
-                     each examples and visualized them.</p>
-                  <p>The selected Feature Descriptor of the first group</p>
-                  <div class="result-box">
-                    <div class="thumb">
-                      <img src="media/canteen_extract0.png" alt="Box filter result 1">
-                      <div class="caption">canteen_extract0.png</div>
-                    </div>
-                    <div class="thumb">
-                      <img src="media/canteen_extract1.png" alt="Box filter result 1">
-                      <div class="caption">canteen_extract1.png</div>
-                    </div>
-                    <div class="thumb">
-                      <img src="media/canteen_extract2.png" alt="Box filter result 1">
-                      <div class="caption">canteen_extract2.png</div>
+
+            <ol class="section-steps">
+
+              <li>
+
+                <p>
+                  After Harris Corner Detection and ANMS, each image contains a compact
+                  set of feature locations.
+                  These locations tell us where distinctive structures occur, but they
+                  do not yet tell us whether a feature in one image corresponds to a
+                  feature in another image.
+                </p>
+
+                <p>
+                  To perform matching, each selected point needs a compact description
+                  of the local appearance around it.
+                  This representation is called a feature descriptor.
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \boxed{
+                  \text{Feature Location}
+                  \longrightarrow
+                  \text{Local Image Patch}
+                  \longrightarrow
+                  \text{Feature Descriptor}
+                  }
+                  \]
+                </div>
+
+                <p>
+                  A useful descriptor should satisfy two competing goals.
+                  It should remain reasonably stable when the same scene point appears
+                  with small imaging variations, while still being different enough
+                  from descriptors of unrelated points.
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \boxed{
+                  \text{Good Descriptor}
+                  =
+                  \text{Stable}
+                  +
+                  \text{Distinctive}
+                  }
+                  \]
+                </div>
+
+                <p>
+                  This project uses a simplified version of the Multi Scale Oriented
+                  Patches descriptor.
+                  Since rotation invariance is not required here, I use axis aligned
+                  patches centered at the ANMS feature locations.
+                </p>
+
+                <p>
+                  For every selected feature point, I first extract a relatively large
+                  \(40\times40\) window from the image.
+                  Using a larger neighborhood allows the descriptor to capture more
+                  context around the corner than a very small patch would.
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \boxed{
+                  \mathbf x_i
+                  \longrightarrow
+                  40\times40
+                  \text{ Local Window}
+                  }
+                  \]
+                </div>
+
+                <p>
+                  I then downsample this window to an \(8\times8\) patch.
+                  This produces a lower resolution description of the local image
+                  structure.
+                  Fine pixel level variation is reduced, while larger intensity
+                  patterns such as edges, corners, and nearby textures are preserved.
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \boxed{
+                  40\times40
+                  \longrightarrow
+                  8\times8
+                  }
+                  \]
+                </div>
+
+                <p>
+                  The \(8\times8\) patch contains 64 intensity values and can therefore
+                  be flattened into a 64 dimensional feature vector.
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \boxed{
+                  D_i
+                  =
+                  \operatorname{vec}
+                  \left(
+                  P_i^{8\times8}
+                  \right)
+                  \in
+                  \mathbb R^{64}
+                  }
+                  \]
+                </div>
+
+                <p>
+                  Before using the descriptor for matching, I normalize its intensity
+                  values.
+                  Let \(\mu_i\) and \(\sigma_i\) denote the mean and standard deviation
+                  of the descriptor patch.
+                  Each value is transformed according to
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \boxed{
+                  D_i'
+                  =
+                  \frac{
+                  D_i-\mu_i
+                  }{
+                  \sigma_i
+                  }
+                  }
+                  \]
+                </div>
+
+                <p>
+                  This bias and gain normalization reduces sensitivity to simple
+                  brightness and contrast differences between images.
+                  Two patches with similar spatial structure can therefore remain
+                  comparable even when their absolute intensity values are not exactly
+                  the same.
+                </p>
+
+                <p>
+                  The complete descriptor extraction process can be summarized as
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \boxed{
+                  \begin{gathered}
+                  \text{ANMS Feature Point}
+                  \longrightarrow
+                  40\times40
+                  \text{ Window}
+                  \longrightarrow
+                  8\times8
+                  \text{ Patch}
+                  \\
+                  \longrightarrow
+                  \text{Normalization}
+                  \longrightarrow
+                  64
+                  \text{ Dimensional Descriptor}
+                  \end{gathered}
+                  }
+                  \]
+                </div>
+
+                <p>
+                  I applied this procedure to the feature points selected in all three
+                  image groups.
+                  The following examples show several extracted descriptors.
+                  Although these visualizations appear as small image patches, each one
+                  is used computationally as a normalized 64 dimensional vector.
+                </p>
+
+                <p>
+                  <strong>Canteen Descriptors</strong>
+                </p>
+
+                <div class="result-box panorama-sequence">
+
+                  <div class="thumb">
+                    <img
+                      src="media/canteen_extract0.png"
+                      alt="First extracted canteen feature descriptor"
+                    >
+                    <div class="caption">
+                      canteen_extract0.png
                     </div>
                   </div>
-                  <p>The selected Feature Descriptor of the second group</p>
-                  <div class="result-box">
-                    <div class="thumb">
-                      <img src="media/room_extract0.png" alt="Box filter result 1">
-                      <div class="caption">room_extract0.png</div>
-                    </div>
-                    <div class="thumb">
-                      <img src="media/room_extract1.png" alt="Box filter result 1">
-                      <div class="caption">room_extract1.png</div>
-                    </div>
-                    <div class="thumb">
-                      <img src="media/room_extract2.png" alt="Box filter result 1">
-                      <div class="caption">room_extract2.png</div>
+
+                  <div class="thumb">
+                    <img
+                      src="media/canteen_extract1.png"
+                      alt="Second extracted canteen feature descriptor"
+                    >
+                    <div class="caption">
+                      canteen_extract1.png
                     </div>
                   </div>
-                <p>The selected Feature Descriptor of the third group</p>
-                <div class="result-box">
-                    <div class="thumb">
-                      <img src="media/lib_extract0.png" alt="Box filter result 1">
-                      <div class="caption">lib_extract0.png</div>
-                    </div>
-                    <div class="thumb">
-                      <img src="media/lib_extract1.png" alt="Box filter result 1">
-                      <div class="caption">lib_extract1.png</div>
-                    </div>
-                    <div class="thumb">
-                      <img src="media/lib_extract2.png" alt="Box filter result 1">
-                      <div class="caption">lib_extract2.png</div>
+
+                  <div class="thumb">
+                    <img
+                      src="media/canteen_extract2.png"
+                      alt="Third extracted canteen feature descriptor"
+                    >
+                    <div class="caption">
+                      canteen_extract2.png
                     </div>
                   </div>
+
+                </div>
+
+                <p>
+                  <strong>Room Descriptors</strong>
+                </p>
+
+                <div class="result-box panorama-sequence">
+
+                  <div class="thumb">
+                    <img
+                      src="media/room_extract0.png"
+                      alt="First extracted room feature descriptor"
+                    >
+                    <div class="caption">
+                      room_extract0.png
+                    </div>
+                  </div>
+
+                  <div class="thumb">
+                    <img
+                      src="media/room_extract1.png"
+                      alt="Second extracted room feature descriptor"
+                    >
+                    <div class="caption">
+                      room_extract1.png
+                    </div>
+                  </div>
+
+                  <div class="thumb">
+                    <img
+                      src="media/room_extract2.png"
+                      alt="Third extracted room feature descriptor"
+                    >
+                    <div class="caption">
+                      room_extract2.png
+                    </div>
+                  </div>
+
+                </div>
+
+                <p>
+                  <strong>Library Descriptors</strong>
+                </p>
+
+                <div class="result-box panorama-sequence">
+
+                  <div class="thumb">
+                    <img
+                      src="media/lib_extract0.png"
+                      alt="First extracted library feature descriptor"
+                    >
+                    <div class="caption">
+                      lib_extract0.png
+                    </div>
+                  </div>
+
+                  <div class="thumb">
+                    <img
+                      src="media/lib_extract1.png"
+                      alt="Second extracted library feature descriptor"
+                    >
+                    <div class="caption">
+                      lib_extract1.png
+                    </div>
+                  </div>
+
+                  <div class="thumb">
+                    <img
+                      src="media/lib_extract2.png"
+                      alt="Third extracted library feature descriptor"
+                    >
+                    <div class="caption">
+                      lib_extract2.png
+                    </div>
+                  </div>
+
+                </div>
+
+                <p>
+                  At this stage, each selected feature point is associated with both a
+                  spatial location and a normalized appearance descriptor.
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \boxed{
+                  \text{Feature}
+                  =
+                  \left(
+                  \mathbf x_i,
+                  D_i'
+                  \right)
+                  }
+                  \]
+                </div>
+
+                <p>
+                  The spatial coordinate tells us where the feature occurs in the
+                  image, while the descriptor summarizes what its local neighborhood
+                  looks like.
+                  The next step is to compare these descriptor vectors across two
+                  images and identify likely correspondences.
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \boxed{
+                  \text{Detected Point}
+                  \longrightarrow
+                  \text{Descriptor}
+                  \longrightarrow
+                  \text{Cross Image Matching}
+                  }
+                  \]
+                </div>
+
               </li>
+
             </ol>
+
           </div>
+
         </div>
 
+        <!-- ====================================================== -->
+        <!-- Part B.3 Feature Matching                              -->
+        <!-- ====================================================== -->
 
-        <!-- Small step box -->
         <div class="mini-box" id="2.3">
+
           <div class="mini-hd">
-            <span>Part B</span>
             <span class="hint">2.3</span>
-            <button class="mini-toggle" type="button" data-target="#2.3-bo">Hide</button>
+            <span>Feature Matching</span>
+
+            <button class="mini-toggle" type="button"
+                    data-target="#2.3-body">Hide</button>
           </div>
+
           <div class="mini-bd" id="2.3-body">
-            <ol>
-              <li><p>In this section, I implemented feature matching between two corresponding images using the extracted feature descriptors.
-First, I created a 500×500 matrix where each entry stores the Euclidean distance between two feature vectors (one from the left image and one from the right image).
-For each feature vector in the left image, I found the smallest distance d_1 and the second smallest d_2, then computed their ratio d_1 / d_2.
-If this ratio is smaller than 0.7, I considered the pair as a reliable match and kept it for homography matrix estimation.
-Finally, I visualized these matched pairs by drawing connecting lines between the two images, as shown below.</p>
-                  <div class="result-box">
-                    <div class="thumb large-box">
-                      <img src="media/canteen_matched_features.png" alt="Box filter result 1">
-                      <div class="caption">canteen_matched_features.png</div>
+
+            <ol class="section-steps">
+
+              <li>
+
+                <p>
+                  After the previous section, every selected feature point is associated
+                  with a normalized descriptor that summarizes its local appearance.
+                  We can now compare these descriptors across two overlapping images
+                  and search for likely correspondences.
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \boxed{
+                  \text{Feature Descriptors in Image 1}
+                  \longrightarrow
+                  \text{Descriptor Comparison}
+                  \longrightarrow
+                  \text{Candidate Matches in Image 2}
+                  }
+                  \]
+                </div>
+
+                <p>
+                  Suppose the left image contains descriptors
+                  \(\mathbf f_i^{L}\) and the right image contains descriptors
+                  \(\mathbf f_j^{R}\).
+                  Since every descriptor is represented as a 64 dimensional vector,
+                  their similarity can be measured using Euclidean distance.
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \boxed{
+                  D_{ij}
+                  =
+                  \left\|
+                  \mathbf f_i^{L}
+                  -
+                  \mathbf f_j^{R}
+                  \right\|_2
+                  }
+                  \]
+                </div>
+
+                <p>
+                  A small value of \(D_{ij}\) means that the two local image patches
+                  have similar normalized appearance.
+                  A large value means that their local structures are different.
+                </p>
+
+                <p>
+                  Since ANMS retains 500 features in each image, I compute all pairwise
+                  descriptor distances and store them in a \(500\times500\) distance
+                  matrix.
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \boxed{
+                  D
+                  \in
+                  \mathbb R^{500\times500}
+                  }
+                  \]
+                </div>
+
+                <p>
+                  Each row corresponds to one feature in the left image and each column
+                  corresponds to one feature in the right image.
+                  For a particular feature in the left image, the smallest value in its
+                  row identifies the most similar descriptor in the right image.
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \boxed{
+                  j_1
+                  =
+                  \arg\min_j
+                  D_{ij}
+                  }
+                  \]
+                </div>
+
+                <p>
+                  This nearest neighbor provides a natural candidate match.
+                  However, simply selecting the closest descriptor is not reliable
+                  enough.
+                  Repeated textures, windows, tiles, shelves, and other similar
+                  structures can produce several descriptors with nearly identical
+                  appearance.
+                </p>
+
+                <p>
+                  To determine whether the best match is actually distinctive, I also
+                  examine the second closest descriptor.
+                  Let \(d_1\) denote the smallest descriptor distance and \(d_2\)
+                  denote the second smallest distance.
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \boxed{
+                  d_1
+                  =
+                  \text{nearest descriptor distance},
+                  \qquad
+                  d_2
+                  =
+                  \text{second nearest descriptor distance}
+                  }
+                  \]
+                </div>
+
+                <p>
+                  I then compute the ratio
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \boxed{
+                  r
+                  =
+                  \frac{d_1}{d_2}
+                  }
+                  \]
+                </div>
+
+                <p>
+                  This ratio measures how clearly the best candidate stands out from
+                  the alternatives.
+                  If \(d_1\) is much smaller than \(d_2\), then the best descriptor is
+                  substantially more similar than the next best option.
+                  The match is therefore relatively distinctive.
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  d_1
+                  \ll
+                  d_2
+                  \qquad
+                  \Longrightarrow
+                  \qquad
+                  \frac{d_1}{d_2}
+                  \text{ is small}
+                  \]
+                </div>
+
+                <p>
+                  In contrast, if the two distances are similar, then several features
+                  in the right image explain the left descriptor almost equally well.
+                  Such a match is ambiguous.
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  d_1
+                  \approx
+                  d_2
+                  \qquad
+                  \Longrightarrow
+                  \qquad
+                  \frac{d_1}{d_2}
+                  \approx
+                  1
+                  \]
+                </div>
+
+                <p>
+                  I therefore retain a match only when the nearest neighbor ratio is
+                  smaller than \(0.7\).
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \boxed{
+                  \frac{d_1}{d_2}
+                  <
+                  0.7
+                  }
+                  \]
+                </div>
+
+                <p>
+                  This filtering step removes many ambiguous correspondences and leaves
+                  a smaller set of more distinctive candidate matches.
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \boxed{
+                  \text{Descriptor Distances}
+                  \longrightarrow
+                  \text{Nearest Neighbor}
+                  \longrightarrow
+                  \text{Ratio Test}
+                  \longrightarrow
+                  \text{Candidate Correspondences}
+                  }
+                  \]
+                </div>
+
+                <p>
+                  I visualize the accepted correspondences by placing the two images
+                  next to each other and drawing a line between each matched feature
+                  pair.
+                  The following results show the matches recovered for the three image
+                  groups.
+                </p>
+
+                <p>
+                  <strong>Canteen Feature Matches</strong>
+                </p>
+
+                <div class="result-box single-figure">
+
+                  <div class="thumb large-box">
+                    <img
+                      src="media/canteen_matched_features.png"
+                      alt="Matched feature correspondences for the canteen images"
+                    >
+                    <div class="caption">
+                      canteen_matched_features.png
                     </div>
                   </div>
-                  <div class="result-box">
-                    <div class="thumb large-box">
-                      <img src="media/room_matched_features.png" alt="Box filter result 1">
-                      <div class="caption">room_matched_features.png</div>
+
+                </div>
+
+                <p>
+                  <strong>Room Feature Matches</strong>
+                </p>
+
+                <div class="result-box single-figure">
+
+                  <div class="thumb large-box">
+                    <img
+                      src="media/room_matched_features.png"
+                      alt="Matched feature correspondences for the room images"
+                    >
+                    <div class="caption">
+                      room_matched_features.png
                     </div>
                   </div>
-                  <div class="result-box">
-                    <div class="thumb large-box">
-                      <img src="media/lib_matched_features.png" alt="Box filter result 1">
-                      <div class="caption">lib_matched_features.png</div>
+
+                </div>
+
+                <p>
+                  <strong>Library Feature Matches</strong>
+                </p>
+
+                <div class="result-box single-figure">
+
+                  <div class="thumb large-box">
+                    <img
+                      src="media/lib_matched_features.png"
+                      alt="Matched feature correspondences for the library images"
+                    >
+                    <div class="caption">
+                      lib_matched_features.png
                     </div>
                   </div>
+
+                </div>
+
+                <p>
+                  At this point, the manually selected correspondences used in Part A
+                  have been replaced by automatically discovered feature matches.
+                  However, appearance based matching alone does not guarantee that every
+                  accepted pair is geometrically correct.
+                  A few incorrect correspondences can still survive the ratio test.
+                </p>
+
+                <p>
+                  These remaining outliers are particularly important because even a
+                  small number of incorrect point pairs can strongly affect homography
+                  estimation.
+                  The next section therefore introduces RANSAC to identify a
+                  geometrically consistent subset of the candidate matches before
+                  computing the final homography.
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \boxed{
+                  \text{Harris}
+                  \longrightarrow
+                  \text{ANMS}
+                  \longrightarrow
+                  \text{Descriptors}
+                  \longrightarrow
+                  \text{Feature Matching}
+                  \longrightarrow
+                  \text{RANSAC}
+                  \longrightarrow
+                  H
+                  }
+                  \]
+                </div>
+
               </li>
+
             </ol>
+
           </div>
+
         </div>
           
         <!-- Small step box -->
