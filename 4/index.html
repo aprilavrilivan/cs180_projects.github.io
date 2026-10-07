@@ -505,7 +505,168 @@
                 </p>
 
                 <p>
-                  Image coordinates are first written in homogeneous form.
+                  A homography is not itself a three dimensional rotation matrix.
+                  Instead, it is a two dimensional projective transformation between
+                  two image planes.
+                  In the panorama setting used here, however, its origin can be
+                  understood directly from the underlying camera rotation.
+                </p>
+
+                <p>
+                  Consider a pixel in the first image written in homogeneous
+                  coordinates.
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \mathbf p_1
+                  =
+                  \begin{bmatrix}
+                  u_1\\
+                  v_1\\
+                  1
+                  \end{bmatrix}
+                  \]
+                </div>
+
+                <p>
+                  Using the intrinsic matrix of the first camera, this pixel can be
+                  back projected into a three dimensional viewing direction in the
+                  first camera coordinate system.
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \boxed{
+                  \mathbf d_1
+                  \propto
+                  K_1^{-1}\mathbf p_1
+                  }
+                  \]
+                </div>
+
+                <p>
+                  During panorama capture, the camera center remains approximately
+                  fixed while the camera rotates.
+                  Let \(R\) denote the relative rotation from the first camera
+                  orientation to the second.
+                  The same viewing ray expressed in the second camera coordinate
+                  system is therefore
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \boxed{
+                  \mathbf d_2
+                  =
+                  R\mathbf d_1
+                  }
+                  \]
+                </div>
+
+                <p>
+                  Projecting this direction onto the second image plane using the
+                  second intrinsic matrix gives
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \mathbf p_2
+                  \sim
+                  K_2\mathbf d_2
+                  \]
+                </div>
+
+                <p>
+                  Substituting the previous expressions gives
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \mathbf p_2
+                  \sim
+                  K_2
+                  R
+                  K_1^{-1}
+                  \mathbf p_1
+                  \]
+                </div>
+
+                <p>
+                  This means that pure camera rotation induces a single projective
+                  mapping between the two image planes.
+                  We define this mapping as the homography
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \boxed{
+                  H
+                  =
+                  K_2
+                  R
+                  K_1^{-1}
+                  }
+                  \]
+                </div>
+
+                <p>
+                  If both images are captured using the same camera with unchanged
+                  zoom and focal settings, then the two intrinsic matrices are the
+                  same and the expression becomes
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \boxed{
+                  H
+                  =
+                  KRK^{-1}
+                  }
+                  \]
+                </div>
+
+                <p>
+                  This explains why the images collected in Part 1.1 can be aligned
+                  using a single homography.
+                  The three dimensional camera rotation induces a two dimensional
+                  projective transformation on the image coordinates.
+                </p>
+
+                <p>
+                  The same homography model also applies when the observed scene is
+                  planar, even if the camera center changes.
+                  For a general three dimensional scene with significant camera
+                  translation, however, different depths produce different parallax
+                  and one global homography is generally insufficient.
+                </p>
+
+                <p>
+                  In this project, we do not explicitly calibrate the camera or recover
+                  the relative rotation \(R\).
+                  Instead, we observe corresponding points directly in the two images
+                  and estimate the equivalent image to image transformation \(H\)
+                  from those correspondences.
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \boxed{
+                  \mathbf p_i
+                  \longleftrightarrow
+                  \mathbf p_i'
+                  \qquad
+                  \Longrightarrow
+                  \qquad
+                  \mathbf p_i'
+                  \sim
+                  H\mathbf p_i
+                  }
+                  \]
+                </div>
+
+                <p>
+                  Image coordinates are written in homogeneous form.
                 </p>
 
                 <div class="equation-block">
@@ -529,8 +690,8 @@
                 </div>
 
                 <p>
-                  A homography maps the first point to the corresponding point in the
-                  second image up to scale.
+                  The homography maps the first point to the corresponding point in
+                  the second image up to a nonzero scale.
                 </p>
 
                 <div class="equation-block">
@@ -561,7 +722,8 @@
 
                 <p>
                   Although the matrix contains nine entries, multiplying the entire
-                  matrix by any nonzero scalar produces the same projective mapping.
+                  matrix by any nonzero scalar produces exactly the same projective
+                  mapping.
                   The homography therefore contains eight independent degrees of
                   freedom.
                 </p>
@@ -577,7 +739,26 @@
                 </div>
 
                 <p>
-                  Expanding the homogeneous mapping gives the image coordinates
+                  To see how the matrix changes image coordinates, we first multiply
+                  \(H\) by the homogeneous source point.
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  H\mathbf p
+                  =
+                  \begin{bmatrix}
+                  h_{11}x+h_{12}y+h_{13}\\
+                  h_{21}x+h_{22}y+h_{23}\\
+                  h_{31}x+h_{32}y+h_{33}
+                  \end{bmatrix}
+                  \]
+                </div>
+
+                <p>
+                  The result is still expressed in homogeneous coordinates.
+                  Dividing by its third component converts it back into ordinary pixel
+                  coordinates.
                 </p>
 
                 <div class="equation-block">
@@ -609,10 +790,12 @@
                 </div>
 
                 <p>
-                  These equations explain why a projective transformation is more
-                  general than an affine transformation.
-                  The denominator depends on the input position, allowing parallel
-                  lines and apparent scale to change under perspective.
+                  The first two rows determine the transformed horizontal and vertical
+                  coordinates.
+                  The third row produces a position dependent homogeneous scale.
+                  This final division is what allows a homography to represent
+                  perspective effects that cannot be described by an affine
+                  transformation.
                 </p>
 
                 <p>
@@ -643,8 +826,15 @@
                 </div>
 
                 <p>
-                  The unknown entries of \(H\) can now be collected into a single
-                  vector.
+                  The important observation is that the image coordinates
+                  \(x,y,x',y'\) are already known from the selected correspondences.
+                  The only unknown quantities are the entries of \(H\).
+                  After rearranging the equations, each correspondence therefore
+                  provides two linear constraints on the homography parameters.
+                </p>
+
+                <p>
+                  The unknown entries of \(H\) can be collected into a single vector.
                 </p>
 
                 <div class="equation-block">
