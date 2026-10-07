@@ -202,9 +202,130 @@
       color: var(--muted);
       margin-top: 6px;
     }
+
+    .project-main .equation-block {
+      position: relative;
+      width: min(100%, 780px);
+      margin: 20px auto;
+      padding: 17px 22px;
+      overflow-x: auto;
+      border: 1px solid color-mix(in srgb, var(--project-accent) 24%, var(--project-border));
+      border-radius: 13px;
+      background: linear-gradient(
+        135deg,
+        color-mix(in srgb, var(--project-accent-soft) 70%, var(--project-paper)),
+        var(--project-paper)
+      );
+      color: var(--project-text);
+      text-align: center;
+      scrollbar-width: thin;
+    }
+
+    .project-main .equation-block mjx-container {
+      margin: 0 !important;
+      color: var(--project-text);
+      font-size: clamp(.88rem, 1.35vw, 1.06rem) !important;
+    }
+
+    .project-main .result-box.panorama-sequence {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+      margin: 22px 0 28px;
+    }
+
+    .project-main .result-box.panorama-sequence .thumb {
+      width: 100%;
+      max-width: none;
+    }
+
+    .project-main .result-box.single-figure {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      justify-items: center;
+      width: 100%;
+      margin: 22px 0 28px;
+    }
+
+    .project-main .result-box.single-figure .thumb {
+      width: min(100%, var(--single-figure-width, 620px));
+      max-width: var(--single-figure-width, 620px);
+    }
+
+    .project-main .result-box.formula-figure {
+      --single-figure-width: 560px;
+    }
+
+    .project-main .result-box.wide-matrix-figure {
+      --single-figure-width: 690px;
+    }
+
+    .project-main .homography-steps {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+      counter-reset: homography-step;
+    }
+
+    .project-main .homography-steps > li {
+      position: relative;
+      margin: 0;
+      padding-left: 34px;
+      counter-increment: homography-step;
+    }
+
+    .project-main .homography-steps > li::before {
+      position: absolute;
+      top: .15em;
+      left: 0;
+      color: var(--project-accent-dark);
+      content: counter(homography-step, decimal-leading-zero);
+      font-size: .72rem;
+      font-weight: 800;
+      letter-spacing: .08em;
+    }
+
+    .project-main .homography-steps > li + li {
+      margin-top: 48px;
+      padding-top: 42px;
+      border-top: 1px solid var(--project-border);
+    }
+
+    @media (max-width: 760px) {
+      .project-main .equation-block {
+        margin: 15px 0;
+        padding: 14px 12px;
+      }
+
+      .project-main .result-box.panorama-sequence {
+        grid-template-columns: 1fr;
+      }
+
+      .project-main .homography-steps > li {
+        padding-left: 0;
+      }
+
+      .project-main .homography-steps > li::before {
+        position: static;
+        display: block;
+        margin-bottom: 12px;
+      }
+    }
   </style>
   <link rel="stylesheet" href="../portfolio-polish.css">
   <link rel="stylesheet" href="../project-detail.css?v=20261004b">
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['\\(', '\\)']],
+        displayMath: [['\\[', '\\]']]
+      },
+      options: {
+        skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      }
+    };
+  </script>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
 </head>
     
 <body>
@@ -223,7 +344,7 @@
 
   <main class="wrap">
     <h1 class="page-title">(Auto)stitching and Photo Mosaics</h1>
-    <p class="lead">This project aims to warp and mosaic pictures using various tools</span>.</p>
+    <p class="lead">This project aims to warp and mosaic pictures using various tools.</p>
     
     <!-- P1 -->
     <section class="panel" aria-labelledby="sec-simple">
@@ -232,134 +353,598 @@
         <span class="muted">4 sections in total</span>
       </div>
       <div class="panel-bd">
-        <!-- Small step box -->
+        <!-- Part A.1 Image Capture -->
         <div class="mini-box" id="1.1">
           <div class="mini-hd">
-            <span>Part A</span>
             <span class="hint">1.1</span>
-            <button class="mini-toggle" type="button" data-target="#1.1-bo">Hide</button>
+            <span>Image Capture</span>
+            <button class="mini-toggle" type="button" data-target="#1.1-body">Hide</button>
           </div>
+
           <div class="mini-bd" id="1.1-body">
-            <ol>
-              <li>In this section I demonstrated 2 sets of images with projective transformations between them (fixed center of projection, rotate camera). In section 1.4 I'use them for constructing a panorama
-                  <div class="result-box">
-                    <div class="thumb">
-                      <img src="media/2.jpeg" alt="Box filter result 1">
-                      <div class="caption">room1.png</div>
-                    </div>
-                    <div class="thumb">
-                      <img src="media/3.jpeg" alt="Box filter result 1">
-                      <div class="caption">room2.png</div>
-                    </div>
-                    <div class="thumb">
-                      <img src="media/4.jpeg" alt="Box filter result 2">
-                      <div class="caption">room3.png</div>
-                    </div>
+            <p>
+              The first step is to capture a set of overlapping images that can later
+              be aligned through projective transformations.
+              I collected two image sequences, one inside my room and one inside
+              the library.
+              Each sequence contains three images observing the same scene from
+              different viewing directions.
+            </p>
+
+            <p>
+              While capturing the images, I kept the camera position approximately
+              fixed and mainly rotated the camera to change the viewing direction.
+              This condition is important because images taken from the same center
+              of projection can be related through a homography.
+            </p>
+
+            <div class="equation-block">
+              \[
+              \boxed{
+              \mathbf p'
+              \sim
+              H\mathbf p
+              }
+              \]
+            </div>
+
+            <p>
+              Here, \(\mathbf p\) and \(\mathbf p'\) represent corresponding image
+              points in two different views, while \(H\) is a \(3\times3\)
+              projective transformation.
+              The symbol \(\sim\) indicates equality up to an arbitrary scale in
+              homogeneous coordinates.
+            </p>
+
+            <p>
+              The reason this works can be understood geometrically.
+              Rotating the camera changes the orientation of the image plane while
+              keeping the optical center approximately unchanged.
+              The incoming scene rays therefore remain associated with the same
+              center of projection and are simply reparameterized on different
+              image planes.
+              A homography can describe this image to image mapping.
+            </p>
+
+            <div class="equation-block">
+              \[
+              \boxed{
+              \text{Fixed Camera Center}
+              \quad
+              +
+              \quad
+              \text{Camera Rotation}
+              \quad
+              \Longrightarrow
+              \quad
+              \text{Homography Between Views}
+              }
+              \]
+            </div>
+
+            <p>
+              Keeping the camera center approximately fixed also reduces parallax.
+              If the camera were translated significantly, nearby and distant
+              objects would move by different amounts across the images.
+              In that case, a single global homography would generally no longer
+              align the entire three dimensional scene.
+            </p>
+
+            <p>
+              I also ensured that neighboring images contain substantial overlap.
+              The overlapping regions provide corresponding visual structures that
+              will later be used to estimate the homographies between views.
+              In Part A, these correspondences are selected manually.
+              In Part B, the same task will be performed automatically using
+              feature detection and matching.
+            </p>
+
+            <p>
+              The first sequence contains three views of my room.
+            </p>
+
+            <div class="result-box panorama-sequence">
+              <div class="thumb">
+                <img src="media/2.jpeg" alt="Left view of the room panorama sequence">
+                <div class="caption">room1.png</div>
+              </div>
+
+              <div class="thumb">
+                <img src="media/3.jpeg" alt="Center view of the room panorama sequence">
+                <div class="caption">room2.png</div>
+              </div>
+
+              <div class="thumb">
+                <img src="media/4.jpeg" alt="Right view of the room panorama sequence">
+                <div class="caption">room3.png</div>
+              </div>
+            </div>
+
+            <p>
+              The second sequence contains three overlapping views of the library.
+            </p>
+
+            <div class="result-box panorama-sequence">
+              <div class="thumb">
+                <img src="media/one.jpeg" alt="Left view of the library panorama sequence">
+                <div class="caption">library1.png</div>
+              </div>
+
+              <div class="thumb">
+                <img src="media/two.jpeg" alt="Center view of the library panorama sequence">
+                <div class="caption">library2.png</div>
+              </div>
+
+              <div class="thumb">
+                <img src="media/five.jpeg" alt="Right view of the library panorama sequence">
+                <div class="caption">library3.png</div>
+              </div>
+            </div>
+
+            <p>
+              These two sequences will later be warped into common coordinate
+              systems and blended into panoramas.
+              Before performing the warp, however, we first need to recover the
+              homography that relates corresponding image coordinates.
+            </p>
+          </div>
+        </div>
+        
+        <!-- Part A.2 Recovering the Homography -->
+        <div class="mini-box" id="1.2">
+          <div class="mini-hd">
+            <span class="hint">1.2</span>
+            <span>Recovering the Homography</span>
+            <button class="mini-toggle" type="button" data-target="#1.2-body">Hide</button>
+          </div>
+
+          <div class="mini-bd" id="1.2-body">
+            <ol class="homography-steps">
+              <li>
+                <p>
+                  Once two images contain overlapping content, the next step is to
+                  determine the projective transformation that maps coordinates from
+                  one image into the other.
+                  This transformation is represented by a homography matrix \(H\).
+                </p>
+
+                <p>
+                  Image coordinates are first written in homogeneous form.
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \mathbf p
+                  =
+                  \begin{bmatrix}
+                  x\\
+                  y\\
+                  1
+                  \end{bmatrix},
+                  \qquad
+                  \mathbf p'
+                  =
+                  \begin{bmatrix}
+                  x'\\
+                  y'\\
+                  1
+                  \end{bmatrix}
+                  \]
+                </div>
+
+                <p>
+                  A homography maps the first point to the corresponding point in the
+                  second image up to scale.
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \boxed{
+                  \mathbf p'
+                  \sim
+                  H\mathbf p
+                  }
+                  \]
+                </div>
+
+                <p>
+                  The matrix \(H\) has the form
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  H
+                  =
+                  \begin{bmatrix}
+                  h_{11} &amp; h_{12} &amp; h_{13}\\
+                  h_{21} &amp; h_{22} &amp; h_{23}\\
+                  h_{31} &amp; h_{32} &amp; h_{33}
+                  \end{bmatrix}
+                  \]
+                </div>
+
+                <p>
+                  Although the matrix contains nine entries, multiplying the entire
+                  matrix by any nonzero scalar produces the same projective mapping.
+                  The homography therefore contains eight independent degrees of
+                  freedom.
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \boxed{
+                  H
+                  \sim
+                  \lambda H
+                  }
+                  \]
+                </div>
+
+                <p>
+                  Expanding the homogeneous mapping gives the image coordinates
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \boxed{
+                  x'
+                  =
+                  \frac{
+                  h_{11}x+h_{12}y+h_{13}
+                  }{
+                  h_{31}x+h_{32}y+h_{33}
+                  }
+                  }
+                  \]
+                </div>
+
+                <div class="equation-block">
+                  \[
+                  \boxed{
+                  y'
+                  =
+                  \frac{
+                  h_{21}x+h_{22}y+h_{23}
+                  }{
+                  h_{31}x+h_{32}y+h_{33}
+                  }
+                  }
+                  \]
+                </div>
+
+                <p>
+                  These equations explain why a projective transformation is more
+                  general than an affine transformation.
+                  The denominator depends on the input position, allowing parallel
+                  lines and apparent scale to change under perspective.
+                </p>
+
+                <div class="result-box single-figure formula-figure">
+                  <div class="thumb">
+                    <img src="media/formula1.png" alt="Homography coordinate equations">
                   </div>
+                </div>
+
+                <p>
+                  Multiplying both equations by their common denominator removes the
+                  fractions.
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  x'
+                  \left(
+                  h_{31}x+h_{32}y+h_{33}
+                  \right)
+                  =
+                  h_{11}x+h_{12}y+h_{13}
+                  \]
+                </div>
+
+                <div class="equation-block">
+                  \[
+                  y'
+                  \left(
+                  h_{31}x+h_{32}y+h_{33}
+                  \right)
+                  =
+                  h_{21}x+h_{22}y+h_{23}
+                  \]
+                </div>
+
+                <div class="result-box single-figure formula-figure">
+                  <div class="thumb">
+                    <img src="media/formula2.png" alt="Rearranged homography equations">
+                  </div>
+                </div>
+
+                <p>
+                  The unknown entries of \(H\) can now be collected into a single
+                  vector.
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \mathbf h
+                  =
+                  \begin{bmatrix}
+                  h_{11} &amp;
+                  h_{12} &amp;
+                  h_{13} &amp;
+                  h_{21} &amp;
+                  h_{22} &amp;
+                  h_{23} &amp;
+                  h_{31} &amp;
+                  h_{32} &amp;
+                  h_{33}
+                  \end{bmatrix}^{T}
+                  \]
+                </div>
+
+                <div class="result-box single-figure wide-matrix-figure">
+                  <div class="thumb">
+                    <img src="media/formula3.png" alt="Vectorized homography parameters">
+                  </div>
+                </div>
+
+                <p>
+                  Each point correspondence contributes two linear constraints on
+                  \(\mathbf h\).
+                  One convenient form is
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \begin{bmatrix}
+                  -x &amp; -y &amp; -1
+                  &amp; 0 &amp; 0 &amp; 0
+                  &amp; xx' &amp; yx' &amp; x'\\
+                  0 &amp; 0 &amp; 0
+                  &amp; -x &amp; -y &amp; -1
+                  &amp; xy' &amp; yy' &amp; y'
+                  \end{bmatrix}
+                  \mathbf h
+                  =
+                  \mathbf 0
+                  \]
+                </div>
+
+                <p>
+                  Stacking the constraints from all correspondences produces a
+                  homogeneous linear system.
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \boxed{
+                  A\mathbf h
+                  =
+                  \mathbf 0
+                  }
+                  \]
+                </div>
+
+                <div class="result-box single-figure formula-figure">
+                  <div class="thumb">
+                    <img src="media/formula4.png" alt="Linear system for homography estimation">
+                  </div>
+                </div>
+
+                <p>
+                  Since the homography contains eight independent degrees of freedom
+                  and each correspondence provides two independent constraints, at
+                  least four point correspondences are required.
+                  These points should not form a degenerate configuration such as all
+                  lying on the same line.
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \boxed{
+                  4
+                  \text{ correspondences}
+                  \times
+                  2
+                  \text{ constraints}
+                  =
+                  8
+                  \text{ constraints}
+                  }
+                  \]
+                </div>
+
+                <p>
+                  In practice, more than four correspondences are preferable.
+                  This produces an overdetermined system and allows the estimated
+                  homography to average over small inaccuracies in manually selected
+                  points.
+                </p>
+
+                <p>
+                  Before solving for the homography, I normalize the image coordinates.
+                  The points are translated and scaled so that their numerical ranges
+                  are better conditioned.
+                  Let \(T\) and \(T'\) denote the normalization transformations for the
+                  source and destination points.
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \tilde{\mathbf p}
+                  =
+                  T\mathbf p,
+                  \qquad
+                  \tilde{\mathbf p}'
+                  =
+                  T'\mathbf p'
+                  \]
+                </div>
+
+                <p>
+                  I then construct the linear system from the normalized coordinates
+                  and solve it using Singular Value Decomposition.
+                  Since we seek a nonzero vector satisfying
+                  \(A\mathbf h\approx\mathbf 0\), the solution is the right singular
+                  vector associated with the smallest singular value of \(A\).
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  A
+                  =
+                  U\Sigma V^T
+                  \]
+                </div>
+
+                <div class="equation-block">
+                  \[
+                  \boxed{
+                  \tilde{\mathbf h}
+                  =
+                  \mathbf v_{\min}
+                  }
+                  \]
+                </div>
+
+                <p>
+                  After reshaping this vector into the normalized homography
+                  \(\tilde H\), I transform it back into the original pixel coordinate
+                  systems.
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \boxed{
+                  H
+                  =
+                  T'^{-1}
+                  \tilde H
+                  T
+                  }
+                  \]
+                </div>
+
+                <p>
+                  Finally, I remove the arbitrary projective scale by normalizing the
+                  matrix so that \(h_{33}=1\) whenever this value is nonzero.
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \boxed{
+                  H
+                  \leftarrow
+                  \frac{H}{H_{33}}
+                  }
+                  \]
+                </div>
+              </li>
+
+              <li>
+                <p>
+                  To verify the implementation, I first tested the homography solver on
+                  a controlled example.
+                  The goal is to transform the first image so that the selected
+                  rectangular region agrees with the corresponding rectangle in the
+                  second image.
+                </p>
+
                 <div class="result-box">
-                    <div class="thumb">
-                      <img src="media/one.jpeg" alt="Box filter result 1">
-                      <div class="caption">library1.png</div>
-                    </div>
-                    <div class="thumb">
-                      <img src="media/two.jpeg" alt="Box filter result 1">
-                      <div class="caption">library2.png</div>
-                    </div>
-                    <div class="thumb">
-                      <img src="media/five.jpeg" alt="Box filter result 1">
-                      <div class="caption">library3.png</div>
-                    </div>
+                  <div class="thumb">
+                    <img src="media/ex1.jpeg" alt="Source image for homography test">
+                    <div class="caption">example1.png</div>
                   </div>
+
+                  <div class="thumb">
+                    <img src="media/ex2.jpeg" alt="Destination image for homography test">
+                    <div class="caption">example2.png</div>
+                  </div>
+                </div>
+
+                <p>
+                  I manually selected four corresponding corners in the two images.
+                  Each pair supplies two constraints on the unknown homography.
+                </p>
+
+                <div class="result-box single-figure">
+                  <div class="thumb">
+                    <img src="media/positions.png" alt="Selected point correspondences for homography estimation">
+                    <div class="caption">positions.png</div>
+                  </div>
+                </div>
+
+                <p>
+                  After coordinate normalization, the correspondences are assembled
+                  into the matrix \(A\).
+                </p>
+
+                <div class="result-box single-figure wide-matrix-figure">
+                  <div class="thumb">
+                    <img src="media/A.png" alt="Linear system matrix used for homography estimation">
+                    <div class="caption">matrix A</div>
+                  </div>
+                </div>
+
+                <p>
+                  Solving the normalized system with SVD and then transforming the
+                  solution back to the original image coordinates gives the recovered
+                  homography.
+                </p>
+
+                <div class="result-box single-figure">
+                  <div class="thumb">
+                    <img src="media/H.png" alt="Recovered homography matrix">
+                    <div class="caption">Matrix H</div>
+                  </div>
+                </div>
+
+                <p>
+                  Applying this homography maps the selected structure in the source
+                  image onto the corresponding structure in the destination image.
+                  This verifies that the estimated projective transformation is
+                  consistent with the manually selected correspondences.
+                </p>
+
+                <div class="result-box single-figure">
+                  <div class="thumb">
+                    <img src="media/solution.png" alt="Result of applying the recovered homography">
+                    <div class="caption">Homography transformation result</div>
+                  </div>
+                </div>
+
+                <p>
+                  The complete estimation procedure can therefore be summarized by the
+                  following sequence.
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \boxed{
+                  \text{Point Correspondences}
+                  \longrightarrow
+                  \text{Coordinate Normalization}
+                  \longrightarrow
+                  A\mathbf h=\mathbf 0
+                  \longrightarrow
+                  \text{SVD}
+                  \longrightarrow
+                  \tilde H
+                  \longrightarrow
+                  H
+                  }
+                  \]
+                </div>
+
+                <p>
+                  Once \(H\) has been recovered, the remaining task is to use it to
+                  resample the source image onto the destination coordinate system.
+                  The next section compares two interpolation strategies for this
+                  inverse warping process.
+                </p>
               </li>
             </ol>
           </div>
         </div>
-        
-        <!-- Small step box -->
-        <div class="mini-box" id="1.2">
-          <div class="mini-hd">
-            <span>Part A</span>
-            <span class="hint">1.2</span>
-            <button class="mini-toggle" type="button" data-target="#1.2-bo">Hide</button>
-          </div>
-          <div class="mini-bd" id="1.2-body">
-            <ol>
-              <li>
-                <p>In this section I'll explain the way to do homography transformation. We define the projective matrix to be H. 
-                  Then a location of pixel (vector p) could be transformed by multiplying H. [p'=H@p]. By doing this over all the pixels 
-                  in the target image, the target image will be warped. We can use least square solution to solve out the projective matrix 
-                  between two prospective transformed images. We know p=[x,y], and p'=[x',y']. The projective matrix has entries h11-h3, 
-                  with 8 dofs. Then the relationship between p' and p canbe calculated as</p>
-                  <div class="result-box">    
-                    <div class="thumb">
-                      <img src="media/formula1.png" alt="Box filter result 1">
-                    </div>
-                  </div>
-                <p>multiplying the denominator on both sides for the two equations, we get:</p>
-                <div class="result-box">    
-                    <div class="thumb">
-                      <img src="media/formula2.png" alt="Box filter result 1">
-                    </div>
-                </div>
-                <p>Then, we could rewrite the above equation to the form of A@h=0, where A is:</p>
-                <div class="result-box">    
-                  <div class="thumb">
-                    <img src="media/formula4.png" alt="Box filter result 1">
-                  </div>
-                </div>
-                <p>And h is the squeezed version of those nine entries:</p>
-                <div class="result-box">    
-                  <div class="thumb">
-                    <img src="media/formula3.png" alt="Box filter result 1">
-                  </div>
-                </div>
-                <p>We need at least 8 equations to solve the 8 dofs of the projective matrix. This could be done by collecting more
-                  than four [p,p'] pairs. To solve the final H out, we could first normalized the positions of the pixels, then 
-                  do SVD decomposition to solve out the best H， and finally denormalize the H.</p>
-              </li>
-              <li><p>Here is an example. Supposed we want to warp example 1 to example 2:</p>
-                  <div class="result-box">
-                    <div class="thumb">
-                      <img src="media/ex1.jpeg" alt="Box filter result 1">
-                      <div class="caption">example1.png</div>
-                    </div>
-                    <div class="thumb">
-                      <img src="media/ex2.jpeg" alt="Box filter result 1">
-                      <div class="caption">example2.png</div>
-                    </div>
-                  </div>
-                  <p>Then I selected 4 corners on each of the rectangles, with the following positions:</p>
-                  <div class="result-box">
-                    <div class="thumb">
-                      <img src="media/positions.png" alt="Box filter result 1">
-                      <div class="caption">positions.png</div>
-                    </div>
-                  </div>
-                <p>Using these positions together with normalization, we get the matrix A:</p>
-                <div class="result-box">
-                    <div class="thumb">
-                      <img src="media/A.png" alt="Box filter result 1">
-                      <div class="caption">matrix A</div>
-                    </div>
-                  </div>
-                <p>And solving using SVD and denormalize the h33 to be 1, we get the optimal H matrix:</p>
-                <div class="result-box">
-                    <div class="thumb">
-                      <img src="media/H.png" alt="Box filter result 1">
-                      <div class="caption">Matrix H</div>
-                    </div>
-                  </div>
-                <p>This could exactly transfer the first example to the second one.</p>
-                <div class="result-box">
-                    <div class="thumb">
-                      <img src="media/solution.png" alt="Box filter result 1">
-                      <div class="caption"></div>
-                    </div>
-                  </div> 
-              </li>
-            </ol>
-          </div>
-
 
         <!-- Small step box -->
         <div class="mini-box" id="1.3">
@@ -579,12 +1164,13 @@
               </li>
             </ol>
           </div>
-        </div>  
+        </div>
+      </div>
     </section>
     <!---------------- P2 ----------->
-    <section class="panel" aria-labelledby="sec-simple">
+    <section class="panel" aria-labelledby="sec-feature-matching">
       <div class="panel-hd">
-        <h2 id="sec-simple">Part B: FEATURE MATCHING for AUTOSTITCHING</h2>
+        <h2 id="sec-feature-matching">Part B: FEATURE MATCHING for AUTOSTITCHING</h2>
         <span class="muted">4 sections in total</span>
       </div>
       <div class="panel-bd">
@@ -855,7 +1441,8 @@ Finally, I recompute the homography using all inlier correspondences judged by t
               </li>
             </ol>
           </div>
-        </div> 
+        </div>
+      </div>
     </section>      
   </main>
         
