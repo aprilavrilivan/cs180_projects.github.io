@@ -2417,119 +2417,800 @@
 
         </div>
 
-        <!-- Small step box -->
+        <!-- ====================================================== -->
+        <!-- Part 2.3 Gaussian and Laplacian Stacks                 -->
+        <!-- ====================================================== -->
+
         <div class="mini-box" id="2.3">
+
           <div class="mini-hd">
-            <span>Part one</span>
-            <span class="hint">2.3 & 2.4</span>
-            <button class="mini-toggle" type="button" data-target="#2.3-bo">Hide</button>
+            <span class="hint">2.3</span>
+            <span>Gaussian and Laplacian Stacks</span>
+
+            <button class="mini-toggle" type="button"
+                    data-target="#2.3-body">Hide</button>
           </div>
+
           <div class="mini-bd" id="2.3-body">
-            <ol>
-              <li>In this section I tried to create a laplacian stack of pictures and a gaussian stack of a mask. By multiplying and summing them together, I got a blended picture.
-                  <div class="result-line">
-                    <div class="thumb">
-                      <img src="media/LA0.png" alt="Box filter result 1">
-                    </div>
-                    <div class="thumb">
-                      <img src="media/LA1.png" alt="Box filter result 1">
-                    </div>
-                    <div class="thumb">
-                      <img src="media/LA2.png" alt="Box filter result 1">
-                    </div>
-                    <div class="thumb">
-                      <img src="media/LA3.png" alt="Box filter result 1">
-                    </div>
-                    <div class="thumb">
-                      <img src="media/LA4.png" alt="Box filter result 1">
-                    </div>
-                    <div class="thumb">
-                      <img src="media/LA5.png" alt="Box filter result 1">
-                    </div>
-                    <div class="thumb">
-                      <img src="media/LA6.png" alt="Box filter result 1">
-                    </div>
-                  </div>
-                  <div class="result-line">
-                    <div class="thumb">
-                      <img src="media/LB0.png" alt="Box filter result 1">
-                    </div>
-                    <div class="thumb">
-                      <img src="media/LB1.png" alt="Box filter result 1">
-                    </div>
-                    <div class="thumb">
-                      <img src="media/LB2.png" alt="Box filter result 1">
-                    </div>
-                    <div class="thumb">
-                      <img src="media/LB3.png" alt="Box filter result 1">
-                    </div>
-                    <div class="thumb">
-                      <img src="media/LB4.png" alt="Box filter result 1">
-                    </div>
-                    <div class="thumb">
-                      <img src="media/LB5.png" alt="Box filter result 1">
-                    </div>
-                    <div class="thumb">
-                      <img src="media/LB6.png" alt="Box filter result 1">
-                    </div>
-                  </div>
-                  <div class="result-line">
-                    <div class="thumb">
-                      <img src="media/blend0.png" alt="Box filter result 1">
-                    </div>
-                    <div class="thumb">
-                      <img src="media/blend1.png" alt="Box filter result 1">
-                    </div>
-                    <div class="thumb">
-                      <img src="media/blend2.png" alt="Box filter result 1">
-                    </div>
-                    <div class="thumb">
-                      <img src="media/blend3.png" alt="Box filter result 1">
-                    </div>
-                    <div class="thumb">
-                      <img src="media/blend4.png" alt="Box filter result 1">
-                    </div>
-                    <div class="thumb">
-                      <img src="media/blend5.png" alt="Box filter result 1">
-                    </div>
-                    <div class="thumb">
-                      <img src="media/blend6.png" alt="Box filter result 1">
-                    </div>
-                  </div>
-                    The successfully blended picture is shown below:
-                    <div class="thumb">
-                      <img src="media/blend_final.png" alt="Box filter result 1">
-                    </div>
-              </li>
-              <li>Here is an additional example:
-                <div class="result-box">
-                    <div class="thumb">
-                      <img src="media/oneDollar.png" alt="Box filter result 1">
-                    </div>
-                    <div class="thumb">
-                      <img src="media/oneHundredDollars.png" alt="Box filter result 1">
-                    </div>
-                    <div class="thumb">
-                      <img src="media/blend_final2.png" alt="Box filter result 1">
-                    </div>
+
+            <ol class="section-steps">
+
+              <li>
+
+                <p>
+                  The previous section separated an image into only two broad frequency
+                  ranges.
+                  A low pass filter produced coarse image structure, while subtraction
+                  from the original image produced high frequency detail.
+                  For multiresolution blending, it is useful to extend this idea and
+                  represent an image using several spatial frequency ranges instead of
+                  only two.
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \boxed{
+                  \text{Image}
+                  \longrightarrow
+                  \text{Multiple Spatial Scales}
+                  \longrightarrow
+                  \text{Multiple Frequency Bands}
+                  }
+                  \]
                 </div>
-              </li>
-              <li>Here, I applied the irregular mask to reproduce the result in the paper:
-                <div class="result-box">
-                    <div class="thumb">
-                      <img src="media/eye.png" alt="Box filter result 1">
-                    </div>
-                    <div class="thumb">
-                      <img src="media/hand.png" alt="Box filter result 1">
-                    </div>
-                    <div class="thumb">
-                      <img src="media/blend_final3.png" alt="Box filter result 1">
-                    </div>
+
+                <p>
+                  I begin by constructing a Gaussian stack.
+                  Every level is obtained by smoothing the original image using a
+                  Gaussian filter with an increasingly large scale.
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \boxed{
+                  G_i
+                  =
+                  I*G_{\sigma_i}
+                  }
+                  \]
                 </div>
+
+                <p>
+                  The first level contains nearly all of the original image structure.
+                  As the smoothing scale increases, fine details disappear and each
+                  later level contains progressively lower frequency information.
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \boxed{
+                  G_0,
+                  G_1,
+                  G_2,
+                  \ldots,
+                  G_n
+                  }
+                  \]
+                </div>
+
+                <p>
+                  This project uses a stack rather than a traditional Gaussian pyramid.
+                  A traditional pyramid repeatedly smooths and downsamples the image.
+                  In a stack, every level remains at the same spatial resolution and
+                  only the amount of Gaussian smoothing changes.
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \boxed{
+                  \begin{aligned}
+                  \text{Pyramid}
+                  &\qquad
+                  \text{Smoothing}
+                  +
+                  \text{Downsampling}
+                  \\
+                  \text{Stack}
+                  &\qquad
+                  \text{Smoothing Only}
+                  \end{aligned}
+                  }
+                  \]
+                </div>
+
+                <p>
+                  The Gaussian stack contains cumulative low frequency information.
+                  To isolate individual frequency ranges, I subtract neighboring
+                  Gaussian levels and construct a Laplacian stack.
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \boxed{
+                  L_i
+                  =
+                  G_i-G_{i+1}
+                  }
+                  \]
+                </div>
+
+                <p>
+                  The final level stores the remaining lowest frequency component.
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \boxed{
+                  L_n
+                  =
+                  G_n
+                  }
+                  \]
+                </div>
+
+                <p>
+                  Each Laplacian level therefore contains image structure that is
+                  present at one Gaussian scale but removed at the next.
+                  Earlier levels contain finer spatial details, while later levels
+                  contain progressively coarser structures.
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \boxed{
+                  \begin{aligned}
+                  L_0
+                  &\longrightarrow
+                  \text{Fine Detail}
+                  \\
+                  L_1,L_2,\ldots
+                  &\longrightarrow
+                  \text{Intermediate Scales}
+                  \\
+                  L_n
+                  &\longrightarrow
+                  \text{Coarse Structure}
+                  \end{aligned}
+                  }
+                  \]
+                </div>
+
+                <p>
+                  Another useful property of the Laplacian stack is that the original
+                  image can be reconstructed exactly by adding all of its levels.
+                  This follows directly from the telescoping differences between
+                  neighboring Gaussian levels.
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \begin{aligned}
+                  \sum_{i=0}^{n}L_i
+                  &=
+                  (G_0-G_1)
+                  +
+                  (G_1-G_2)
+                  +
+                  \cdots
+                  +
+                  (G_{n-1}-G_n)
+                  +
+                  G_n
+                  \\
+                  &=
+                  G_0
+                  \end{aligned}
+                  \]
+                </div>
+
+                <div class="equation-block">
+                  \[
+                  \boxed{
+                  I
+                  =
+                  \sum_{i=0}^{n}L_i
+                  }
+                  \]
+                </div>
+
+                <p>
+                  I construct Laplacian stacks for both source images.
+                  The following row shows the seven levels of the first image.
+                  Moving from left to right reveals increasingly coarse spatial
+                  structure.
+                </p>
+
+                <p>
+                  <strong>Laplacian Stack of the First Image</strong>
+                </p>
+
+                <div class="result-line">
+
+                  <div class="thumb">
+                    <img src="media/LA0.png" alt="First Laplacian stack level of image A">
+                    <div class="caption">
+                      \(L_A^0\)
+                    </div>
+                  </div>
+
+                  <div class="thumb">
+                    <img src="media/LA1.png" alt="Second Laplacian stack level of image A">
+                    <div class="caption">
+                      \(L_A^1\)
+                    </div>
+                  </div>
+
+                  <div class="thumb">
+                    <img src="media/LA2.png" alt="Third Laplacian stack level of image A">
+                    <div class="caption">
+                      \(L_A^2\)
+                    </div>
+                  </div>
+
+                  <div class="thumb">
+                    <img src="media/LA3.png" alt="Fourth Laplacian stack level of image A">
+                    <div class="caption">
+                      \(L_A^3\)
+                    </div>
+                  </div>
+
+                  <div class="thumb">
+                    <img src="media/LA4.png" alt="Fifth Laplacian stack level of image A">
+                    <div class="caption">
+                      \(L_A^4\)
+                    </div>
+                  </div>
+
+                  <div class="thumb">
+                    <img src="media/LA5.png" alt="Sixth Laplacian stack level of image A">
+                    <div class="caption">
+                      \(L_A^5\)
+                    </div>
+                  </div>
+
+                  <div class="thumb">
+                    <img src="media/LA6.png" alt="Final Laplacian stack level of image A">
+                    <div class="caption">
+                      \(L_A^6\)
+                    </div>
+                  </div>
+
+                </div>
+
+                <p>
+                  The same decomposition is applied to the second image.
+                </p>
+
+                <p>
+                  <strong>Laplacian Stack of the Second Image</strong>
+                </p>
+
+                <div class="result-line">
+
+                  <div class="thumb">
+                    <img src="media/LB0.png" alt="First Laplacian stack level of image B">
+                    <div class="caption">
+                      \(L_B^0\)
+                    </div>
+                  </div>
+
+                  <div class="thumb">
+                    <img src="media/LB1.png" alt="Second Laplacian stack level of image B">
+                    <div class="caption">
+                      \(L_B^1\)
+                    </div>
+                  </div>
+
+                  <div class="thumb">
+                    <img src="media/LB2.png" alt="Third Laplacian stack level of image B">
+                    <div class="caption">
+                      \(L_B^2\)
+                    </div>
+                  </div>
+
+                  <div class="thumb">
+                    <img src="media/LB3.png" alt="Fourth Laplacian stack level of image B">
+                    <div class="caption">
+                      \(L_B^3\)
+                    </div>
+                  </div>
+
+                  <div class="thumb">
+                    <img src="media/LB4.png" alt="Fifth Laplacian stack level of image B">
+                    <div class="caption">
+                      \(L_B^4\)
+                    </div>
+                  </div>
+
+                  <div class="thumb">
+                    <img src="media/LB5.png" alt="Sixth Laplacian stack level of image B">
+                    <div class="caption">
+                      \(L_B^5\)
+                    </div>
+                  </div>
+
+                  <div class="thumb">
+                    <img src="media/LB6.png" alt="Final Laplacian stack level of image B">
+                    <div class="caption">
+                      \(L_B^6\)
+                    </div>
+                  </div>
+
+                </div>
+
+                <p>
+                  The Laplacian stacks give us a representation in which image
+                  structures at different scales can be manipulated independently.
+                  This is exactly what is needed for multiresolution blending.
+                  Rather than blending an entire image using one transition width, the
+                  next section blends each frequency band using a transition scale that
+                  is appropriate for that level.
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \boxed{
+                  \text{Gaussian Stack}
+                  \longrightarrow
+                  \text{Laplacian Stack}
+                  \longrightarrow
+                  \text{Frequency Bands}
+                  \longrightarrow
+                  \text{Multiresolution Blending}
+                  }
+                  \]
+                </div>
+
               </li>
+
             </ol>
+
           </div>
+
         </div>
+
+
+        <!-- ====================================================== -->
+        <!-- Part 2.4 Multiresolution Blending                      -->
+        <!-- ====================================================== -->
+
+        <div class="mini-box" id="2.4">
+
+          <div class="mini-hd">
+            <span class="hint">2.4</span>
+            <span>Multiresolution Blending</span>
+
+            <button class="mini-toggle" type="button"
+                    data-target="#2.4-body">Hide</button>
+          </div>
+
+          <div class="mini-bd" id="2.4-body">
+
+            <ol class="section-steps">
+
+              <li>
+
+                <p>
+                  With the two source images represented by Laplacian stacks, the next
+                  step is to combine them into a seamless image.
+                  A simple approach would be to use a spatial mask and directly blend
+                  the two images.
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \boxed{
+                  I_{\mathrm{blend}}
+                  =
+                  M I_A
+                  +
+                  (1-M)I_B
+                  }
+                  \]
+                </div>
+
+                <p>
+                  Here, \(M\) determines how much each source contributes at every
+                  image location.
+                  A value near one selects the first image, while a value near zero
+                  selects the second image.
+                </p>
+
+                <p>
+                  The difficulty is choosing the spatial transition of this mask.
+                  If the transition is too sharp, the boundary between the two images
+                  can remain visible as a seam.
+                  If the transition is too broad, unrelated structures from both images
+                  can overlap and create ghosting.
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \boxed{
+                  \begin{aligned}
+                  \text{Sharp Transition}
+                  &\longrightarrow
+                  \text{Visible Seam}
+                  \\
+                  \text{Wide Smooth Transition}
+                  &\longrightarrow
+                  \text{Possible Ghosting}
+                  \end{aligned}
+                  }
+                  \]
+                </div>
+
+                <p>
+                  The reason one transition width is insufficient is that an image
+                  contains structures at many spatial frequencies.
+                  Fine details and coarse appearance changes should not necessarily be
+                  blended over the same spatial scale.
+                </p>
+
+                <p>
+                  Multiresolution blending solves this problem by blending each
+                  Laplacian frequency band separately.
+                  I first construct a Gaussian stack from the blending mask using the
+                  same smoothing scales used for the image stacks.
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \boxed{
+                  G_M^0,
+                  G_M^1,
+                  G_M^2,
+                  \ldots,
+                  G_M^n
+                  }
+                  \]
+                </div>
+
+                <p>
+                  Earlier mask levels remain relatively sharp, while later levels are
+                  increasingly smooth.
+                  The mask therefore changes rapidly for fine image structure and more
+                  gradually for coarse image structure.
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \boxed{
+                  \begin{aligned}
+                  \text{Fine Frequency Bands}
+                  &\longrightarrow
+                  \text{Sharper Mask}
+                  \\
+                  \text{Coarse Frequency Bands}
+                  &\longrightarrow
+                  \text{Smoother Mask}
+                  \end{aligned}
+                  }
+                  \]
+                </div>
+
+                <p>
+                  For every level \(i\), I combine the corresponding Laplacian bands of
+                  the two images using the Gaussian filtered mask at the same scale.
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \boxed{
+                  L_{\mathrm{blend}}^i
+                  =
+                  G_M^iL_A^i
+                  +
+                  \left(
+                  1-G_M^i
+                  \right)
+                  L_B^i
+                  }
+                  \]
+                </div>
+
+                <p>
+                  The following images show the blended Laplacian levels from fine to
+                  coarse spatial scales.
+                </p>
+
+                <p>
+                  <strong>Blended Laplacian Stack</strong>
+                </p>
+
+                <div class="result-line">
+
+                  <div class="thumb">
+                    <img src="media/blend0.png" alt="First blended Laplacian level">
+                    <div class="caption">
+                      \(L_{\mathrm{blend}}^0\)
+                    </div>
+                  </div>
+
+                  <div class="thumb">
+                    <img src="media/blend1.png" alt="Second blended Laplacian level">
+                    <div class="caption">
+                      \(L_{\mathrm{blend}}^1\)
+                    </div>
+                  </div>
+
+                  <div class="thumb">
+                    <img src="media/blend2.png" alt="Third blended Laplacian level">
+                    <div class="caption">
+                      \(L_{\mathrm{blend}}^2\)
+                    </div>
+                  </div>
+
+                  <div class="thumb">
+                    <img src="media/blend3.png" alt="Fourth blended Laplacian level">
+                    <div class="caption">
+                      \(L_{\mathrm{blend}}^3\)
+                    </div>
+                  </div>
+
+                  <div class="thumb">
+                    <img src="media/blend4.png" alt="Fifth blended Laplacian level">
+                    <div class="caption">
+                      \(L_{\mathrm{blend}}^4\)
+                    </div>
+                  </div>
+
+                  <div class="thumb">
+                    <img src="media/blend5.png" alt="Sixth blended Laplacian level">
+                    <div class="caption">
+                      \(L_{\mathrm{blend}}^5\)
+                    </div>
+                  </div>
+
+                  <div class="thumb">
+                    <img src="media/blend6.png" alt="Final blended Laplacian level">
+                    <div class="caption">
+                      \(L_{\mathrm{blend}}^6\)
+                    </div>
+                  </div>
+
+                </div>
+
+                <p>
+                  Because this project uses stacks rather than downsampled pyramids,
+                  reconstruction does not require repeated upsampling.
+                  The final image is obtained by adding all blended Laplacian levels.
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \boxed{
+                  I_{\mathrm{blend}}
+                  =
+                  \sum_{i=0}^{n}
+                  L_{\mathrm{blend}}^i
+                  }
+                  \]
+                </div>
+
+                <p>
+                  The resulting multiresolution blend is shown below.
+                </p>
+
+                <div class="result-box single-figure">
+
+                  <div class="thumb large-box">
+                    <img
+                      src="media/blend_final.png"
+                      alt="Final multiresolution blended image"
+                    >
+                    <div class="caption">
+                      Final multiresolution blend
+                    </div>
+                  </div>
+
+                </div>
+
+                <p>
+                  The complete procedure can therefore be summarized as
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \boxed{
+                  \begin{gathered}
+                  \text{Laplacian Stack of Image A}
+                  \\
+                  +
+                  \\
+                  \text{Laplacian Stack of Image B}
+                  \\
+                  +
+                  \\
+                  \text{Gaussian Stack of Mask}
+                  \\
+                  \downarrow
+                  \\
+                  \text{Blend Corresponding Frequency Bands}
+                  \\
+                  \downarrow
+                  \\
+                  \text{Sum All Blended Levels}
+                  \\
+                  \downarrow
+                  \\
+                  \text{Final Image}
+                  \end{gathered}
+                  }
+                  \]
+                </div>
+
+              </li>
+
+
+              <li>
+
+                <p>
+                  I apply the same multiresolution blending procedure to a second pair
+                  of images.
+                  The same algorithm can be reused without changing the frequency
+                  decomposition or reconstruction process.
+                </p>
+
+                <p>
+                  <strong>Dollar Image Blend</strong>
+                </p>
+
+                <div class="result-box">
+
+                  <div class="thumb">
+                    <img
+                      src="media/oneDollar.png"
+                      alt="One dollar source image"
+                    >
+                    <div class="caption">
+                      First source image
+                    </div>
+                  </div>
+
+                  <div class="thumb">
+                    <img
+                      src="media/oneHundredDollars.png"
+                      alt="One hundred dollar source image"
+                    >
+                    <div class="caption">
+                      Second source image
+                    </div>
+                  </div>
+
+                  <div class="thumb">
+                    <img
+                      src="media/blend_final2.png"
+                      alt="Multiresolution blend of the two dollar images"
+                    >
+                    <div class="caption">
+                      Multiresolution blend
+                    </div>
+                  </div>
+
+                </div>
+
+                <p>
+                  This example again combines coarse image appearance over broad
+                  spatial regions while preserving finer structures locally around the
+                  blending boundary.
+                </p>
+
+              </li>
+
+
+              <li>
+
+                <p>
+                  The mask does not need to contain a simple straight boundary.
+                  Multiresolution blending can also use an irregular mask to specify a
+                  more complex region taken from one image and inserted into another.
+                </p>
+
+                <p>
+                  I demonstrate this using an eye image and a hand image.
+                  The irregular spatial mask determines the region where the eye
+                  contributes to the result.
+                  A Gaussian stack of this mask then creates a different transition
+                  width at every spatial scale.
+                </p>
+
+                <div class="result-box">
+
+                  <div class="thumb">
+                    <img
+                      src="media/eye.png"
+                      alt="Eye source image for irregular mask blending"
+                    >
+                    <div class="caption">
+                      Eye image
+                    </div>
+                  </div>
+
+                  <div class="thumb">
+                    <img
+                      src="media/hand.png"
+                      alt="Hand source image for irregular mask blending"
+                    >
+                    <div class="caption">
+                      Hand image
+                    </div>
+                  </div>
+
+                  <div class="thumb">
+                    <img
+                      src="media/blend_final3.png"
+                      alt="Irregular mask multiresolution blend"
+                    >
+                    <div class="caption">
+                      Irregular mask blend
+                    </div>
+                  </div>
+
+                </div>
+
+                <p>
+                  This example illustrates that the method is not tied to vertical or
+                  horizontal seams.
+                  The same Gaussian mask and Laplacian stack formulation can blend
+                  arbitrary spatial regions as long as a suitable mask is provided.
+                </p>
+
+              </li>
+
+
+              <li>
+
+                <p>
+                  Multiresolution blending works because different spatial frequencies
+                  are allowed to transition between the two source images over
+                  different distances.
+                  Fine structures are blended more locally, while coarse structures
+                  change more gradually.
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \boxed{
+                  \text{Different Frequency Bands}
+                  +
+                  \text{Different Mask Scales}
+                  \longrightarrow
+                  \text{Smooth Multiscale Transition}
+                  }
+                  \]
+                </div>
+
+                <p>
+                  This completes the frequency based progression of Part Two.
+                  Sharpening amplified high frequency information within one image,
+                  hybrid images combined frequency ranges from two images, and
+                  multiresolution blending extended the same idea across many spatial
+                  scales.
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \boxed{
+                  \text{Sharpening}
+                  \longrightarrow
+                  \text{Two Band Frequency Manipulation}
+                  \longrightarrow
+                  \text{Hybrid Images}
+                  \longrightarrow
+                  \text{Multiscale Frequency Blending}
+                  }
+                  \]
+                </div>
+
+              </li>
+
+            </ol>
+
+          </div>
+
+        </div>
+
       </div>
     </section>
   </main>
