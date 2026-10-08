@@ -197,9 +197,93 @@
       color: var(--muted);
       margin-top: 6px;
     }
+
+    .project-main .equation-block {
+      position: relative;
+      width: min(100%, 780px);
+      margin: 20px auto;
+      padding: 17px 22px;
+      overflow-x: auto;
+      border: 1px solid color-mix(in srgb, var(--project-accent) 24%, var(--project-border));
+      border-radius: 13px;
+      background: linear-gradient(
+        135deg,
+        color-mix(in srgb, var(--project-accent-soft) 70%, var(--project-paper)),
+        var(--project-paper)
+      );
+      color: var(--project-text);
+      text-align: center;
+      scrollbar-width: thin;
+    }
+
+    .project-main .equation-block mjx-container {
+      margin: 0 !important;
+      color: var(--project-text);
+      font-size: clamp(.88rem, 1.35vw, 1.06rem) !important;
+    }
+
+    .project-main .section-steps {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+      counter-reset: filter-step;
+    }
+
+    .project-main .section-steps > li {
+      position: relative;
+      margin: 0;
+      padding-left: 34px;
+      counter-increment: filter-step;
+    }
+
+    .project-main .section-steps > li::before {
+      position: absolute;
+      top: .15em;
+      left: 0;
+      color: var(--project-accent-dark);
+      content: counter(filter-step, decimal-leading-zero);
+      font-size: .72rem;
+      font-weight: 800;
+      letter-spacing: .08em;
+    }
+
+    .project-main .section-steps > li + li {
+      margin-top: 48px;
+      padding-top: 42px;
+      border-top: 1px solid var(--project-border);
+    }
+
+    @media (max-width: 760px) {
+      .project-main .equation-block {
+        margin: 15px 0;
+        padding: 14px 12px;
+      }
+
+      .project-main .section-steps > li {
+        padding-left: 0;
+      }
+
+      .project-main .section-steps > li::before {
+        position: static;
+        display: block;
+        margin-bottom: 12px;
+      }
+    }
   </style>
   <link rel="stylesheet" href="../portfolio-polish.css">
   <link rel="stylesheet" href="../project-detail.css?v=20261004b">
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['\\(', '\\)']],
+        displayMath: [['\\[', '\\]']]
+      },
+      options: {
+        skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      }
+    };
+  </script>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
 </head>
     
 <body>
@@ -221,167 +305,1120 @@
     <p class="lead">This project adopts various skills to play with images. Including Gaussian Blurring, differencing, binarize, sharpening, stacking, and blending the images.</span>.</p>
     
     <!-- P1 -->
-    <section class="panel" aria-labelledby="sec-simple">
+    <section class="panel" aria-labelledby="sec-filters">
       <div class="panel-hd">
-        <h2 id="sec-simple">P1: Fun With Filters</h2>
+        <h2 id="sec-filters">P1: Fun With Filters</h2>
         <span class="muted">3 in total</span>
       </div>
       <div class="panel-bd">
-        <!-- Small step box -->
+        <!-- ====================================================== -->
+        <!-- Part 1.1 Convolution from Scratch                      -->
+        <!-- ====================================================== -->
+
         <div class="mini-box" id="1.1">
+
           <div class="mini-hd">
-            <span>Part one</span>
             <span class="hint">1.1</span>
-            <button class="mini-toggle" type="button" data-target="#1.1-bo">Hide</button>
+            <span>Convolution from Scratch</span>
+
+            <button class="mini-toggle" type="button"
+                    data-target="#1.1-body">Hide</button>
           </div>
+
           <div class="mini-bd" id="1.1-body">
-            <ol>
-              <li>In this section I implemented the function of convolution from scratch. First, I implemented it using four for loops, which the outer two loops traversing every pixel in the target image, and inner two loops focusing on traversing the filter to multiply filter with target image. In the two for loops version, I just simply relaced the inner two for loops with the np.sum function. Also, I padded the boundary with zeros to make sure the size of img after convolustion doesn't change. Here are the results of to kinds of implementation of convolution, which are exactly the same. I applied the box filter of 9*9 to my selfies, and here are the results. 
-                  <div class="result-box">
-                    <div class="thumb">
-                      <img src="media/selfie.png" alt="Box filter result 1">
-                      <div class="caption">selfie_origin.png</div>
-                    </div>
-                    <div class="thumb">
-                      <img src="media/selfie_four_loops.png" alt="Box filter result 1">
-                      <div class="caption">selfie_four_loops.png</div>
-                    </div>
-                    <div class="thumb">
-                      <img src="media/selfie_two_loops.png" alt="Box filter result 2">
-                      <div class="caption">selfie_two_loops.png</div>
-                    </div>
-                  </div>
-              </li>
-              <li>The code snippets are demonstrated as follows:
-                <div class="result-box">
-                    <div class="thumb">
-                      <img src="media/four_loops.png" alt="Box filter result 1">
-                      <div class="caption">four_loops</div>
-                    </div>
-                    <div class="thumb">
-                      <img src="media/two_loops.png" alt="Box filter result 1">
-                      <div class="caption">two_loops</div>
-                    </div>
-                  </div>
-              </li>
-              <li>Then, I applied the standard scipy.signal.convolve2d function with the same box filter to my selfies, which results in exactly the same picture.
-                  <div class="result-box">
-                    <div class="thumb">
-                      <img src="media/selfie_sci.png" alt="Box filter result 1">
-                      <div class="caption">selfie_sci.png</div>
-                    </div>
-                  </div>
-              </li>
-              <li>The runtime result shown below reveals that four_loops > two_loops > libversion, which is because that four_loops uses brute force computation, while two_loops uses numpy to acclerate, and the function in scipy is the most mature and efficient one. 
-                  <div class="result-box">
-                    <div class="thumb">
-                      <img src="media/runtime.png" alt="Box filter result 1">
-                      <div class="caption">runtime.png</div>
-                    </div>
-                  </div>
-              </li>
-              <li>Finally, I changed the kernel to be [1,0,-1] and its transpose to realize the outcome of difference operators.
-                  <div class="result-box">
-                    <div class="thumb">
-                      <img src="media/selfie_Dx.png" alt="Box filter result 1">
-                      <div class="caption">selfie_Dx.png</div>
-                    </div>
-                    <div class="thumb">
-                      <img src="media/selfie_Dy.png" alt="Box filter result 2">
-                      <div class="caption">selfie_Dy.png</div>
-                    </div>
-                  </div>
-              </li>
+
+            <ol class="section-steps">
+
               <li>
-                To sum up, except the ones that call scipy function, all other tasks can be implemented by numpy. We can implement convolution by for loops, and by using D_x and D_y as kernel, we could get the result of finite difference of picture.
-              </li>
-            </ol>
-          </div>
-        </div>
-        
-        <!-- Small step box -->
-        <div class="mini-box" id="1.2">
-          <div class="mini-hd">
-            <span>Part one</span>
-            <span class="hint">1.2</span>
-            <button class="mini-toggle" type="button" data-target="#1.2-bo">Hide</button>
-          </div>
-          <div class="mini-bd" id="1.2-body">
-            <ol>
-              <li>In this section I tried to binarize the cameraman image. 
-                  <div class="result-box">    
-                    <div class="thumb">
-                      <img src="media/cameraman.png" alt="Box filter result 2">
-                      <div class="caption">cameraman.png</div>
-                    </div>
-                  </div>
-                First, I convolute the cameraman image with finite difference opterators D_x and D_y to get its partial derivative in directions of x and y. Here are the results:
-                <div class="result-box">    
-                    <div class="thumb">
-                      <img src="media/cameraman_Dx.png" alt="Box filter result 1">
-                      <div class="caption">cameraman_Dx.png</div>
-                    </div>
-                    <div class="thumb">
-                      <img src="media/cameraman_Dy.png" alt="Box filter result 2">
-                      <div class="caption">cameraman_Dy.png</div>
-                    </div>
-                  </div>
-              </li>
-              <li>Then, I calcutated the square root of sum of squares of partial derivatives in each pixel, and treat it as the brightness to get the magnitude image.
-                  <div class="result-box">
-                    <div class="thumb">
-                      <img src="media/cameraman_grad_mag.png" alt="Box filter result 1">
-                      <div class="caption">cameraman_grad_mag.png</div>
-                    </div>
-                  </div>
-              </li>
-              <li>Finally, I applies a threashold to those square root of sums to serve as a classifier. The brightness below the threashold will be flattened to zero, and above the threashold will be pulled up to 255. I found setting the threashold to be 35 cound result in a satisfied outcome. This result in a clear binarized image with reduced noise.
-                  <div class="result-box">
-                    <div class="thumb">
-                      <img src="media/cameraman_binarized.png" alt="Box filter result 1">
-                      <div class="caption">cameraman_binarized.png</div>
-                    </div>
-                  </div>
-              </li>
-            </ol>
-          </div>
 
+                <p>
+                  Convolution is one of the basic operations used throughout image
+                  processing.
+                  It transforms an image by moving a small filter kernel across the
+                  image and computing a weighted combination of nearby pixel values.
+                  Different kernels therefore allow the same computational operation
+                  to perform very different types of image processing.
+                </p>
 
+                <p>
+                  Let \(I\) denote an image and \(K\) denote a filter kernel.
+                  The filtered image can be written as
+                </p>
 
-        <!-- Small step box -->
-        <div class="mini-box" id="1.3">
-          <div class="mini-hd">
-            <span>Part one</span>
-            <span class="hint">1.3</span>
-            <button class="mini-toggle" type="button" data-target="#1.3-bo">Hide</button>
-          </div>
-          <div class="mini-bd" id="1.3-body">
-            <ol>
-              <li>In this section I tried to smoothering the result of binarized image. There are two ways to implement this. The first way is to gaussian blurr the image and then partial differentiate it, resulting a denoised version.
-                <div class="result-box">    
+                <div class="equation-block">
+                  \[
+                  \boxed{
+                  (I*K)[m,n]
+                  =
+                  \sum_{i}
+                  \sum_{j}
+                  K[i,j]
+                  I[m-i,n-j]
+                  }
+                  \]
+                </div>
+
+                <p>
+                  Each output pixel is produced from a local neighborhood of the
+                  original image.
+                  The kernel determines how strongly each neighboring pixel
+                  contributes to the result.
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \boxed{
+                  \text{Input Image}
+                  \longrightarrow
+                  \text{Local Neighborhood}
+                  \longrightarrow
+                  \text{Weighted Sum}
+                  \longrightarrow
+                  \text{Output Pixel}
+                  }
+                  \]
+                </div>
+
+                <p>
+                  As a first example, I use a \(9\times9\) box filter.
+                  Every entry in the kernel has the same weight, so each output pixel
+                  becomes the average of a local \(9\times9\) neighborhood.
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \boxed{
+                  K_{\mathrm{box}}
+                  =
+                  \frac{1}{81}
+                  \mathbf 1_{9\times9}
+                  }
+                  \]
+                </div>
+
+                <p>
+                  Averaging nearby pixels suppresses rapid local intensity changes.
+                  The resulting image therefore appears smoother and contains less
+                  fine detail.
+                </p>
+
+                <p>
+                  I implemented convolution from scratch in two different ways.
+                  The first implementation uses four explicit loops.
+                  The outer two loops visit every output pixel, while the inner two
+                  loops traverse the filter window and accumulate the weighted pixel
+                  values.
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \boxed{
+                  \text{Image Rows}
+                  \times
+                  \text{Image Columns}
+                  \times
+                  \text{Kernel Rows}
+                  \times
+                  \text{Kernel Columns}
+                  }
+                  \]
+                </div>
+
+                <p>
+                  The second implementation keeps the two outer loops over output
+                  pixels but replaces the two inner loops with NumPy array operations.
+                  For each output location, the corresponding image patch is multiplied
+                  with the kernel and summed using vectorized computation.
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \boxed{
+                  I_{\mathrm{patch}}
+                  \odot
+                  K
+                  \longrightarrow
+                  \operatorname{sum}
+                  \longrightarrow
+                  I_{\mathrm{out}}[m,n]
+                  }
+                  \]
+                </div>
+
+                <p>
+                  In both implementations, I use zero padding around the image
+                  boundary.
+                  Without padding, the kernel cannot be centered on pixels close to the
+                  image border and the output image would become smaller.
+                  Padding preserves the original spatial dimensions.
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \boxed{
+                  H\times W
+                  \longrightarrow
+                  \text{Zero Padding}
+                  \longrightarrow
+                  \text{Convolution}
+                  \longrightarrow
+                  H\times W
+                  }
+                  \]
+                </div>
+
+                <p>
+                  I apply both implementations to the same selfie using the
+                  \(9\times9\) box filter.
+                  The two implementations produce the same smoothing result.
+                </p>
+
+                <div class="result-box">
+
                   <div class="thumb">
-                      <img src="media/gaussianBlurBina_two_steps.png" alt="Box filter result 1">
-                      <div class="caption">gaussianBlurBina_two_steps.png</div>
+                    <img
+                      src="media/selfie.png"
+                      alt="Original selfie before filtering"
+                    >
+                    <div class="caption">
+                      selfie_origin.png
                     </div>
                   </div>
-              </li>
-              <li>The second way is to difference the gaussian kernel, and use this result to convolute the image. (I_x = I * G_x,  I_y = I * G_y). By the assiciative law of convolution operation, these two operations have the same result, as demonstrated by the two pictures.
-                  <div class="result-box">
-                    <div class="thumb">
-                      <img src="media/gaussianBlurBina_one_step.png" alt="Box filter result 1">
-                      <div class="caption">gaussianBlurBina_one_step.png</div>
+
+                  <div class="thumb">
+                    <img
+                      src="media/selfie_four_loops.png"
+                      alt="Selfie filtered using the four loop convolution implementation"
+                    >
+                    <div class="caption">
+                      selfie_four_loops.png
                     </div>
                   </div>
+
+                  <div class="thumb">
+                    <img
+                      src="media/selfie_two_loops.png"
+                      alt="Selfie filtered using the two loop convolution implementation"
+                    >
+                    <div class="caption">
+                      selfie_two_loops.png
+                    </div>
+                  </div>
+
+                </div>
+
               </li>
+
+
+              <li>
+
+                <p>
+                  The corresponding implementations are shown below.
+                  Both compute the same mathematical operation, but the second version
+                  moves more of the computation from Python loops into optimized NumPy
+                  operations.
+                </p>
+
+                <div class="result-box">
+
+                  <div class="thumb">
+                    <img
+                      src="media/four_loops.png"
+                      alt="Four loop convolution implementation"
+                    >
+                    <div class="caption">
+                      four_loops
+                    </div>
+                  </div>
+
+                  <div class="thumb">
+                    <img
+                      src="media/two_loops.png"
+                      alt="Two loop convolution implementation using NumPy operations"
+                    >
+                    <div class="caption">
+                      two_loops
+                    </div>
+                  </div>
+
+                </div>
+
+              </li>
+
+
+              <li>
+
+                <p>
+                  I also compare my implementations with
+                  <code>scipy.signal.convolve2d</code>.
+                  Applying the same box filter with the library implementation gives
+                  the same visual result, providing a useful correctness check for the
+                  convolution functions written from scratch.
+                </p>
+
+                <div class="result-box">
+
+                  <div class="thumb">
+                    <img
+                      src="media/selfie_sci.png"
+                      alt="Selfie filtered using scipy signal convolve2d"
+                    >
+                    <div class="caption">
+                      selfie_sci.png
+                    </div>
+                  </div>
+
+                </div>
+
+                <div class="equation-block">
+                  \[
+                  \boxed{
+                  \text{Four Loop Result}
+                  \approx
+                  \text{Two Loop Result}
+                  \approx
+                  \text{SciPy Result}
+                  }
+                  \]
+                </div>
+
+              </li>
+
+
+              <li>
+
+                <p>
+                  Although the three implementations produce the same filtered image,
+                  their computational costs are very different.
+                  The four loop version performs nearly all operations through explicit
+                  Python iteration and is therefore the slowest.
+                  The two loop version uses NumPy to perform the kernel computation more
+                  efficiently.
+                  The SciPy implementation is substantially more optimized and achieves
+                  the shortest runtime in this experiment.
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \boxed{
+                  T_{\mathrm{four\ loops}}
+                  >
+                  T_{\mathrm{two\ loops}}
+                  >
+                  T_{\mathrm{SciPy}}
+                  }
+                  \]
+                </div>
+
+                <div class="result-box">
+
+                  <div class="thumb">
+                    <img
+                      src="media/runtime.png"
+                      alt="Runtime comparison between convolution implementations"
+                    >
+                    <div class="caption">
+                      runtime.png
+                    </div>
+                  </div>
+
+                </div>
+
+                <p>
+                  This comparison illustrates an important distinction between the
+                  mathematical definition of an image operation and its computational
+                  implementation.
+                  All three methods implement the same filtering idea, while
+                  vectorization and optimized numerical routines make the computation
+                  much more efficient.
+                </p>
+
+              </li>
+
+
+              <li>
+
+                <p>
+                  The box filter demonstrates that changing the kernel changes the
+                  behavior of convolution.
+                  I next replace the averaging kernel with finite difference filters.
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \boxed{
+                  D_x
+                  =
+                  \begin{bmatrix}
+                  1 &amp; 0 &amp; -1
+                  \end{bmatrix}
+                  }
+                  \]
+                </div>
+
+                <div class="equation-block">
+                  \[
+                  \boxed{
+                  D_y
+                  =
+                  \begin{bmatrix}
+                  1\\
+                  0\\
+                  -1
+                  \end{bmatrix}
+                  }
+                  \]
+                </div>
+
+                <p>
+                  Instead of averaging neighboring intensities, these filters measure
+                  local intensity change.
+                  Convolution with \(D_x\) measures horizontal intensity variation,
+                  while convolution with \(D_y\) measures vertical intensity
+                  variation.
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \boxed{
+                  I_x
+                  =
+                  I*D_x,
+                  \qquad
+                  I_y
+                  =
+                  I*D_y
+                  }
+                  \]
+                </div>
+
+                <p>
+                  Regions with little intensity variation produce values close to zero.
+                  Strong transitions produce responses with larger magnitude.
+                  This makes finite difference filters useful for detecting image
+                  structure such as edges.
+                </p>
+
+                <div class="result-box">
+
+                  <div class="thumb">
+                    <img
+                      src="media/selfie_Dx.png"
+                      alt="Horizontal derivative of the selfie"
+                    >
+                    <div class="caption">
+                      selfie_Dx.png
+                    </div>
+                  </div>
+
+                  <div class="thumb">
+                    <img
+                      src="media/selfie_Dy.png"
+                      alt="Vertical derivative of the selfie"
+                    >
+                    <div class="caption">
+                      selfie_Dy.png
+                    </div>
+                  </div>
+
+                </div>
+
+              </li>
+
+
+              <li>
+
+                <p>
+                  This section establishes convolution as a general framework for image
+                  filtering.
+                  The same operation can smooth an image or measure local image
+                  derivatives simply by changing the kernel.
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \boxed{
+                  \begin{aligned}
+                  \text{Box Kernel}
+                  &\longrightarrow
+                  \text{Local Averaging}
+                  \longrightarrow
+                  \text{Smoothing}
+                  \\
+                  D_x,\ D_y
+                  &\longrightarrow
+                  \text{Local Differences}
+                  \longrightarrow
+                  \text{Image Derivatives}
+                  \end{aligned}
+                  }
+                  \]
+                </div>
+
+                <p>
+                  The finite difference responses provide the horizontal and vertical
+                  components of the image gradient.
+                  In the next section, I combine these components to measure edge
+                  strength and construct a binary edge map.
+                </p>
+
+              </li>
+
             </ol>
+
           </div>
-        </div>  
+
+        </div>
+
+        <!-- ====================================================== -->
+        <!-- Part 1.2 Finite Differences and Edge Detection         -->
+        <!-- ====================================================== -->
+
+        <div class="mini-box" id="1.2">
+
+          <div class="mini-hd">
+            <span class="hint">1.2</span>
+            <span>Finite Differences and Edge Detection</span>
+
+            <button class="mini-toggle" type="button"
+                    data-target="#1.2-body">Hide</button>
+          </div>
+
+          <div class="mini-bd" id="1.2-body">
+
+            <ol class="section-steps">
+
+              <li>
+
+                <p>
+                  After using finite difference filters in the previous section,
+                  I apply them to the Cameraman image to construct an edge map.
+                  The central idea is that an edge corresponds to a rapid change in
+                  image intensity.
+                  Image derivatives provide a direct way to measure these changes.
+                </p>
+
+                <p>
+                  The original grayscale image is shown below.
+                </p>
+
+                <div class="result-box">
+
+                  <div class="thumb">
+                    <img
+                      src="media/cameraman.png"
+                      alt="Original Cameraman image"
+                    >
+                    <div class="caption">
+                      cameraman.png
+                    </div>
+                  </div>
+
+                </div>
+
+                <p>
+                  I first convolve the image with the horizontal and vertical finite
+                  difference operators introduced in Part 1.1.
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  D_x
+                  =
+                  \begin{bmatrix}
+                  1 &amp; 0 &amp; -1
+                  \end{bmatrix},
+                  \qquad
+                  D_y
+                  =
+                  \begin{bmatrix}
+                  1\\
+                  0\\
+                  -1
+                  \end{bmatrix}
+                  \]
+                </div>
+
+                <p>
+                  These filters approximate the partial derivatives of the image along
+                  the horizontal and vertical directions.
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \boxed{
+                  I_x
+                  =
+                  I*D_x,
+                  \qquad
+                  I_y
+                  =
+                  I*D_y
+                  }
+                  \]
+                </div>
+
+                <p>
+                  The horizontal derivative \(I_x\) responds strongly where intensity
+                  changes rapidly as we move across image columns.
+                  The vertical derivative \(I_y\) responds strongly where intensity
+                  changes rapidly as we move across image rows.
+                </p>
+
+                <p>
+                  Together, these two derivative images describe the local image
+                  gradient.
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \boxed{
+                  \nabla I
+                  =
+                  \begin{bmatrix}
+                  I_x\\
+                  I_y
+                  \end{bmatrix}
+                  }
+                  \]
+                </div>
+
+                <div class="result-box">
+
+                  <div class="thumb">
+                    <img
+                      src="media/cameraman_Dx.png"
+                      alt="Horizontal derivative of the Cameraman image"
+                    >
+                    <div class="caption">
+                      cameraman_Dx.png
+                    </div>
+                  </div>
+
+                  <div class="thumb">
+                    <img
+                      src="media/cameraman_Dy.png"
+                      alt="Vertical derivative of the Cameraman image"
+                    >
+                    <div class="caption">
+                      cameraman_Dy.png
+                    </div>
+                  </div>
+
+                </div>
+
+              </li>
+
+
+              <li>
+
+                <p>
+                  The two derivative components can be combined into a single measure
+                  of how strongly the image changes at every pixel.
+                  This quantity is the gradient magnitude.
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \boxed{
+                  \left\|
+                  \nabla I
+                  \right\|
+                  =
+                  \sqrt{
+                  I_x^2
+                  +
+                  I_y^2
+                  }
+                  }
+                  \]
+                </div>
+
+                <p>
+                  A small gradient magnitude indicates that the local image intensity
+                  changes slowly.
+                  A large gradient magnitude indicates a strong local transition and is
+                  therefore evidence of an edge.
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \boxed{
+                  \begin{aligned}
+                  \left\|
+                  \nabla I
+                  \right\|
+                  \text{ small}
+                  &\longrightarrow
+                  \text{Smooth Region}
+                  \\
+                  \left\|
+                  \nabla I
+                  \right\|
+                  \text{ large}
+                  &\longrightarrow
+                  \text{Strong Edge}
+                  \end{aligned}
+                  }
+                  \]
+                </div>
+
+                <p>
+                  The gradient also has an orientation given by
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \theta
+                  =
+                  \operatorname{atan2}
+                  \left(
+                  I_y,
+                  I_x
+                  \right)
+                  \]
+                </div>
+
+                <p>
+                  This direction indicates the direction of the fastest increase in
+                  image intensity.
+                  For this part of the project, I only need the gradient magnitude
+                  because the goal is to measure edge strength rather than edge
+                  orientation.
+                </p>
+
+                <div class="result-box">
+
+                  <div class="thumb">
+                    <img
+                      src="media/cameraman_grad_mag.png"
+                      alt="Gradient magnitude of the Cameraman image"
+                    >
+                    <div class="caption">
+                      cameraman_grad_mag.png
+                    </div>
+                  </div>
+
+                </div>
+
+              </li>
+
+
+              <li>
+
+                <p>
+                  The gradient magnitude is still a continuous valued image.
+                  To obtain a binary edge map, I apply a threshold that separates
+                  strong gradient responses from weak ones.
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \boxed{
+                  E(x,y)
+                  =
+                  \begin{cases}
+                  255,
+                  &amp;
+                  \left\|
+                  \nabla I(x,y)
+                  \right\|
+                  \geq
+                  \tau
+                  \\
+                  0,
+                  &amp;
+                  \left\|
+                  \nabla I(x,y)
+                  \right\|
+                  <
+                  \tau
+                  \end{cases}
+                  }
+                  \]
+                </div>
+
+                <p>
+                  The choice of threshold controls the tradeoff between retaining weak
+                  edges and suppressing small responses.
+                  A very low threshold keeps many weak gradients, including responses
+                  caused by noise and texture.
+                  A very high threshold removes noise more aggressively but may also
+                  discard meaningful edges.
+                </p>
+
+                <p>
+                  I found that a threshold of \(35\) provides a reasonable balance for
+                  this image.
+                  Strong object boundaries are preserved while many weaker responses
+                  are removed.
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \boxed{
+                  \tau
+                  =
+                  35
+                  }
+                  \]
+                </div>
+
+                <div class="result-box">
+
+                  <div class="thumb">
+                    <img
+                      src="media/cameraman_binarized.png"
+                      alt="Binary edge map of the Cameraman image"
+                    >
+                    <div class="caption">
+                      cameraman_binarized.png
+                    </div>
+                  </div>
+
+                </div>
+
+              </li>
+
+
+              <li>
+
+                <p>
+                  The complete edge detection procedure can therefore be summarized as
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \boxed{
+                  \text{Image}
+                  \longrightarrow
+                  D_x,\ D_y
+                  \longrightarrow
+                  I_x,\ I_y
+                  \longrightarrow
+                  \left\|
+                  \nabla I
+                  \right\|
+                  \longrightarrow
+                  \text{Threshold}
+                  \longrightarrow
+                  \text{Binary Edge Map}
+                  }
+                  \]
+                </div>
+
+                <p>
+                  One limitation becomes visible in this process.
+                  Finite difference filters respond to rapid intensity changes, but
+                  image noise also consists largely of rapid local variations.
+                  Derivative filters can therefore amplify noise together with real
+                  edges.
+                </p>
+
+                <p>
+                  The next section addresses this problem by smoothing the image with a
+                  Gaussian before differentiation.
+                  It also shows that smoothing followed by differentiation can be
+                  combined into a single Derivative of Gaussian filter through the
+                  algebraic properties of convolution.
+                </p>
+
+              </li>
+
+            </ol>
+
+          </div>
+
+        </div>
+
+        <div class="mini-box" id="1.3">
+
+          <div class="mini-hd">
+            <span class="hint">1.3</span>
+            <span>Derivative of Gaussian</span>
+
+            <button class="mini-toggle" type="button"
+                    data-target="#1.3-body">Hide</button>
+          </div>
+
+          <div class="mini-bd" id="1.3-body">
+
+            <ol class="section-steps">
+
+              <li>
+
+                <p>
+                  In the previous section, finite difference filters were used to
+                  detect image edges from local intensity changes.
+                  However, these derivative filters also respond strongly to small
+                  high frequency variations caused by image noise.
+                  This can introduce many weak and unstable responses into the edge map.
+                </p>
+
+                <p>
+                  To make the derivative estimate more robust, I first smooth the image
+                  using a Gaussian filter.
+                  Gaussian filtering averages nearby pixels with smoothly decaying
+                  weights, which suppresses high frequency noise while preserving larger
+                  image structures.
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \boxed{
+                  I_{\mathrm{smooth}}
+                  =
+                  I * G
+                  }
+                  \]
+                </div>
+
+                <p>
+                  After smoothing, I apply the finite difference filters to the
+                  Gaussian filtered image.
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \boxed{
+                  I_x
+                  =
+                  (I*G)*D_x
+                  }
+                  \]
+                </div>
+
+                <div class="equation-block">
+                  \[
+                  \boxed{
+                  I_y
+                  =
+                  (I*G)*D_y
+                  }
+                  \]
+                </div>
+
+                <p>
+                  The horizontal and vertical derivative responses can then be combined
+                  using the same gradient magnitude computation as in the previous
+                  section.
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \boxed{
+                  \left\|
+                  \nabla I
+                  \right\|
+                  =
+                  \sqrt{
+                  I_x^2
+                  +
+                  I_y^2
+                  }
+                  }
+                  \]
+                </div>
+
+                <p>
+                  Because the image is smoothed before differentiation, small noisy
+                  variations are reduced before the derivative filters are applied.
+                  The resulting edge map is therefore cleaner and emphasizes larger,
+                  more stable image boundaries.
+                </p>
+
+                <div class="result-box">
+
+                  <div class="thumb">
+                    <img
+                      src="media/gaussianBlurBina_two_steps.png"
+                      alt="Edge detection using Gaussian smoothing followed by finite differences"
+                    >
+                    <div class="caption">
+                      Gaussian smoothing followed by differentiation
+                    </div>
+                  </div>
+
+                </div>
+
+              </li>
+
+
+              <li>
+
+                <p>
+                  The same operation can also be performed in a single filtering step.
+                  Convolution is associative, which means that the order in which
+                  consecutive filters are grouped does not change the final result.
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \boxed{
+                  (I*G)*D_x
+                  =
+                  I*(G*D_x)
+                  }
+                  \]
+                </div>
+
+                <div class="equation-block">
+                  \[
+                  \boxed{
+                  (I*G)*D_y
+                  =
+                  I*(G*D_y)
+                  }
+                  \]
+                </div>
+
+                <p>
+                  Instead of first smoothing the image and then differentiating it,
+                  I can therefore differentiate the Gaussian filter itself.
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \boxed{
+                  G_x
+                  =
+                  G*D_x,
+                  \qquad
+                  G_y
+                  =
+                  G*D_y
+                  }
+                  \]
+                </div>
+
+                <p>
+                  These filters are Derivative of Gaussian filters.
+                  They combine smoothing and differentiation into a single kernel.
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \boxed{
+                  I_x
+                  =
+                  I*G_x,
+                  \qquad
+                  I_y
+                  =
+                  I*G_y
+                  }
+                  \]
+                </div>
+
+                <p>
+                  The result is mathematically equivalent to first applying the Gaussian
+                  filter and then applying the finite difference operator.
+                  The difference is that the two filtering operations have been combined
+                  before being applied to the image.
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \boxed{
+                  \text{Smooth Then Differentiate}
+                  =
+                  \text{Differentiate the Gaussian Then Filter}
+                  }
+                  \]
+                </div>
+
+                <div class="result-box">
+
+                  <div class="thumb">
+                    <img
+                      src="media/gaussianBlurBina_one_step.png"
+                      alt="Edge detection using a Derivative of Gaussian filter"
+                    >
+                    <div class="caption">
+                      Derivative of Gaussian result
+                    </div>
+                  </div>
+
+                </div>
+
+              </li>
+
+
+              <li>
+
+                <p>
+                  The two approaches produce the same result because they represent the
+                  same sequence of linear filtering operations.
+                  The difference lies only in when the filters are combined.
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \boxed{
+                  \begin{aligned}
+                  \text{Two Step Method}
+                  &\qquad
+                  I
+                  \longrightarrow
+                  I*G
+                  \longrightarrow
+                  (I*G)*D
+                  \\
+                  \text{One Step Method}
+                  &\qquad
+                  G*D
+                  \longrightarrow
+                  I*(G*D)
+                  \end{aligned}
+                  }
+                  \]
+                </div>
+
+                <p>
+                  This example illustrates an important property of convolution.
+                  Multiple linear filters can often be combined into a single filter
+                  before being applied to the image.
+                  This allows us to understand image processing operations not only as
+                  sequences of steps, but also as combinations of kernels.
+                </p>
+
+                <p>
+                  It also introduces a frequency based interpretation that becomes
+                  important in the next part of the project.
+                  Gaussian smoothing suppresses high frequency components, while image
+                  derivatives emphasize rapid intensity changes.
+                  Combining the two produces a derivative operator that is less
+                  sensitive to high frequency noise.
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \boxed{
+                  \text{Gaussian Smoothing}
+                  \longrightarrow
+                  \text{Noise Suppression}
+                  \longrightarrow
+                  \text{Differentiation}
+                  \longrightarrow
+                  \text{Cleaner Edge Response}
+                  }
+                  \]
+                </div>
+
+              </li>
+
+            </ol>
+
+          </div>
+
+        </div>
+      </div>
     </section>
 
     <!-- P2 -->
-    <section class="panel" aria-labelledby="sec-simple">
+    <section class="panel" aria-labelledby="sec-frequencies">
       <div class="panel-hd">
-        <h2 id="sec-simple">P2: Fun With Frequencies</h2>
+        <h2 id="sec-frequencies">P2: Fun With Frequencies</h2>
         <span class="muted">4 in total</span>
       </div>
       <div class="panel-bd">
