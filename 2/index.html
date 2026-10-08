@@ -1915,5 +1915,36 @@
     });
   </script>
   <script src="../project-detail.js?v=20261008a"></script>
+  <script>
+    const sidebarLabels = [
+      {
+        section: 'Single Scale Alignment',
+        subsections: ['Translation Model', 'Matching Metrics', 'Exhaustive Search', 'Results']
+      },
+      {
+        section: 'Pyramid Alignment',
+        subsections: ['Image Pyramid', 'Coarse to Fine', 'Edge Alignment', 'Results']
+      },
+      {
+        section: 'Additional Results',
+        subsections: ['Extra Images']
+      }
+    ];
+
+    document.querySelectorAll('.project-nav-group').forEach((group, groupIndex) => {
+      const labels = sidebarLabels[groupIndex];
+      if (!labels) return;
+
+      const sectionLink = group.querySelector(':scope > a[data-level="section"]');
+      if (sectionLink) sectionLink.textContent = labels.section;
+
+      group.querySelectorAll('.project-nav-sublist a[data-level="subsection"]')
+        .forEach((link, subsectionIndex) => {
+          if (labels.subsections[subsectionIndex]) {
+            link.textContent = labels.subsections[subsectionIndex];
+          }
+        });
+    });
+  </script>
 </body>
 </html>
