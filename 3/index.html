@@ -154,7 +154,7 @@
     .mini-toggle:hover{ filter:saturate(110%); transform: translateY(-1px); }
     @media (max-width:760px){ .mini-box{ padding: 10px 12px; } }
 
-    
+
     .result-box {
       margin: 10px 0;
       display: flex;
@@ -190,7 +190,7 @@
       height: auto;
       display: block;
     }
-    
+
     .caption {
       text-align: center;
       font-size: 13px;
@@ -285,7 +285,7 @@
   </script>
   <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
 </head>
-    
+
 <body>
   <!-- Sticky Header -->
   <header class="site">
@@ -303,7 +303,7 @@
   <main class="wrap">
     <h1 class="page-title">Fun with Filters and Frequencies!</h1>
     <p class="lead">This project adopts various skills to play with images. Including Gaussian Blurring, differencing, binarize, sharpening, stacking, and blending the images.</span>.</p>
-    
+
     <!-- P1 -->
     <section class="panel" aria-labelledby="sec-filters">
       <div class="panel-hd">
@@ -1422,150 +1422,1000 @@
         <span class="muted">4 in total</span>
       </div>
       <div class="panel-bd">
-        <!-- Small step box -->
+        <!-- Part 2.1 Image Sharpening with the Unsharp Mask -->
+
         <div class="mini-box" id="2.1">
+
           <div class="mini-hd">
-            <span>Part two</span>
             <span class="hint">2.1</span>
-            <button class="mini-toggle" type="button" data-target="#2.1-bo">Hide</button>
+            <span>Image Sharpening with the Unsharp Mask</span>
+
+            <button class="mini-toggle" type="button"
+                    data-target="#2.1-body">Hide</button>
           </div>
+
           <div class="mini-bd" id="2.1-body">
-            <ol>
-              <li>In this section I managed to sharpen the image by adding high frequencies to the image. A naive way to do this is to first extract the high frequencies out by subtracting the blurred img from the orign img, and add the result to the original image. But we can also do this by calcutate out a single kernel to convolute, resulting in the same result The single-kernel formula is [sharpen_knl = (1+alpha)*delta_knl - alpha*gaus_knl]. We can adjust the alpha to change the amount of sharpening. 
-                  <div class="result-line">
-                    <div class="thumb">
-                      <img src="media/taj.jpg" alt="Box filter result 1">
-                      <div class="caption">taj_origin.png</div>
-                    </div>
-                    <div class="thumb">
-                      <img src="media/taj_blurred_img.png" alt="Box filter result 1">
-                      <div class="caption">taj_blurred_img.png</div>
-                    </div>
-                    <div class="thumb">
-                      <img src="media/taj_high_freq_img.png" alt="Box filter result 1">
-                      <div class="caption">taj_high_freq_img.png</div>
-                    </div>
-                    <div class="thumb">
-                      <img src="media/taj_unsharpMask0.png" alt="Box filter result 1">
-                      <div class="caption">taj_unsharpMask_alpha=1.png</div>
-                    </div>
-                    <div class="thumb">
-                      <img src="media/taj_unsharpMask.png" alt="Box filter result 1">
-                      <div class="caption">taj_unsharpMask_alpha=3.png</div>
-                    </div>
-                  </div>
-                  <div class="result-line">
+
+            <ol class="section-steps">
+
+              <li>
+
+                <p>
+                  The previous sections used Gaussian filtering to suppress rapid
+                  intensity variation and produce a smoother image.
+                  Image sharpening uses the same frequency decomposition in the
+                  opposite direction.
+                  Instead of removing fine scale variation, we first isolate it and
+                  then amplify it.
+                </p>
+
+                <p>
+                  An image can be viewed as a combination of slowly varying structure
+                  and rapidly varying detail.
+                  Gaussian filtering acts as a low pass filter, so convolving an image
+                  \(I\) with a Gaussian kernel \(G\) produces its low frequency
+                  component.
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \boxed{
+                  I_{\mathrm{low}}
+                  =
+                  I*G
+                  }
+                  \]
+                </div>
+
+                <p>
+                  The information removed by this smoothing operation can be recovered
+                  by subtracting the blurred image from the original image.
+                  This residual contains the higher frequency structures that the
+                  Gaussian filter attenuated.
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \boxed{
+                  I_{\mathrm{high}}
+                  =
+                  I-I_{\mathrm{low}}
+                  =
+                  I-I*G
+                  }
+                  \]
+                </div>
+
+                <p>
+                  Strong edges, fine texture, and other rapid intensity changes are
+                  therefore emphasized in \(I_{\mathrm{high}}\).
+                  Sharpening is performed by adding a scaled version of this component
+                  back to the original image.
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \boxed{
+                  I_{\mathrm{sharp}}
+                  =
+                  I
+                  +
+                  \alpha I_{\mathrm{high}}
+                  }
+                  \]
+                </div>
+
+                <p>
+                  Substituting the high frequency component gives
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \boxed{
+                  I_{\mathrm{sharp}}
+                  =
+                  I
+                  +
+                  \alpha
+                  \left(
+                  I-I*G
+                  \right)
+                  }
+                  \]
+                </div>
+
+                <p>
+                  The parameter \(\alpha\) controls the amount of sharpening.
+                  When \(\alpha\) is small, the additional high frequency contribution
+                  is weak.
+                  Increasing \(\alpha\) makes edges and fine structures more
+                  pronounced.
+                  Very large values can also amplify noise and produce an unnaturally
+                  strong appearance.
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \boxed{
+                  \alpha
+                  \uparrow
+                  \qquad
+                  \Longrightarrow
+                  \qquad
+                  \text{Stronger High Frequency Emphasis}
+                  }
+                  \]
+                </div>
+
+                <p>
+                  The first experiment applies this process to the Taj Mahal image.
+                  The sequence shows the original image, its Gaussian blurred version,
+                  the extracted high frequency component, and two sharpened results
+                  obtained with different values of \(\alpha\).
+                </p>
+
+                <div class="result-line">
+
                   <div class="thumb">
-                      <img src="media/group_image.png" alt="Box filter result 1">
-                      <div class="caption">group_image.png.png</div>
-                    </div>
-                    <div class="thumb">
-                      <img src="media/group_blurred_img.png" alt="Box filter result 1">
-                      <div class="caption">group_blurred_img.png</div>
-                    </div>
-                    <div class="thumb">
-                      <img src="media/group_high_freq_img.png" alt="Box filter result 1">
-                      <div class="caption">group_high_freq_img.png</div>
-                    </div>
-                    <div class="thumb">
-                      <img src="media/group_unsharpMask0.png" alt="Box filter result 1">
-                      <div class="caption">taj_unsharpMask_alpha=3.png</div>
-                    </div>
-                    <div class="thumb">
-                      <img src="media/group_unsharpMask.png" alt="Box filter result 1">
-                      <div class="caption">taj_unsharpMask_alpha=10.png</div>
+                    <img
+                      src="media/taj.jpg"
+                      alt="Original Taj Mahal image"
+                    >
+                    <div class="caption">
+                      Original
                     </div>
                   </div>
-              </li>
-              <li>Then, I pick a sharp image, blur it and then try to sharpen it again. This image looks different from the original one. The original img enhances all details including noise, while this one suppresses fine details through blurring and emphasizes only stronger, larger edges.
-                  <div class="result-box">
-                    <div class="thumb">
-                      <img src="media/taj_unsharpMask_multi.png" alt="Box filter result 2">
-                      <div class="caption">taj_unsharpMask_multi.png</div>
+
+                  <div class="thumb">
+                    <img
+                      src="media/taj_blurred_img.png"
+                      alt="Gaussian blurred Taj Mahal image"
+                    >
+                    <div class="caption">
+                      Low frequency component
                     </div>
                   </div>
+
+                  <div class="thumb">
+                    <img
+                      src="media/taj_high_freq_img.png"
+                      alt="High frequency component of the Taj Mahal image"
+                    >
+                    <div class="caption">
+                      High frequency component
+                    </div>
+                  </div>
+
+                  <div class="thumb">
+                    <img
+                      src="media/taj_unsharpMask0.png"
+                      alt="Sharpened Taj Mahal image with alpha equal to one"
+                    >
+                    <div class="caption">
+                      Sharpened with \(\alpha=1\)
+                    </div>
+                  </div>
+
+                  <div class="thumb">
+                    <img
+                      src="media/taj_unsharpMask.png"
+                      alt="Sharpened Taj Mahal image with alpha equal to three"
+                    >
+                    <div class="caption">
+                      Sharpened with \(\alpha=3\)
+                    </div>
+                  </div>
+
+                </div>
+
+                <p>
+                  I repeat the same frequency decomposition on a second image.
+                  Increasing the amount of added high frequency content again produces
+                  progressively stronger sharpening.
+                </p>
+
+                <div class="result-line">
+
+                  <div class="thumb">
+                    <img
+                      src="media/group_image.png"
+                      alt="Original group image"
+                    >
+                    <div class="caption">
+                      Original
+                    </div>
+                  </div>
+
+                  <div class="thumb">
+                    <img
+                      src="media/group_blurred_img.png"
+                      alt="Gaussian blurred group image"
+                    >
+                    <div class="caption">
+                      Low frequency component
+                    </div>
+                  </div>
+
+                  <div class="thumb">
+                    <img
+                      src="media/group_high_freq_img.png"
+                      alt="High frequency component of the group image"
+                    >
+                    <div class="caption">
+                      High frequency component
+                    </div>
+                  </div>
+
+                  <div class="thumb">
+                    <img
+                      src="media/group_unsharpMask0.png"
+                      alt="Sharpened group image with alpha equal to three"
+                    >
+                    <div class="caption">
+                      Sharpened with \(\alpha=3\)
+                    </div>
+                  </div>
+
+                  <div class="thumb">
+                    <img
+                      src="media/group_unsharpMask.png"
+                      alt="Sharpened group image with alpha equal to ten"
+                    >
+                    <div class="caption">
+                      Sharpened with \(\alpha=10\)
+                    </div>
+                  </div>
+
+                </div>
+
               </li>
+
+
+              <li>
+
+                <p>
+                  The previous formulation appears to require several operations.
+                  We first blur the image, subtract the blurred image from the original,
+                  and then add the scaled residual back.
+                  Because convolution is linear, these operations can be combined into
+                  one convolution kernel.
+                </p>
+
+                <p>
+                  Let \(\delta\) denote the unit impulse kernel.
+                  Convolution with \(\delta\) leaves an image unchanged.
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \boxed{
+                  I*\delta
+                  =
+                  I
+                  }
+                  \]
+                </div>
+
+                <p>
+                  Starting from the sharpening equation, we can rearrange the terms as
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \begin{aligned}
+                  I_{\mathrm{sharp}}
+                  &=
+                  I
+                  +
+                  \alpha
+                  \left(
+                  I-I*G
+                  \right)
+                  \\
+                  &=
+                  (1+\alpha)I
+                  -
+                  \alpha I*G
+                  \end{aligned}
+                  \]
+                </div>
+
+                <p>
+                  Replacing the unchanged image with convolution by the unit impulse
+                  gives
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \begin{aligned}
+                  I_{\mathrm{sharp}}
+                  &=
+                  (1+\alpha)
+                  I*\delta
+                  -
+                  \alpha I*G
+                  \\
+                  &=
+                  I*
+                  \left[
+                  (1+\alpha)\delta
+                  -
+                  \alpha G
+                  \right]
+                  \end{aligned}
+                  \]
+                </div>
+
+                <p>
+                  The complete sharpening operation can therefore be represented by a
+                  single filter.
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \boxed{
+                  K_{\mathrm{unsharp}}
+                  =
+                  (1+\alpha)\delta
+                  -
+                  \alpha G
+                  }
+                  \]
+                </div>
+
+                <p>
+                  Convolving the original image with this kernel directly produces the
+                  same unsharp masking result.
+                  The two formulations therefore describe the same operation from two
+                  different perspectives.
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \boxed{
+                  \text{Extract Details Then Add Them Back}
+                  =
+                  \text{Convolve with One Unsharp Mask Kernel}
+                  }
+                  \]
+                </div>
+
+              </li>
+
+
+              <li>
+
+                <p>
+                  I also test what happens when information has already been removed
+                  from an image.
+                  I begin with a sharp image, deliberately blur it, and then apply
+                  sharpening to the blurred result.
+                </p>
+
+                <p>
+                  This experiment highlights an important limitation of unsharp
+                  masking.
+                  Sharpening does not recreate high frequency information that was
+                  destroyed during blurring.
+                  It only amplifies the frequency content that still remains in the
+                  blurred image.
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \boxed{
+                  \text{Blur}
+                  \longrightarrow
+                  \text{Loss of High Frequency Information}
+                  }
+                  \]
+                </div>
+
+                <div class="equation-block">
+                  \[
+                  \boxed{
+                  \text{Sharpening}
+                  \longrightarrow
+                  \text{Amplification of Remaining Detail}
+                  }
+                  \]
+                </div>
+
+                <p>
+                  The resharpened image can therefore appear crisper than the blurred
+                  version, but it is not identical to the original sharp image.
+                  Fine structures that were strongly suppressed by the Gaussian filter
+                  cannot be recovered simply by increasing their contrast afterward.
+                </p>
+
+                <div class="result-box">
+
+                  <div class="thumb">
+                    <img
+                      src="media/taj_unsharpMask_multi.png"
+                      alt="Comparison of the original blurred and resharpened Taj Mahal image"
+                    >
+                    <div class="caption">
+                      Blur followed by resharpening
+                    </div>
+                  </div>
+
+                </div>
+
+              </li>
+
+
+              <li>
+
+                <p>
+                  Image sharpening can therefore be understood as a controlled
+                  manipulation of spatial frequencies.
+                  Gaussian filtering extracts the low frequency structure, subtraction
+                  isolates the higher frequency detail, and unsharp masking amplifies
+                  that detail before combining it with the original image.
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \boxed{
+                  \text{Image}
+                  \longrightarrow
+                  \text{Low Frequency}
+                  +
+                  \text{High Frequency}
+                  \longrightarrow
+                  \text{Amplify High Frequency}
+                  \longrightarrow
+                  \text{Sharpened Image}
+                  }
+                  \]
+                </div>
+
+                <p>
+                  The next section uses the same frequency decomposition in a different
+                  way.
+                  Instead of combining the low and high frequency components from one
+                  image, hybrid images combine low frequencies from one image with high
+                  frequencies from another.
+                </p>
+
+              </li>
+
             </ol>
+
           </div>
+
         </div>
-        
-        <!-- Small step box -->
+
+        <!-- Part 2.2 Hybrid Images -->
+
         <div class="mini-box" id="2.2">
+
           <div class="mini-hd">
-            <span>Part two</span>
             <span class="hint">2.2</span>
-            <button class="mini-toggle" type="button" data-target="#2.2-bo">Hide</button>
+            <span>Hybrid Images</span>
+
+            <button class="mini-toggle" type="button"
+                    data-target="#2.2-body">Hide</button>
           </div>
+
           <div class="mini-bd" id="2.2-body">
-            <ol>
-              <li>In this section I tried to create hybird images by stacking the high frequencies of a certain pic to the low frequencies of another pic. For a low-pass filter, I used a standard 2D Gaussian filter. For a high-pass filter, I used the impulse filter minus the Gaussian filter. Firstly I showed the outcome of sample imgs. The signma for low pass filter is 4.0, for high pass filter is 7.0, and the mixing weight is 50% each.
-                  <div class="result-line">
-                    <div class="thumb">
-                      <img src="media/DerekPicture.jpg" alt="Box filter result 1">
-                      <div class="caption">DerekPicture.jpg</div>
-                    </div>
-                    <div class="thumb">
-                      <img src="media/nutmeg.jpg" alt="Box filter result 1">
-                      <div class="caption">nutmeg.jpg</div>
-                    </div>
-                    <div class="thumb">
-                      <img src="media/lowfreq_cat_man.png" alt="Box filter result 1">
-                      <div class="caption">lowfreq_cat_man.png</div>
-                    </div>
-                    <div class="thumb">
-                      <img src="media/highfreq_cat_man.png" alt="Box filter result 2">
-                      <div class="caption">highfreq_cat_man.png</div>
-                    </div>
-                    <div class="thumb">
-                      <img src="media/hybrid_cat_man.png" alt="Box filter result 1">
-                      <div class="caption">hybrid_cat_man.png</div>
+
+            <ol class="section-steps">
+
+              <li>
+
+                <p>
+                  The previous section used low and high frequency components from the
+                  same image to perform sharpening.
+                  Hybrid images use the same frequency decomposition in a different way.
+                  The low frequency structure of one image is combined with the high
+                  frequency detail of another image.
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \boxed{
+                  I_{\mathrm{hybrid}}
+                  =
+                  w_{\mathrm{low}}
+                  I_{\mathrm{low}}
+                  +
+                  w_{\mathrm{high}}
+                  I_{\mathrm{high}}
+                  }
+                  \]
+                </div>
+
+                <p>
+                  The effect works because visual perception depends on spatial
+                  frequency and viewing distance.
+                  High frequency structures correspond to rapid local intensity
+                  changes and fine details.
+                  They are especially noticeable when the image is viewed nearby.
+                  Low frequency structures correspond to slowly varying coarse shapes
+                  and remain visible more strongly when the image is viewed from a
+                  greater distance.
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \boxed{
+                  \begin{aligned}
+                  \text{Near View}
+                  &\longrightarrow
+                  \text{High Frequency Detail Becomes More Salient}
+                  \\
+                  \text{Far View}
+                  &\longrightarrow
+                  \text{Low Frequency Structure Becomes More Salient}
+                  \end{aligned}
+                  }
+                  \]
+                </div>
+
+                <p>
+                  To obtain the low frequency component, I convolve an image with a
+                  Gaussian filter.
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \boxed{
+                  I_{\mathrm{low}}
+                  =
+                  I_A*G_{\sigma_{\mathrm{low}}}
+                  }
+                  \]
+                </div>
+
+                <p>
+                  The Gaussian suppresses rapid spatial variation and preserves the
+                  coarse structure of the image.
+                  The parameter \(\sigma\) determines the scale of this smoothing.
+                  Increasing \(\sigma\) removes a wider range of high frequency detail.
+                </p>
+
+                <p>
+                  To obtain the high frequency component of the second image, I
+                  subtract its Gaussian filtered version from the original image.
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \boxed{
+                  I_{\mathrm{high}}
+                  =
+                  I_B
+                  -
+                  I_B*G_{\sigma_{\mathrm{high}}}
+                  }
+                  \]
+                </div>
+
+                <p>
+                  Using the unit impulse kernel \(\delta\), the same operation can be
+                  written as a single convolution.
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \boxed{
+                  I_{\mathrm{high}}
+                  =
+                  I_B*
+                  \left(
+                  \delta
+                  -
+                  G_{\sigma_{\mathrm{high}}}
+                  \right)
+                  }
+                  \]
+                </div>
+
+                <p>
+                  The kernel
+                  \(\delta-G\)
+                  therefore behaves as a high pass filter.
+                  Slowly varying image structure is removed while faster local changes
+                  such as edges and texture remain.
+                </p>
+
+                <p>
+                  The full construction can be summarized as
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \boxed{
+                  \begin{aligned}
+                  I_A
+                  &\longrightarrow
+                  \text{Gaussian Low Pass}
+                  \longrightarrow
+                  I_{\mathrm{low}}
+                  \\
+                  I_B
+                  &\longrightarrow
+                  \text{High Pass}
+                  \longrightarrow
+                  I_{\mathrm{high}}
+                  \\
+                  I_{\mathrm{low}}
+                  +
+                  I_{\mathrm{high}}
+                  &\longrightarrow
+                  I_{\mathrm{hybrid}}
+                  \end{aligned}
+                  }
+                  \]
+                </div>
+
+                <p>
+                  I first apply this procedure to the provided Derek and Nutmeg images.
+                  I use
+                  \(\sigma_{\mathrm{low}}=4.0\)
+                  for the low pass component and
+                  \(\sigma_{\mathrm{high}}=7.0\)
+                  for the high pass component.
+                  Both components are combined with equal weights.
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \boxed{
+                  w_{\mathrm{low}}
+                  =
+                  0.5,
+                  \qquad
+                  w_{\mathrm{high}}
+                  =
+                  0.5
+                  }
+                  \]
+                </div>
+
+                <div class="result-line">
+
+                  <div class="thumb">
+                    <img
+                      src="media/DerekPicture.jpg"
+                      alt="Original Derek image"
+                    >
+                    <div class="caption">
+                      Derek
                     </div>
                   </div>
-              </li>
-              <li>The following are the visualized frequency domain for the above results.
-                  <div class="result-line">
-                    <div class="thumb">
-                      <img src="media/fourier_man.png" alt="Box filter result 1">
-                      <div class="caption">fourier_man.png</div>
-                    </div>
-                    <div class="thumb">
-                      <img src="media/fourier_cat.png" alt="Box filter result 1">
-                      <div class="caption">fourier_cat.png</div>
-                    </div>
-                    <div class="thumb">
-                      <img src="media/fourier_lowfreq_0.png" alt="Box filter result 1">
-                      <div class="caption">fourier_lowfreq.png</div>
-                    </div>
-                    <div class="thumb">
-                      <img src="media/fourier_highfreq_0.png" alt="Box filter result 2">
-                      <div class="caption">fourier_highfreq.png</div>
-                    </div>
-                    <div class="thumb">
-                      <img src="media/fourier_hybrid_0.png" alt="Box filter result 1">
-                      <div class="caption">fourier_hybrid.png</div>
+
+                  <div class="thumb">
+                    <img
+                      src="media/nutmeg.jpg"
+                      alt="Original Nutmeg image"
+                    >
+                    <div class="caption">
+                      Nutmeg
                     </div>
                   </div>
-              </li>
-              <li>The following are the result from another set of pictures. The signma for low pass filter is 3.0, for high pass filter is 7.0, and the mixing weight is 45% for low freq and 55% for high freq.
-                  <div class="result-box">
-                    <div class="thumb">
-                      <img src="media/avril.png" alt="Box filter result 1">
-                      <div class="caption">Avril.png</div>
-                    </div>
-                    <div class="thumb">
-                      <img src="media/taylor.png" alt="Box filter result 1">
-                      <div class="caption">Taylor.png</div>
-                    </div>
-                    <div class="thumb">
-                      <img src="media/hybrid_avril_taylor.png" alt="Box filter result 1">
-                      <div class="caption">hybrid_avril_taylor.png</div>
+
+                  <div class="thumb">
+                    <img
+                      src="media/lowfreq_cat_man.png"
+                      alt="Low frequency component used in the Derek and Nutmeg hybrid image"
+                    >
+                    <div class="caption">
+                      Low frequency component
                     </div>
                   </div>
+
+                  <div class="thumb">
+                    <img
+                      src="media/highfreq_cat_man.png"
+                      alt="High frequency component used in the Derek and Nutmeg hybrid image"
+                    >
+                    <div class="caption">
+                      High frequency component
+                    </div>
+                  </div>
+
+                  <div class="thumb">
+                    <img
+                      src="media/hybrid_cat_man.png"
+                      alt="Hybrid image formed from Derek and Nutmeg"
+                    >
+                    <div class="caption">
+                      Hybrid image
+                    </div>
+                  </div>
+
+                </div>
+
+                <p>
+                  The final image contains information from both sources at different
+                  spatial scales.
+                  When viewed nearby, the high frequency component contributes much of
+                  the visible fine structure.
+                  As the viewing distance increases, these fine structures become less
+                  perceptually dominant and the low frequency component increasingly
+                  determines the overall appearance.
+                </p>
+
               </li>
+
+
+              <li>
+
+                <p>
+                  The same filtering process can also be understood in the frequency
+                  domain.
+                  The Fourier transform represents an image according to how much
+                  energy it contains at different spatial frequencies.
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \boxed{
+                  I(x,y)
+                  \longleftrightarrow
+                  \mathcal F
+                  \left\{
+                  I(x,y)
+                  \right\}
+                  }
+                  \]
+                </div>
+
+                <p>
+                  In the centered Fourier visualizations below, frequencies near the
+                  center represent slower spatial variation, while locations farther
+                  from the center represent faster spatial variation.
+                </p>
+
+                <p>
+                  Gaussian low pass filtering concentrates the retained information
+                  near the low frequency region.
+                  High pass filtering suppresses this low frequency content and keeps
+                  more of the fine scale structure.
+                  The hybrid spectrum contains contributions from both frequency
+                  ranges.
+                </p>
+
+                <p>
+                  This frequency interpretation is consistent with the convolution
+                  theorem.
+                  Convolution with a filter in the spatial domain corresponds to
+                  multiplication by that filter response in the frequency domain.
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \boxed{
+                  \mathcal F
+                  \left\{
+                  I*K
+                  \right\}
+                  =
+                  \mathcal F
+                  \left\{
+                  I
+                  \right\}
+                  \mathcal F
+                  \left\{
+                  K
+                  \right\}
+                  }
+                  \]
+                </div>
+
+                <p>
+                  The following images visualize the frequency content of the original
+                  images, the filtered components, and the final hybrid result.
+                </p>
+
+                <div class="result-line">
+
+                  <div class="thumb">
+                    <img
+                      src="media/fourier_man.png"
+                      alt="Fourier spectrum of the Derek image"
+                    >
+                    <div class="caption">
+                      Derek spectrum
+                    </div>
+                  </div>
+
+                  <div class="thumb">
+                    <img
+                      src="media/fourier_cat.png"
+                      alt="Fourier spectrum of the Nutmeg image"
+                    >
+                    <div class="caption">
+                      Nutmeg spectrum
+                    </div>
+                  </div>
+
+                  <div class="thumb">
+                    <img
+                      src="media/fourier_lowfreq_0.png"
+                      alt="Fourier spectrum of the low frequency component"
+                    >
+                    <div class="caption">
+                      Low frequency spectrum
+                    </div>
+                  </div>
+
+                  <div class="thumb">
+                    <img
+                      src="media/fourier_highfreq_0.png"
+                      alt="Fourier spectrum of the high frequency component"
+                    >
+                    <div class="caption">
+                      High frequency spectrum
+                    </div>
+                  </div>
+
+                  <div class="thumb">
+                    <img
+                      src="media/fourier_hybrid_0.png"
+                      alt="Fourier spectrum of the final hybrid image"
+                    >
+                    <div class="caption">
+                      Hybrid spectrum
+                    </div>
+                  </div>
+
+                </div>
+
+                <p>
+                  These visualizations show that the hybrid image does not simply
+                  average two photographs.
+                  It deliberately preserves different spatial frequency ranges from
+                  the two source images.
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \boxed{
+                  \text{Hybrid Image}
+                  =
+                  \text{Coarse Structure from One Image}
+                  +
+                  \text{Fine Structure from Another}
+                  }
+                  \]
+                </div>
+
+              </li>
+
+
+              <li>
+
+                <p>
+                  I also apply the same method to a second image pair using Avril
+                  Lavigne and Taylor Swift.
+                  For this experiment I use
+                  \(\sigma_{\mathrm{low}}=3.0\)
+                  and
+                  \(\sigma_{\mathrm{high}}=7.0\).
+                  I assign a weight of \(0.45\) to the low frequency component and
+                  \(0.55\) to the high frequency component.
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \boxed{
+                  I_{\mathrm{hybrid}}
+                  =
+                  0.45
+                  I_{\mathrm{low}}
+                  +
+                  0.55
+                  I_{\mathrm{high}}
+                  }
+                  \]
+                </div>
+
+                <div class="result-box">
+
+                  <div class="thumb">
+                    <img
+                      src="media/avril.png"
+                      alt="Original Avril Lavigne image"
+                    >
+                    <div class="caption">
+                      Avril
+                    </div>
+                  </div>
+
+                  <div class="thumb">
+                    <img
+                      src="media/taylor.png"
+                      alt="Original Taylor Swift image"
+                    >
+                    <div class="caption">
+                      Taylor
+                    </div>
+                  </div>
+
+                  <div class="thumb">
+                    <img
+                      src="media/hybrid_avril_taylor.png"
+                      alt="Hybrid image formed from Avril Lavigne and Taylor Swift"
+                    >
+                    <div class="caption">
+                      Hybrid image
+                    </div>
+                  </div>
+
+                </div>
+
+                <p>
+                  The values of the Gaussian scales and mixing weights determine how
+                  strongly each source contributes to the final percept.
+                  The Gaussian scales control which spatial structures are assigned to
+                  the low and high frequency components, while the mixing weights
+                  control their relative visual strength.
+                </p>
+
+              </li>
+
+
+              <li>
+
+                <p>
+                  Hybrid images demonstrate that frequency decomposition is not only a
+                  mathematical representation of an image.
+                  Different frequency bands can carry different perceptual information,
+                  and they can be manipulated independently to construct an image whose
+                  interpretation changes with viewing scale.
+                </p>
+
+                <div class="equation-block">
+                  \[
+                  \boxed{
+                  \text{Image A}
+                  \longrightarrow
+                  \text{Low Frequencies}
+                  }
+                  \]
+                </div>
+
+                <div class="equation-block">
+                  \[
+                  \boxed{
+                  \text{Image B}
+                  \longrightarrow
+                  \text{High Frequencies}
+                  }
+                  \]
+                </div>
+
+                <div class="equation-block">
+                  \[
+                  \boxed{
+                  \text{Low Frequencies}
+                  +
+                  \text{High Frequencies}
+                  \longrightarrow
+                  \text{Scale Dependent Perception}
+                  }
+                  \]
+                </div>
+
+                <p>
+                  The next section extends the same frequency decomposition idea from
+                  only two frequency ranges to multiple scales.
+                  Gaussian and Laplacian stacks allow an image to be separated into a
+                  sequence of frequency bands, which later makes multiresolution
+                  blending possible.
+                </p>
+
+              </li>
+
             </ol>
+
           </div>
 
-
+        </div>
 
         <!-- Small step box -->
         <div class="mini-box" id="2.3">
@@ -1655,10 +2505,10 @@
                 <div class="result-box">
                     <div class="thumb">
                       <img src="media/oneDollar.png" alt="Box filter result 1">
-                    </div>    
+                    </div>
                     <div class="thumb">
                       <img src="media/oneHundredDollars.png" alt="Box filter result 1">
-                    </div>               
+                    </div>
                     <div class="thumb">
                       <img src="media/blend_final2.png" alt="Box filter result 1">
                     </div>
@@ -1679,9 +2529,11 @@
               </li>
             </ol>
           </div>
+        </div>
+      </div>
     </section>
   </main>
-        
+
   <script>
     // Theme toggle with localStorage
     const root = document.documentElement;
@@ -1708,6 +2560,6 @@
       });
     });
   </script>
-        
-  <script src="../project-detail.js?v=20260929d"></script>
+
+  <script src="../project-detail.js?v=20261008a"></script>
 </body>

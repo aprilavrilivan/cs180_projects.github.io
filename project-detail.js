@@ -147,15 +147,20 @@
 
   if (observed[0]) setActive(observed[0].id);
 
-  if ('IntersectionObserver' in window) {
-    const observer = new IntersectionObserver((entries) => {
-      const visible = entries
-        .filter((entry) => entry.isIntersecting)
-        .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
-      if (visible[0]) setActive(visible[0].target.id);
-    }, { rootMargin: '-18% 0px -68% 0px', threshold: [0, 0.01] });
-    observed.forEach((element) => observer.observe(element));
-  }
+  const updateActiveSection = () => {
+    const activationLine = Math.min(220, Math.max(120, window.innerHeight * 0.24));
+    let current = observed[0];
+
+    observed.forEach((element) => {
+      if (element.getBoundingClientRect().top <= activationLine) current = element;
+    });
+
+    if (current) setActive(current.id);
+  };
+
+  updateActiveSection();
+  window.addEventListener('scroll', updateActiveSection, { passive: true });
+  window.addEventListener('resize', updateActiveSection);
 
   const updatePageState = () => {
     const scrollable = document.documentElement.scrollHeight - window.innerHeight;
