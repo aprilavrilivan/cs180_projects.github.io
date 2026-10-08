@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-CN" data-theme="light">
+<html lang="en" data-theme="light">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -7,7 +7,7 @@
   <meta name="description" content="CS180/280A Project 1: Colorizing the Prokudin‑Gorskii photo collection" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
   <style>
     /* ------------------------------
        Theme & Reset
@@ -154,8 +154,182 @@
     .mini-toggle:hover{ filter:saturate(110%); transform: translateY(-1px); }
     @media (max-width:760px){ .mini-box{ padding: 10px 12px; } }
   </style>
+  <style>
+    .project-hero {
+      margin: 18px 0 52px;
+      padding: 24px 26px;
+      border-left: 3px solid var(--project-accent);
+      border-radius: 0 14px 14px 0;
+      background: color-mix(in srgb, var(--project-accent-soft) 55%, transparent);
+    }
+
+    .project-hero p {
+      margin: 10px 0 0;
+      color: var(--project-muted);
+    }
+
+    .project-hero p:first-child {
+      margin-top: 0;
+    }
+
+    .story-line {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      margin: 22px 0 4px;
+    }
+
+    .story-step {
+      padding: 8px 12px;
+      border: 1px solid var(--project-border);
+      border-radius: 999px;
+      background: var(--project-paper);
+      color: var(--project-text);
+      font-size: 0.78rem;
+      font-weight: 680;
+      line-height: 1.35;
+      text-align: center;
+    }
+
+    .story-arrow {
+      color: var(--project-muted);
+      font-weight: 700;
+    }
+
+    .section-intro {
+      max-width: 920px;
+      margin: 0 0 28px;
+      color: var(--project-muted);
+    }
+
+    .concept-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+      margin: 18px 0;
+    }
+
+    .concept-card {
+      padding: 16px 17px;
+      border: 1px solid var(--project-border);
+      border-radius: 12px;
+      background: var(--project-paper-soft);
+    }
+
+    .concept-card strong {
+      display: block;
+      margin-bottom: 6px;
+    }
+
+    .concept-card p,
+    .result-note p,
+    .summary-box p {
+      margin: 0;
+    }
+
+    .project-main .equation-block {
+      width: min(100%, 820px);
+      margin: 18px auto;
+      padding: 16px 18px;
+      overflow-x: auto;
+      border: 1px solid color-mix(in srgb, var(--project-accent) 24%, var(--project-border));
+      border-radius: 13px;
+      background: color-mix(in srgb, var(--project-accent-soft) 48%, var(--project-paper));
+      color: var(--project-text);
+      text-align: center;
+    }
+
+    .project-main .equation-block mjx-container {
+      margin: 0 !important;
+      color: var(--project-text);
+      font-size: clamp(0.88rem, 1.35vw, 1.06rem) !important;
+    }
+
+    .result-note {
+      margin: 18px 0;
+      padding: 14px 16px;
+      border-left: 3px solid var(--project-accent);
+      border-radius: 0 10px 10px 0;
+      background: color-mix(in srgb, var(--project-accent-soft) 55%, transparent);
+    }
+
+    .summary-box {
+      margin: 72px 0 0;
+      padding: 24px 26px;
+      border-top: 1px solid var(--project-border);
+      border-bottom: 1px solid var(--project-border);
+      background: color-mix(in srgb, var(--project-accent-soft) 32%, transparent);
+    }
+
+    .summary-box p + .story-line,
+    .summary-box .story-line + p {
+      margin-top: 18px;
+    }
+
+    .project-main .tbl td:first-child {
+      width: 42%;
+    }
+
+    .project-main .tbl .image-name {
+      margin-top: 8px;
+      color: var(--project-muted);
+      font-size: 0.75rem;
+      text-align: center;
+    }
+
+    .project-main .tbl img {
+      width: min(100%, 280px);
+      margin: 0 auto;
+    }
+
+    .section-gap {
+      margin-top: 0;
+    }
+
+    @media (max-width: 760px) {
+      .project-hero {
+        margin-bottom: 42px;
+        padding: 18px;
+      }
+
+      .concept-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .story-line {
+        align-items: stretch;
+      }
+
+      .story-arrow {
+        display: none;
+      }
+
+      .story-step {
+        width: 100%;
+      }
+
+      .summary-box {
+        margin-top: 54px;
+        padding: 20px 18px;
+      }
+    }
+  </style>
   <link rel="stylesheet" href="../portfolio-polish.css">
-  <link rel="stylesheet" href="../project-detail.css?v=20261004b">
+  <link rel="stylesheet" href="../project-detail.css?v=20261008a">
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['\\(', '\\)']],
+        displayMath: [['\\[', '\\]']]
+      },
+      options: {
+        skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      }
+    };
+  </script>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
 </head>
 
 
@@ -175,247 +349,1546 @@
   </header>
 
   <main class="wrap">
-    <h1 class="page-title">Images of the Russian Empire: Colorizing the Prokudin-Gorskii photo collection</h1>
-    <p class="lead">Prokudin-Gorskii photo collection stores a set of old pictures, each with seperated RGB channels. This project aims to recover the colorful pictures by precisely align and stack back these channels. The project first succeed on recovering the simple .jpg photos by matching the brightness of each pixel in G and R channel with its surrounding pixels in B channel. For larger .tif photos, searching every pixel using brute-force is time consuming, so a image pyramid is constructed to accelerate the process. Finally, an edge extraction step is add to ensure a more robust alignment. The step description, findings during implementation, final outcomes for each image and their R and G channel shift parameters are listed below.</span>.</p>
 
-    <!-- Simple JPGs -->
-    <section class="panel" aria-labelledby="sec-simple">
-      <div class="panel-hd">
-        <h2 id="sec-simple">Colorizing simple JPG images</h2>
-        <span class="muted">3 in total</span>
-      </div>
-      <div class="panel-bd">
-        <!-- Small step box -->
-        <div class="mini-box" id="steps-simple">
-          <div class="mini-hd">
-            <span>Simple Alignment</span>
-            <span class="hint">Step Description</span>
-            <button class="mini-toggle" type="button" data-target="#steps-simple-body">Hide</button>
-          </div>
-          <div class="mini-bd" id="steps-simple-body">
-            <ol>
-              <li>Import the cv2 package, read the images, and split the concatenated long image to BGR channels.</li>
-              <li>Crop borders of BGR images to reduce noise brought by them.</li>
-              <li>Align <strong>G</strong> and <strong>R</strong> to <strong>B</strong> via exhaustively matching brightness of every pixel with its surrounding pixels (SSD or NCC algorithm with searching range [-15, 15]).</li>
-              <li>Apply the best shift parameters to G and R channels and stack them back with B channel to get an RGB image.</li>
-            </ol>
-          </div>
-        </div>
-        <!-- Small finding box -->
-        <div class="mini-box" id="findings-simple">
-          <div class="mini-hd">
-            <span>Simple Alignment</span>
-            <span class="hint">Findings sharing</span>
-            <button class="mini-toggle" type="button" data-target="#findings-simple-body">Hide</button>
-          </div>
-          <div class="mini-bd" id="findings-simple-body">
-            <ol>
-              <li>NCC performs better than SSD in aligning RGB channels, as NCC normalized the brightness of pixels, making it less sensitive to brightness and contrast differences.</li>
-              <li>Croping boarders by 13% of the orginal image appears effective.</li>
-            </ol>
-          </div>
-        </div>
-        <!-- The table -->
-        <table class="tbl">
-          <thead>
-            <tr>
-              <th>Image</th>
-              <th>G channel shifting</th>
-              <th>R channel shifting</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td data-label="Image">
-                <div class="thumb"><img src="./media/cathedral.jpg" alt="cathedral.jpg" loading="lazy"></div>
-              </td>
-              <td data-label="G channel shifting"><span class="pills"><span class="pill green"><span class="dot"></span>(2, 5)</span></span></td>
-              <td data-label="R channel shifting"><span class="pills"><span class="pill red"><span class="dot"></span>(3, 12)</span></span></td>
-            </tr>
-            <tr>
-              <td data-label="Image">
-                <div class="thumb"><img src="./media/monastery.jpg" alt="monastery.jpg" loading="lazy"></div>
-              </td>
-              <td data-label="G channel shifting"><span class="pills"><span class="pill green"><span class="dot"></span>(2, -3)</span></span></td>
-              <td data-label="R channel shifting"><span class="pills"><span class="pill red"><span class="dot"></span>(2, 3)</span></span></td>
-            </tr>
-            <tr>
-              <td data-label="Image">
-                <div class="thumb"><img src="./media/tobolsk.jpg" alt="tobolsk.jpg" loading="lazy"></div>
-              </td>
-              <td data-label="G channel shifting"><span class="pills"><span class="pill green"><span class="dot"></span>(3, 3)</span></span></td>
-              <td data-label="R channel shifting"><span class="pills"><span class="pill red"><span class="dot"></span>(3, 6)</span></span></td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </section>
+  <h1 class="page-title">
+    Images of the Russian Empire
+  </h1>
 
-    <!-- Complex TIFFs -->
-    <section class="panel" aria-labelledby="sec-complex" style="margin-top: 28px;">
-      <div class="panel-hd">
-        <h2 id="sec-complex">Colorizing complex TIF images</h2>
-        <span class="muted">12 in total</span>
-      </div>
-      <div class="panel-bd">
-        <!-- Complex step box -->
-        <div class="mini-box" id="steps-complex">
-          <div class="mini-hd">
-            <span>Pyramid Alignment</span>
-            <span class="hint">Step Description</span>
-            <button class="mini-toggle" type="button" data-target="#steps-complex-body">Hide</button>
-          </div>
-          <div class="mini-bd" id="steps-complex-body">
-            <ol>
-              <li>Import the cv2 package, read the images, and split the concatenated long image to BGR channels.</li>
-              <li>Crop borders of BGR images to reduce noise brought by the edges.</li>
-              <li>Construct three image pyramids of BGR channels respectively by iterating the process of Gaussian Blurring and Downsampling.</li>
-              <li>Starting from the top of pyramid, iteratively do the following process till bottom: Find best shift of G, R to B by NCC, and add it to current shifting --> times it by two to shift the next level in pyrimid.</li>
-              <li>Apply the best shifts of BGR and stack them back into an RGB image.</li>
-            </ol>
-          </div>
-        </div>
-        <!-- Complex findings box -->
-        <div class="mini-box" id="findings-complex">
-          <div class="mini-hd">
-            <span>Pyramid Alignment</span>
-            <span class="hint">Findings Sharing</span>
-            <button class="mini-toggle" type="button" data-target="#findings-complex-body">Hide</button>
-          </div>
-          <div class="mini-bd" id="findings-complex-body">
-            <ol>
-              <li>In the Gaussian Blurring step, I used "sepfir2d" tool from "scipy.signal" toolbox, with filter = [1/16, 4/16, 6/16, 4/16, 1/16].</li>
-              <li>I constructed a pyramid with 6 levels, each layer size shrinks to (1/2)*(1/2) of its predecessor.</li>
-              <li>The search range is [-5, 5], which proved to be robust, while completing the whole task within 10 sec for all tif pictures.</li>
-              <li>By just doing the above process, every image can be perfectly aligned except for the R channel of "emir". This is because that channel has a large brightness difference with B channel of that image. I addressed it by interting a edge extraction process right after the cropping step. This is done using cv2.Canny() function.</li>
-            </ol>
-          </div>
-        </div>
-        <table class="tbl">
-          <thead>
-            <tr>
-              <th>Image</th>
-              <th>G channel shifting</th>
-              <th>R channel shifting</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td data-label="Image"><div class="thumb"><img src="./media/church.jpeg" alt="church.jpeg" loading="lazy"></div></td>
-              <td data-label="G channel shifting"><span class="pills"><span class="pill green"><span class="dot"></span>(3, 25)</span></span></td>
-              <td data-label="R channel shifting"><span class="pills"><span class="pill red"><span class="dot"></span>(-4, 58)</span></span></td>
-            </tr>
-            <tr>
-              <td data-label="Image"><div class="thumb"><img src="./media/emir.jpeg" alt="emir.jpeg" loading="lazy"></div></td>
-              <td data-label="G channel shifting"><span class="pills"><span class="pill green"><span class="dot"></span>(23, 49)</span></span></td>
-              <td data-label="R channel shifting"><span class="pills"><span class="pill red"><span class="dot"></span>(40, 107)</span></span></td>
-            </tr>
-            <tr>
-              <td data-label="Image"><div class="thumb"><img src="./media/harvesters.jpeg" alt="harvesters.jpeg" loading="lazy"></div></td>
-              <td data-label="G channel shifting"><span class="pills"><span class="pill green"><span class="dot"></span>(17, 60)</span></span></td>
-              <td data-label="R channel shifting"><span class="pills"><span class="pill red"><span class="dot"></span>(10, 124)</span></span></td>
-            </tr>
-            <tr>
-              <td data-label="Image"><div class="thumb"><img src="./media/icon.jpeg" alt="icon.jpeg" loading="lazy"></div></td>
-              <td data-label="G channel shifting"><span class="pills"><span class="pill green"><span class="dot"></span>(16, 39)</span></span></td>
-              <td data-label="R channel shifting"><span class="pills"><span class="pill red"><span class="dot"></span>(22, 87)</span></span></td>
-            </tr>
-            <tr>
-              <td data-label="Image"><div class="thumb"><img src="./media/italil.jpeg" alt="italil.jpeg" loading="lazy"></div></td>
-              <td data-label="G channel shifting"><span class="pills"><span class="pill green"><span class="dot"></span>(22, 40)</span></span></td>
-              <td data-label="R channel shifting"><span class="pills"><span class="pill red"><span class="dot"></span>(36, 77)</span></span></td>
-            </tr>
-            <tr>
-              <td data-label="Image"><div class="thumb"><img src="./media/lastochikino.jpeg" alt="lastochikino.jpeg" loading="lazy"></div></td>
-              <td data-label="G channel shifting"><span class="pills"><span class="pill green"><span class="dot"></span>(-1, -3)</span></span></td>
-              <td data-label="R channel shifting"><span class="pills"><span class="pill red"><span class="dot"></span>(-8, 75)</span></span></td>
-            </tr>
-            <tr>
-              <td data-label="Image"><div class="thumb"><img src="./media/lugano.jpeg" alt="lugano.jpeg" loading="lazy"></div></td>
-              <td data-label="G channel shifting"><span class="pills"><span class="pill green"><span class="dot"></span>(-17, 41)</span></span></td>
-              <td data-label="R channel shifting"><span class="pills"><span class="pill red"><span class="dot"></span>(-29, 93)</span></span></td>
-            </tr>
-            <tr>
-              <td data-label="Image"><div class="thumb"><img src="./media/melons.jpeg" alt="melons.jpeg" loading="lazy"></div></td>
-              <td data-label="G channel shifting"><span class="pills"><span class="pill green"><span class="dot"></span>(10, 80)</span></span></td>
-              <td data-label="R channel shifting"><span class="pills"><span class="pill red"><span class="dot"></span>(14, 177)</span></span></td>
-            </tr>
-            <tr>
-              <td data-label="Image"><div class="thumb"><img src="./media/self_portrait.jpeg" alt="self_portrait.jpeg" loading="lazy"></div></td>
-              <td data-label="G channel shifting"><span class="pills"><span class="pill green"><span class="dot"></span>(29, 77)</span></span></td>
-              <td data-label="R channel shifting"><span class="pills"><span class="pill red"><span class="dot"></span>(37, 175)</span></span></td>
-            </tr>
-            <tr>
-              <td data-label="Image"><div class="thumb"><img src="./media/siren.jpeg" alt="siren.jpeg" loading="lazy"></div></td>
-              <td data-label="G channel shifting"><span class="pills"><span class="pill green"><span class="dot"></span>(-8, 48)</span></span></td>
-              <td data-label="R channel shifting"><span class="pills"><span class="pill red"><span class="dot"></span>(-23, 96)</span></span></td>
-            </tr>
-            <tr>
-              <td data-label="Image"><div class="thumb"><img src="./media/three_generations.jpeg" alt="three_generations.jpeg" loading="lazy"></div></td>
-              <td data-label="G channel shifting"><span class="pills"><span class="pill green"><span class="dot"></span>(12, 56)</span></span></td>
-              <td data-label="R channel shifting"><span class="pills"><span class="pill red"><span class="dot"></span>(8, 111)</span></span></td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </section>
-    
-    <!-- Extra JPGs -->
-    <h1></h1>
-    <h1></h1>
-    <section class="panel" aria-labelledby="sec-simple">
-      <div class="panel-hd">
-        <h2 id="sec-simple">Colorizing Extra .TIF images</h2>
-        <span class="muted">3 in total</span>
-      </div>
-      <div class="panel-bd">
-        <!-- Small step box -->
-        <div class="mini-box" id="steps-simple">
-          <div class="mini-hd">
-            <span>These are the result of my algorithm on 3 examples of my own choosing, downloaded from the Prokudin-Gorskii collection, each with around 70Mb data size but still successfully handled within 10sec.</span>
-          </div>
-        </div>
-        <!-- The table -->
-        <table class="tbl">
-          <thead>
-            <tr>
-              <th>Image</th>
-              <th>G channel shifting</th>
-              <th>R channel shifting</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td data-label="Image">
-                <div class="thumb"><img src="./media/1.jpeg" alt="1.jpeg" loading="lazy"></div>
-              </td>
-              <td data-label="G channel shifting"><span class="pills"><span class="pill green"><span class="dot"></span>(37,45)</span></span></td>
-              <td data-label="R channel shifting"><span class="pills"><span class="pill red"><span class="dot"></span>(58,101)</span></span></td>
-            </tr>
-            <tr>
-              <td data-label="Image">
-                <div class="thumb"><img src="./media/2.jpeg" alt="2.jpeg" loading="lazy"></div>
-              </td>
-              <td data-label="G channel shifting"><span class="pills"><span class="pill green"><span class="dot"></span>(1,35)</span></span></td>
-              <td data-label="R channel shifting"><span class="pills"><span class="pill red"><span class="dot"></span>(-2,84)</span></span></td>
-            </tr>
-            <tr>
-              <td data-label="Image">
-                <div class="thumb"><img src="./media/3.jpeg" alt="3.jpeg" loading="lazy"></div>
-              </td>
-              <td data-label="G channel shifting"><span class="pills"><span class="pill green"><span class="dot"></span>(23,54)</span></span></td>
-              <td data-label="R channel shifting"><span class="pills"><span class="pill red"><span class="dot"></span>(39,117)</span></span></td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </section>
+  <p class="lead">
+    Colorizing the Prokudin Gorskii photo collection through image alignment
+  </p>
 
-    <footer>
-      <a class="back-btn" href="../index.html" aria-label="back to main">
-        <span>← back to main</span>
-      </a>
-  </main>
+
+  <!-- ====================================================== -->
+  <!-- Project Overview                                       -->
+  <!-- ====================================================== -->
+
+  <div class="project-hero">
+
+    <p>
+      Sergei Prokudin Gorskii recorded many scenes of the Russian Empire using
+      three separate monochrome exposures captured through blue, green, and red
+      filters.
+      The three channel images are stored vertically on the same glass plate.
+      If these channels are correctly aligned and stacked together, they can be
+      reconstructed into a color photograph.
+    </p>
+
+    <p>
+      The main challenge is therefore geometric alignment.
+      I use the blue channel as the reference and estimate the translation
+      required to align the green and red channels with it.
+      Small JPEG images can be aligned through an exhaustive translation search.
+      Large TIF images require a coarse to fine image pyramid so that large
+      displacements can be recovered efficiently.
+      For difficult cases such as Emir, I further use edge structure to make
+      the alignment less sensitive to large brightness differences between
+      color channels.
+    </p>
+
+    <div class="story-line">
+
+      <div class="story-step">
+        Split B G R Channels
+      </div>
+
+      <div class="story-arrow">
+        →
+      </div>
+
+      <div class="story-step">
+        Crop Borders
+      </div>
+
+      <div class="story-arrow">
+        →
+      </div>
+
+      <div class="story-step">
+        Estimate Translation
+      </div>
+
+      <div class="story-arrow">
+        →
+      </div>
+
+      <div class="story-step">
+        Align Channels
+      </div>
+
+      <div class="story-arrow">
+        →
+      </div>
+
+      <div class="story-step">
+        Reconstruct Color Image
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <!-- ====================================================== -->
+  <!-- Part 1 Single Scale Alignment                          -->
+  <!-- ====================================================== -->
+
+  <section
+    class="panel"
+    aria-labelledby="sec-single-scale"
+  >
+
+    <div class="panel-hd">
+
+      <h2 id="sec-single-scale">
+        Part 1&nbsp;&nbsp;Single Scale Channel Alignment
+      </h2>
+
+      <span class="muted">
+        3 JPEG images
+      </span>
+
+    </div>
+
+    <div class="panel-bd">
+
+      <p class="section-intro">
+        For the smaller JPEG images, the possible displacement between color
+        channels is limited.
+        I therefore search directly over a small two dimensional translation
+        window and choose the displacement that produces the best agreement
+        with the blue reference channel.
+      </p>
+
+
+      <!-- -------------------------------------------------- -->
+      <!-- Geometry                                           -->
+      <!-- -------------------------------------------------- -->
+
+      <div class="mini-box" id="single-model">
+
+        <div class="mini-hd">
+
+          <span>
+            Translation Model
+          </span>
+
+          <span class="hint">
+            Alignment Geometry
+          </span>
+
+          <button
+            class="mini-toggle"
+            type="button"
+            data-target="#single-model-body"
+          >
+            Hide
+          </button>
+
+        </div>
+
+        <div
+          class="mini-bd"
+          id="single-model-body"
+        >
+
+          <p>
+            The three exposures represent the same static scene, so the main
+            geometric difference between channels can be approximated by a two
+            dimensional translation.
+            Let
+            \(\Delta=(\Delta x,\Delta y)\)
+            denote the displacement applied to a channel.
+          </p>
+
+          <div class="equation-block">
+            \[
+            I_{\Delta}(x,y)
+            =
+            I
+            \left(
+            x-\Delta x,\,
+            y-\Delta y
+            \right)
+            \]
+          </div>
+
+          <p>
+            The blue image is kept fixed.
+            I independently estimate one displacement for the green channel and
+            another for the red channel.
+          </p>
+
+          <div class="equation-block">
+            \[
+            \boxed{
+            \Delta_G^*
+            =
+            \operatorname*{arg\,best}_{\Delta}
+            S
+            \left(
+            B,\,
+            G_{\Delta}
+            \right)
+            }
+            \]
+          </div>
+
+          <div class="equation-block">
+            \[
+            \boxed{
+            \Delta_R^*
+            =
+            \operatorname*{arg\,best}_{\Delta}
+            S
+            \left(
+            B,\,
+            R_{\Delta}
+            \right)
+            }
+            \]
+          </div>
+
+          <p>
+            All reported shifts below are written as
+            \((\Delta x,\Delta y)\).
+          </p>
+
+        </div>
+
+      </div>
+
+
+      <!-- -------------------------------------------------- -->
+      <!-- Similarity Metrics                                 -->
+      <!-- -------------------------------------------------- -->
+
+      <div class="mini-box" id="single-metrics">
+
+        <div class="mini-hd">
+
+          <span>
+            Alignment Metrics
+          </span>
+
+          <span class="hint">
+            SSD and NCC
+          </span>
+
+          <button
+            class="mini-toggle"
+            type="button"
+            data-target="#single-metrics-body"
+          >
+            Hide
+          </button>
+
+        </div>
+
+        <div
+          class="mini-bd"
+          id="single-metrics-body"
+        >
+
+          <p>
+            For every candidate displacement, the shifted channel must be
+            compared with the blue reference.
+            I considered both Sum of Squared Differences and Normalized Cross
+            Correlation.
+          </p>
+
+          <div class="concept-grid">
+
+            <div class="concept-card">
+
+              <strong>
+                Sum of Squared Differences
+              </strong>
+
+              <p>
+                SSD directly measures pixelwise intensity disagreement.
+                Smaller values indicate better alignment.
+              </p>
+
+            </div>
+
+            <div class="concept-card">
+
+              <strong>
+                Normalized Cross Correlation
+              </strong>
+
+              <p>
+                NCC measures the structural similarity between normalized image
+                intensities.
+                Larger values indicate better alignment.
+              </p>
+
+            </div>
+
+          </div>
+
+          <div class="equation-block">
+            \[
+            \boxed{
+            E_{\mathrm{SSD}}(\Delta)
+            =
+            \sum_{x,y}
+            \left[
+            B(x,y)
+            -
+            I_{\Delta}(x,y)
+            \right]^2
+            }
+            \]
+          </div>
+
+          <p>
+            SSD chooses the displacement with the smallest error.
+          </p>
+
+          <div class="equation-block">
+            \[
+            \boxed{
+            \Delta^*
+            =
+            \arg\min_{\Delta}
+            E_{\mathrm{SSD}}(\Delta)
+            }
+            \]
+          </div>
+
+          <p>
+            NCC first removes the local mean and normalizes the magnitude of
+            the compared image vectors.
+          </p>
+
+          <div class="equation-block">
+            \[
+            \boxed{
+            \operatorname{NCC}(A,B)
+            =
+            \frac{
+            \sum
+            (A-\bar A)
+            (B-\bar B)
+            }{
+            \sqrt{
+            \sum
+            (A-\bar A)^2
+            \sum
+            (B-\bar B)^2
+            }
+            }
+            }
+            \]
+          </div>
+
+          <p>
+            This normalization makes the score less sensitive to global
+            brightness and contrast differences between channels.
+            In my experiments, NCC produced more reliable alignment than SSD.
+          </p>
+
+        </div>
+
+      </div>
+
+
+      <!-- -------------------------------------------------- -->
+      <!-- Exhaustive Search                                  -->
+      <!-- -------------------------------------------------- -->
+
+      <div class="mini-box" id="single-search">
+
+        <div class="mini-hd">
+
+          <span>
+            Exhaustive Translation Search
+          </span>
+
+          <span class="hint">
+            Implementation
+          </span>
+
+          <button
+            class="mini-toggle"
+            type="button"
+            data-target="#single-search-body"
+          >
+            Hide
+          </button>
+
+        </div>
+
+        <div
+          class="mini-bd"
+          id="single-search-body"
+        >
+
+          <p>
+            I first split the vertically concatenated plate into blue, green,
+            and red grayscale images.
+            Border regions are cropped before alignment because the plate
+            boundaries contain strong structures that do not correspond to the
+            photographed scene and can dominate the matching score.
+          </p>
+
+          <p>
+            I empirically found that cropping approximately 13 percent from the
+            image boundaries produced stable results.
+          </p>
+
+          <p>
+            For each of the green and red channels, I evaluate candidate
+            translations within
+            \([-15,15]\)
+            pixels along both axes.
+          </p>
+
+          <div class="equation-block">
+            \[
+            \boxed{
+            \Delta x,\Delta y
+            \in
+            [-15,15]
+            }
+            \]
+          </div>
+
+          <p>
+            The displacement with the highest NCC score is applied to the
+            channel.
+            The aligned blue, green, and red channels are then stacked into the
+            final RGB image.
+          </p>
+
+          <div class="equation-block">
+            \[
+            \boxed{
+            I_{\mathrm{RGB}}
+            =
+            \operatorname{stack}
+            \left(
+            R_{\Delta_R^*},
+            G_{\Delta_G^*},
+            B
+            \right)
+            }
+            \]
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <!-- -------------------------------------------------- -->
+      <!-- Small Results                                      -->
+      <!-- -------------------------------------------------- -->
+
+      <div class="mini-box" id="single-results">
+
+        <div class="mini-hd">
+
+          <span>
+            Single Scale Results
+          </span>
+
+          <span class="hint">
+            Reconstructed Images
+          </span>
+
+          <button
+            class="mini-toggle"
+            type="button"
+            data-target="#single-results-body"
+          >
+            Hide
+          </button>
+
+        </div>
+
+        <div
+          class="mini-bd"
+          id="single-results-body"
+        >
+
+          <p>
+            The exhaustive search is sufficient for the three low resolution
+            JPEG examples.
+            Their recovered displacements are shown below.
+          </p>
+
+          <table class="tbl">
+
+            <thead>
+
+              <tr>
+                <th>Image</th>
+                <th>G Channel Shift</th>
+                <th>R Channel Shift</th>
+              </tr>
+
+            </thead>
+
+            <tbody>
+
+              <tr>
+
+                <td data-label="Image">
+
+                  <div class="thumb">
+                    <img
+                      src="./media/cathedral.jpg"
+                      alt="Colorized Cathedral"
+                      loading="lazy"
+                    >
+                  </div>
+
+                  <div class="image-name">
+                    cathedral.jpg
+                  </div>
+
+                </td>
+
+                <td data-label="G Channel Shift">
+
+                  <span class="pills">
+                    <span class="pill green">
+                      <span class="dot"></span>
+                      (2, 5)
+                    </span>
+                  </span>
+
+                </td>
+
+                <td data-label="R Channel Shift">
+
+                  <span class="pills">
+                    <span class="pill red">
+                      <span class="dot"></span>
+                      (3, 12)
+                    </span>
+                  </span>
+
+                </td>
+
+              </tr>
+
+
+              <tr>
+
+                <td data-label="Image">
+
+                  <div class="thumb">
+                    <img
+                      src="./media/monastery.jpg"
+                      alt="Colorized Monastery"
+                      loading="lazy"
+                    >
+                  </div>
+
+                  <div class="image-name">
+                    monastery.jpg
+                  </div>
+
+                </td>
+
+                <td data-label="G Channel Shift">
+
+                  <span class="pills">
+                    <span class="pill green">
+                      <span class="dot"></span>
+                      (2, -3)
+                    </span>
+                  </span>
+
+                </td>
+
+                <td data-label="R Channel Shift">
+
+                  <span class="pills">
+                    <span class="pill red">
+                      <span class="dot"></span>
+                      (2, 3)
+                    </span>
+                  </span>
+
+                </td>
+
+              </tr>
+
+
+              <tr>
+
+                <td data-label="Image">
+
+                  <div class="thumb">
+                    <img
+                      src="./media/tobolsk.jpg"
+                      alt="Colorized Tobolsk"
+                      loading="lazy"
+                    >
+                  </div>
+
+                  <div class="image-name">
+                    tobolsk.jpg
+                  </div>
+
+                </td>
+
+                <td data-label="G Channel Shift">
+
+                  <span class="pills">
+                    <span class="pill green">
+                      <span class="dot"></span>
+                      (3, 3)
+                    </span>
+                  </span>
+
+                </td>
+
+                <td data-label="R Channel Shift">
+
+                  <span class="pills">
+                    <span class="pill red">
+                      <span class="dot"></span>
+                      (3, 6)
+                    </span>
+                  </span>
+
+                </td>
+
+              </tr>
+
+            </tbody>
+
+          </table>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- ====================================================== -->
+  <!-- Part 2 Pyramid Alignment                               -->
+  <!-- ====================================================== -->
+
+  <section
+    class="panel section-gap"
+    aria-labelledby="sec-pyramid"
+  >
+
+    <div class="panel-hd">
+
+      <h2 id="sec-pyramid">
+        Part 2&nbsp;&nbsp;Coarse to Fine Pyramid Alignment
+      </h2>
+
+      <span class="muted">
+        11 TIF images
+      </span>
+
+    </div>
+
+    <div class="panel-bd">
+
+      <p class="section-intro">
+        The high resolution TIF images contain much larger displacements.
+        Searching a very large translation window directly at full resolution
+        would be unnecessarily expensive.
+        I therefore estimate the displacement from coarse to fine using a
+        Gaussian image pyramid.
+      </p>
+
+
+      <!-- -------------------------------------------------- -->
+      <!-- Pyramid Motivation                                 -->
+      <!-- -------------------------------------------------- -->
+
+      <div class="mini-box" id="pyramid-concept">
+
+        <div class="mini-hd">
+
+          <span>
+            Gaussian Image Pyramid
+          </span>
+
+          <span class="hint">
+            Multiscale Search
+          </span>
+
+          <button
+            class="mini-toggle"
+            type="button"
+            data-target="#pyramid-concept-body"
+          >
+            Hide
+          </button>
+
+        </div>
+
+        <div
+          class="mini-bd"
+          id="pyramid-concept-body"
+        >
+
+          <p>
+            The pyramid repeatedly smooths and downsamples an image.
+            Large translations at the original resolution become much smaller
+            at coarse scales.
+            This allows the alignment to begin with a small local search.
+          </p>
+
+          <div class="equation-block">
+            \[
+            \boxed{
+            I^{\ell+1}
+            =
+            \operatorname{Downsample}
+            \left(
+            G * I^{\ell}
+            \right)
+            }
+            \]
+          </div>
+
+          <p>
+            I construct six pyramid levels for each color channel.
+            Each level reduces the image width and height by approximately a
+            factor of two.
+          </p>
+
+          <p>
+            Before downsampling, I apply a separable Gaussian filter using
+          </p>
+
+          <div class="equation-block">
+            \[
+            \boxed{
+            g
+            =
+            \frac{1}{16}
+            \begin{bmatrix}
+            1 &amp; 4 &amp; 6 &amp; 4 &amp; 1
+            \end{bmatrix}
+            }
+            \]
+          </div>
+
+          <p>
+            The smoothing operation reduces aliasing before the resolution is
+            decreased.
+          </p>
+
+        </div>
+
+      </div>
+
+
+      <!-- -------------------------------------------------- -->
+      <!-- Coarse to Fine                                     -->
+      <!-- -------------------------------------------------- -->
+
+      <div class="mini-box" id="pyramid-search">
+
+        <div class="mini-hd">
+
+          <span>
+            Coarse to Fine Search
+          </span>
+
+          <span class="hint">
+            Displacement Refinement
+          </span>
+
+          <button
+            class="mini-toggle"
+            type="button"
+            data-target="#pyramid-search-body"
+          >
+            Hide
+          </button>
+
+        </div>
+
+        <div
+          class="mini-bd"
+          id="pyramid-search-body"
+        >
+
+          <p>
+            Alignment begins at the coarsest level.
+            I search only a small displacement window and estimate an initial
+            translation.
+            When moving to the next finer level, the image dimensions double,
+            so the previous displacement must also be doubled.
+          </p>
+
+          <div class="equation-block">
+            \[
+            \boxed{
+            \Delta_{\ell-1}^{\mathrm{init}}
+            =
+            2\Delta_{\ell}
+            }
+            \]
+          </div>
+
+          <p>
+            I then search for a small residual displacement
+            \(\delta_{\ell-1}\)
+            around this prediction.
+          </p>
+
+          <div class="equation-block">
+            \[
+            \boxed{
+            \Delta_{\ell-1}
+            =
+            2\Delta_{\ell}
+            +
+            \delta_{\ell-1}
+            }
+            \]
+          </div>
+
+          <p>
+            At each level, the residual search is restricted to
+            \([-5,5]\)
+            pixels along both axes.
+          </p>
+
+          <div class="equation-block">
+            \[
+            \boxed{
+            \delta x,\delta y
+            \in
+            [-5,5]
+            }
+            \]
+          </div>
+
+          <p>
+            This process continues until the original resolution is reached.
+            Large motion is resolved cheaply at coarse scales, while the finer
+            levels only refine the estimate.
+          </p>
+
+          <div class="story-line">
+
+            <div class="story-step">
+              Coarsest Level
+            </div>
+
+            <div class="story-arrow">
+              →
+            </div>
+
+            <div class="story-step">
+              Estimate Shift
+            </div>
+
+            <div class="story-arrow">
+              →
+            </div>
+
+            <div class="story-step">
+              Double Shift
+            </div>
+
+            <div class="story-arrow">
+              →
+            </div>
+
+            <div class="story-step">
+              Local Refinement
+            </div>
+
+            <div class="story-arrow">
+              →
+            </div>
+
+            <div class="story-step">
+              Full Resolution
+            </div>
+
+          </div>
+
+          <div class="result-note">
+
+            <p>
+              With six pyramid levels and a small local search window, the full
+              TIF collection can be processed in under roughly ten seconds in my
+              implementation.
+            </p>
+
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <!-- -------------------------------------------------- -->
+      <!-- Edge Alignment                                     -->
+      <!-- -------------------------------------------------- -->
+
+      <div class="mini-box" id="edge-refinement">
+
+        <div class="mini-hd">
+
+          <span>
+            Edge Based Robustness
+          </span>
+
+          <span class="hint">
+            Emir
+          </span>
+
+          <button
+            class="mini-toggle"
+            type="button"
+            data-target="#edge-refinement-body"
+          >
+            Hide
+          </button>
+
+        </div>
+
+        <div
+          class="mini-bd"
+          id="edge-refinement-body"
+        >
+
+          <p>
+            The pyramid method aligns almost all images successfully using raw
+            intensity values.
+            Emir is a more difficult case because the red and blue filtered
+            exposures have substantially different brightness patterns.
+          </p>
+
+          <p>
+            Even when two channels are geometrically aligned, corresponding
+            pixels may therefore have very different intensities.
+            An intensity based similarity score can become unreliable.
+          </p>
+
+          <p>
+            To improve robustness, I compare structural edge information rather
+            than raw brightness.
+            I use Canny edge detection after border cropping and perform the
+            same alignment search on the resulting edge maps.
+          </p>
+
+          <div class="equation-block">
+            \[
+            \boxed{
+            I
+            \longrightarrow
+            \text{Edge Map}
+            \longrightarrow
+            \text{Alignment Score}
+            }
+            \]
+          </div>
+
+          <p>
+            Edges emphasize scene boundaries and geometric structure while
+            reducing sensitivity to large photometric differences between color
+            channels.
+            This resolves the difficult red channel alignment for Emir.
+          </p>
+
+        </div>
+
+      </div>
+
+
+      <!-- -------------------------------------------------- -->
+      <!-- Full TIF Results                                   -->
+      <!-- -------------------------------------------------- -->
+
+      <div class="mini-box" id="pyramid-results">
+
+        <div class="mini-hd">
+
+          <span>
+            Pyramid Alignment Results
+          </span>
+
+          <span class="hint">
+            Reconstructed TIF Images
+          </span>
+
+          <button
+            class="mini-toggle"
+            type="button"
+            data-target="#pyramid-results-body"
+          >
+            Hide
+          </button>
+
+        </div>
+
+        <div
+          class="mini-bd"
+          id="pyramid-results-body"
+        >
+
+          <p>
+            The recovered displacements for the eleven high resolution TIF
+            images are shown below.
+          </p>
+
+          <table class="tbl">
+
+            <thead>
+
+              <tr>
+                <th>Image</th>
+                <th>G Channel Shift</th>
+                <th>R Channel Shift</th>
+              </tr>
+
+            </thead>
+
+            <tbody>
+
+              <tr>
+                <td data-label="Image">
+                  <div class="thumb">
+                    <img src="./media/church.jpeg" alt="Colorized Church" loading="lazy">
+                  </div>
+                  <div class="image-name">church</div>
+                </td>
+                <td data-label="G Channel Shift">
+                  <span class="pills">
+                    <span class="pill green"><span class="dot"></span>(3, 25)</span>
+                  </span>
+                </td>
+                <td data-label="R Channel Shift">
+                  <span class="pills">
+                    <span class="pill red"><span class="dot"></span>(-4, 58)</span>
+                  </span>
+                </td>
+              </tr>
+
+
+              <tr>
+                <td data-label="Image">
+                  <div class="thumb">
+                    <img src="./media/emir.jpeg" alt="Colorized Emir" loading="lazy">
+                  </div>
+                  <div class="image-name">emir</div>
+                </td>
+                <td data-label="G Channel Shift">
+                  <span class="pills">
+                    <span class="pill green"><span class="dot"></span>(23, 49)</span>
+                  </span>
+                </td>
+                <td data-label="R Channel Shift">
+                  <span class="pills">
+                    <span class="pill red"><span class="dot"></span>(40, 107)</span>
+                  </span>
+                </td>
+              </tr>
+
+
+              <tr>
+                <td data-label="Image">
+                  <div class="thumb">
+                    <img src="./media/harvesters.jpeg" alt="Colorized Harvesters" loading="lazy">
+                  </div>
+                  <div class="image-name">harvesters</div>
+                </td>
+                <td data-label="G Channel Shift">
+                  <span class="pills">
+                    <span class="pill green"><span class="dot"></span>(17, 60)</span>
+                  </span>
+                </td>
+                <td data-label="R Channel Shift">
+                  <span class="pills">
+                    <span class="pill red"><span class="dot"></span>(10, 124)</span>
+                  </span>
+                </td>
+              </tr>
+
+
+              <tr>
+                <td data-label="Image">
+                  <div class="thumb">
+                    <img src="./media/icon.jpeg" alt="Colorized Icon" loading="lazy">
+                  </div>
+                  <div class="image-name">icon</div>
+                </td>
+                <td data-label="G Channel Shift">
+                  <span class="pills">
+                    <span class="pill green"><span class="dot"></span>(16, 39)</span>
+                  </span>
+                </td>
+                <td data-label="R Channel Shift">
+                  <span class="pills">
+                    <span class="pill red"><span class="dot"></span>(22, 87)</span>
+                  </span>
+                </td>
+              </tr>
+
+
+              <tr>
+                <td data-label="Image">
+                  <div class="thumb">
+                    <img src="./media/italil.jpeg" alt="Colorized Italil" loading="lazy">
+                  </div>
+                  <div class="image-name">italil</div>
+                </td>
+                <td data-label="G Channel Shift">
+                  <span class="pills">
+                    <span class="pill green"><span class="dot"></span>(22, 40)</span>
+                  </span>
+                </td>
+                <td data-label="R Channel Shift">
+                  <span class="pills">
+                    <span class="pill red"><span class="dot"></span>(36, 77)</span>
+                  </span>
+                </td>
+              </tr>
+
+
+              <tr>
+                <td data-label="Image">
+                  <div class="thumb">
+                    <img src="./media/lastochikino.jpeg" alt="Colorized Lastochikino" loading="lazy">
+                  </div>
+                  <div class="image-name">lastochikino</div>
+                </td>
+                <td data-label="G Channel Shift">
+                  <span class="pills">
+                    <span class="pill green"><span class="dot"></span>(-1, -3)</span>
+                  </span>
+                </td>
+                <td data-label="R Channel Shift">
+                  <span class="pills">
+                    <span class="pill red"><span class="dot"></span>(-8, 75)</span>
+                  </span>
+                </td>
+              </tr>
+
+
+              <tr>
+                <td data-label="Image">
+                  <div class="thumb">
+                    <img src="./media/lugano.jpeg" alt="Colorized Lugano" loading="lazy">
+                  </div>
+                  <div class="image-name">lugano</div>
+                </td>
+                <td data-label="G Channel Shift">
+                  <span class="pills">
+                    <span class="pill green"><span class="dot"></span>(-17, 41)</span>
+                  </span>
+                </td>
+                <td data-label="R Channel Shift">
+                  <span class="pills">
+                    <span class="pill red"><span class="dot"></span>(-29, 93)</span>
+                  </span>
+                </td>
+              </tr>
+
+
+              <tr>
+                <td data-label="Image">
+                  <div class="thumb">
+                    <img src="./media/melons.jpeg" alt="Colorized Melons" loading="lazy">
+                  </div>
+                  <div class="image-name">melons</div>
+                </td>
+                <td data-label="G Channel Shift">
+                  <span class="pills">
+                    <span class="pill green"><span class="dot"></span>(10, 80)</span>
+                  </span>
+                </td>
+                <td data-label="R Channel Shift">
+                  <span class="pills">
+                    <span class="pill red"><span class="dot"></span>(14, 177)</span>
+                  </span>
+                </td>
+              </tr>
+
+
+              <tr>
+                <td data-label="Image">
+                  <div class="thumb">
+                    <img src="./media/self_portrait.jpeg" alt="Colorized Self Portrait" loading="lazy">
+                  </div>
+                  <div class="image-name">self_portrait</div>
+                </td>
+                <td data-label="G Channel Shift">
+                  <span class="pills">
+                    <span class="pill green"><span class="dot"></span>(29, 77)</span>
+                  </span>
+                </td>
+                <td data-label="R Channel Shift">
+                  <span class="pills">
+                    <span class="pill red"><span class="dot"></span>(37, 175)</span>
+                  </span>
+                </td>
+              </tr>
+
+
+              <tr>
+                <td data-label="Image">
+                  <div class="thumb">
+                    <img src="./media/siren.jpeg" alt="Colorized Siren" loading="lazy">
+                  </div>
+                  <div class="image-name">siren</div>
+                </td>
+                <td data-label="G Channel Shift">
+                  <span class="pills">
+                    <span class="pill green"><span class="dot"></span>(-8, 48)</span>
+                  </span>
+                </td>
+                <td data-label="R Channel Shift">
+                  <span class="pills">
+                    <span class="pill red"><span class="dot"></span>(-23, 96)</span>
+                  </span>
+                </td>
+              </tr>
+
+
+              <tr>
+                <td data-label="Image">
+                  <div class="thumb">
+                    <img src="./media/three_generations.jpeg" alt="Colorized Three Generations" loading="lazy">
+                  </div>
+                  <div class="image-name">three_generations</div>
+                </td>
+                <td data-label="G Channel Shift">
+                  <span class="pills">
+                    <span class="pill green"><span class="dot"></span>(12, 56)</span>
+                  </span>
+                </td>
+                <td data-label="R Channel Shift">
+                  <span class="pills">
+                    <span class="pill red"><span class="dot"></span>(8, 111)</span>
+                  </span>
+                </td>
+              </tr>
+
+            </tbody>
+
+          </table>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- ====================================================== -->
+  <!-- Part 3 Additional Images                               -->
+  <!-- ====================================================== -->
+
+  <section
+    class="panel section-gap"
+    aria-labelledby="sec-extra"
+  >
+
+    <div class="panel-hd">
+
+      <h2 id="sec-extra">
+        Part 3&nbsp;&nbsp;Additional Prokudin Gorskii Images
+      </h2>
+
+      <span class="muted">
+        3 additional TIF images
+      </span>
+
+    </div>
+
+    <div class="panel-bd">
+
+      <p class="section-intro">
+        I also tested the same pyramid alignment pipeline on three additional
+        high resolution images selected from the Prokudin Gorskii collection.
+        Each source file is approximately 70 MB, yet the multiscale search
+        handles them efficiently using the same coarse to fine procedure.
+      </p>
+
+      <div class="mini-box" id="extra-results">
+
+        <div class="mini-hd">
+
+          <span>
+            Additional Results
+          </span>
+
+          <span class="hint">
+            Generalization
+          </span>
+
+          <button
+            class="mini-toggle"
+            type="button"
+            data-target="#extra-results-body"
+          >
+            Hide
+          </button>
+
+        </div>
+
+        <div
+          class="mini-bd"
+          id="extra-results-body"
+        >
+
+          <p>
+            No image specific modification is required.
+            The same border cropping, pyramid construction, local NCC search,
+            and channel reconstruction procedure is reused for all three
+            images.
+          </p>
+
+          <table class="tbl">
+
+            <thead>
+
+              <tr>
+                <th>Image</th>
+                <th>G Channel Shift</th>
+                <th>R Channel Shift</th>
+              </tr>
+
+            </thead>
+
+            <tbody>
+
+              <tr>
+
+                <td data-label="Image">
+
+                  <div class="thumb">
+                    <img
+                      src="./media/1.jpeg"
+                      alt="Additional Prokudin Gorskii image one"
+                      loading="lazy"
+                    >
+                  </div>
+
+                  <div class="image-name">
+                    Additional image 1
+                  </div>
+
+                </td>
+
+                <td data-label="G Channel Shift">
+
+                  <span class="pills">
+                    <span class="pill green">
+                      <span class="dot"></span>
+                      (37, 45)
+                    </span>
+                  </span>
+
+                </td>
+
+                <td data-label="R Channel Shift">
+
+                  <span class="pills">
+                    <span class="pill red">
+                      <span class="dot"></span>
+                      (58, 101)
+                    </span>
+                  </span>
+
+                </td>
+
+              </tr>
+
+
+              <tr>
+
+                <td data-label="Image">
+
+                  <div class="thumb">
+                    <img
+                      src="./media/2.jpeg"
+                      alt="Additional Prokudin Gorskii image two"
+                      loading="lazy"
+                    >
+                  </div>
+
+                  <div class="image-name">
+                    Additional image 2
+                  </div>
+
+                </td>
+
+                <td data-label="G Channel Shift">
+
+                  <span class="pills">
+                    <span class="pill green">
+                      <span class="dot"></span>
+                      (1, 35)
+                    </span>
+                  </span>
+
+                </td>
+
+                <td data-label="R Channel Shift">
+
+                  <span class="pills">
+                    <span class="pill red">
+                      <span class="dot"></span>
+                      (-2, 84)
+                    </span>
+                  </span>
+
+                </td>
+
+              </tr>
+
+
+              <tr>
+
+                <td data-label="Image">
+
+                  <div class="thumb">
+                    <img
+                      src="./media/3.jpeg"
+                      alt="Additional Prokudin Gorskii image three"
+                      loading="lazy"
+                    >
+                  </div>
+
+                  <div class="image-name">
+                    Additional image 3
+                  </div>
+
+                </td>
+
+                <td data-label="G Channel Shift">
+
+                  <span class="pills">
+                    <span class="pill green">
+                      <span class="dot"></span>
+                      (23, 54)
+                    </span>
+                  </span>
+
+                </td>
+
+                <td data-label="R Channel Shift">
+
+                  <span class="pills">
+                    <span class="pill red">
+                      <span class="dot"></span>
+                      (39, 117)
+                    </span>
+                  </span>
+
+                </td>
+
+              </tr>
+
+            </tbody>
+
+          </table>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- ====================================================== -->
+  <!-- Final Summary                                          -->
+  <!-- ====================================================== -->
+
+  <div class="summary-box">
+
+    <p>
+      This project begins with a simple translation search and progressively
+      improves the alignment procedure as image scale and photometric variation
+      become more challenging.
+    </p>
+
+    <div class="story-line">
+
+      <div class="story-step">
+        Exhaustive Search
+      </div>
+
+      <div class="story-arrow">
+        →
+      </div>
+
+      <div class="story-step">
+        NCC Matching
+      </div>
+
+      <div class="story-arrow">
+        →
+      </div>
+
+      <div class="story-step">
+        Gaussian Pyramid
+      </div>
+
+      <div class="story-arrow">
+        →
+      </div>
+
+      <div class="story-step">
+        Coarse to Fine Refinement
+      </div>
+
+      <div class="story-arrow">
+        →
+      </div>
+
+      <div class="story-step">
+        Edge Based Robustness
+      </div>
+
+    </div>
+
+    <p>
+      The central idea is that image alignment becomes much more efficient when
+      large motion is first estimated at coarse resolution and then refined at
+      finer scales.
+      When raw intensity values are unreliable, structural features such as
+      edges provide a more robust basis for matching.
+    </p>
+
+  </div>
+
+
+  <footer>
+
+    <a
+      class="back-btn"
+      href="../index.html"
+      aria-label="back to main"
+    >
+      <span>
+        ← back to main
+      </span>
+    </a>
+
+  </footer>
+
+</main>
 
   <script>
     // Theme toggle with localStorage
@@ -441,6 +1914,6 @@
       });
     });
   </script>
-  <script src="../project-detail.js?v=20260929d"></script>
+  <script src="../project-detail.js?v=20261008a"></script>
 </body>
 </html>
